@@ -1,0 +1,36 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "All-Rights-Reserved"
+
+[[mods]]
+modId = "someonesperfectend"
+version = "${version}"
+displayName = "Someone's Perfect End Update"
+authors = "Steve McMaster"
+description = '''
+Adds life, terrain variety, and endgame systems to the End while keeping it desolate. Inspired by fWhip's "perfect End update" video; not affiliated with or endorsed by fWhip or Mojang.
+'''
+
+[[dependencies.someonesperfectend]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.someonesperfectend]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.21.2)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.someonesperfectend]]
+modId = "architectury"
+type = "required"
+versionRange = "[13.0.11,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[mixins]]
+config = "someonesperfectend.mixins.json"

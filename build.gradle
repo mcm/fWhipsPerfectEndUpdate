@@ -1,0 +1,118 @@
+plugins {
+    id 'dev.architectury.loom' version '1.17-SNAPSHOT' apply false
+    id 'architectury-plugin' version '3.5-SNAPSHOT'
+    id 'com.gradleup.shadow' version '9.4.3' apply false
+}
+
+architectury {
+    minecraft = project.minecraft_version
+}
+
+/*
+ * GameTest harness. Each loader project defines a headless `runGameTestServer` run (see fabric/ and
+ * neoforge/ build.gradle) and hands it to this helper, which
+ *  - times out instead of hanging forever,
+ *  - wipes the previous test world so every run starts fresh,
+ *  - fails the task if the server exits non-zero (vanilla exits with the number of failed required tests),
+ *  - fails the task unless the log reports that at least one required test ran and all of them passed
+ *    (guards against a misconfigured run that silently registers zero tests).
+ */
+ext.configureGameTestTask = { Project p, String taskName ->
+    p.tasks.named(taskName, JavaExec).configure { JavaExec t ->
+        t.group = 'verification'
+        t.description = "Runs the ${p.name} GameTest server"
+        // A misconfigured run can start a normal dedicated server that never exits.
+        t.timeout = java.time.Duration.ofMinutes(15)
+        def runDir = p.file('build/gametest')
+        t.doFirst {
+            ['world', 'gametestworld', 'logs', 'junit.xml'].each { p.delete(new File(runDir, it)) }
+        }
+        t.doLast {
+            def log = new File(runDir, 'logs/latest.log')
+            if (!log.exists()) {
+                throw new GradleException("${p.name} GameTest server wrote no log at ${log}")
+            }
+            def m = (log.text =~ /All (\d+) required tests passed/)
+            if (!m.find() || (m.group(1) as int) < 1) {
+                throw new GradleException("${p.name} GameTests did not report a passing run; see ${log}")
+            }
+            p.logger.lifecycle("${p.name}: all ${m.group(1)} required GameTests passed")
+        }
+    }
+}
+
+tasks.register('gameTestAll') {
+    group = 'verification'
+    description = 'Runs the GameTest server for every loader and fails if any required test fails.'
+    dependsOn ':fabric:runGameTestServer', ':neoforge:runGameTestServer'
+}
+
+gradle.projectsEvaluated {
+    // Run the loaders one after another so two game servers never share the 4-core / 16 GB container.
+    project(':neoforge').tasks.named('runGameTestServer') { mustRunAfter ':fabric:runGameTestServer' }
+}
+
+allprojects {
+    group = rootProject.maven_group
+    version = rootProject.mod_version
+}
+
+subprojects {
+    apply plugin: 'dev.architectury.loom'
+    apply plugin: 'architectury-plugin'
+    apply plugin: 'maven-publish'
+
+    base {
+        // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
+        archivesName = "$rootProject.archives_name-$project.name"
+    }
+
+    repositories {
+        // Add repositories to retrieve artifacts from in here.
+        // You should only use this when depending on other mods because
+        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+        // for more information about repositories.
+    }
+
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    dependencies {
+        minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
+        mappings loom.officialMojangMappings()
+    }
+
+    java {
+        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+        // if it is present.
+        // If you remove this line, sources will not be generated.
+        withSourcesJar()
+
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.release = 21
+    }
+
+    // Configure Maven publishing.
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifactId = base.archivesName.get()
+                from components.java
+            }
+        }
+
+        // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+        repositories {
+            // Add repositories to publish to here.
+            // Notice: This block does NOT have the same function as the block in the top level.
+            // The repositories here will be used for publishing your artifact, not for
+            // retrieving dependencies.
+        }
+    }
+}

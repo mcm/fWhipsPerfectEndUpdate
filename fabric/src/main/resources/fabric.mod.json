@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "someonesperfectend",
+  "version": "${version}",
+  "name": "Someone's Perfect End Update",
+  "description": "Adds life, terrain variety, and endgame systems to the End while keeping it desolate. Inspired by fWhip's \"perfect End update\" video; not affiliated with or endorsed by fWhip or Mojang.",
+  "authors": [
+    "Steve McMaster"
+  ],
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.mcmaster.someonesperfectend.fabric.SomeonesPerfectEndFabric"
+    ],
+    "client": [
+      "io.mcmaster.someonesperfectend.fabric.client.SomeonesPerfectEndFabricClient"
+    ],
+    "fabric-gametest": [
+      "io.mcmaster.someonesperfectend.gametest.ModGameTests"
+    ]
+  },
+  "mixins": [
+    "someonesperfectend.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "architectury": ">=13.0.11",
+    "fabric-api": "*"
+  }
+}
