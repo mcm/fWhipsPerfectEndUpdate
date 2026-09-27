@@ -98,6 +98,45 @@ subprojects {
         it.options.release = 21
     }
 
+    /*
+     * Mojang's textures must never be redistributed: the recolor pipeline reads them from the player's own game
+     * at runtime. Fail the build if any output jar (or the source tree) contains assets/minecraft/textures.
+     */
+    def checkNoMojangTextures = tasks.register('checkNoMojangTextures') {
+        group = 'verification'
+        description = 'Fails if any jar of this project or its sources contain assets/minecraft/textures'
+        def jarTasks = tasks.withType(Jar)
+        dependsOn jarTasks
+        def sourceDir = file('src')
+        doLast {
+            def offenders = []
+            jarTasks.each { Jar jarTask ->
+                def jarFile = jarTask.archiveFile.get().asFile
+                if (!jarFile.exists()) {
+                    return
+                }
+                new java.util.zip.ZipFile(jarFile).withCloseable { zip ->
+                    zip.entries().each { entry ->
+                        if (entry.name.startsWith('assets/minecraft/textures/')) {
+                            offenders << "${jarFile.name}!/${entry.name}"
+                        }
+                    }
+                }
+            }
+            if (sourceDir.isDirectory()) {
+                sourceDir.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+                    if (f.path.replace(File.separatorChar, (char) '/').contains('/assets/minecraft/textures/')) {
+                        offenders << project.relativePath(f)
+                    }
+                }
+            }
+            if (!offenders.isEmpty()) {
+                throw new GradleException("Mojang textures must not be committed or packaged:\n  " + offenders.join('\n  '))
+            }
+        }
+    }
+    tasks.named('check') { dependsOn checkNoMojangTextures }
+
     // Configure Maven publishing.
     publishing {
         publications {

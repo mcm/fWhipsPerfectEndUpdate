@@ -30,7 +30,8 @@ public final class ModGameTests {
     public static final String EMPTY_TEMPLATE = SomeonesPerfectEnd.MOD_ID + ":gametest/empty";
 
     public static final List<Class<?>> TEST_CLASSES = List.of(
-            SmokeGameTests.class);
+            SmokeGameTests.class,
+            RecolorGameTests.class);
 
     public ModGameTests() {
     }

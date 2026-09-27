@@ -6,6 +6,7 @@
   "client": [
   ],
   "mixins": [
+    "ReloadableResourceManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

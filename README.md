@@ -17,9 +17,12 @@ common/               loader-independent code and resources (Mojang mappings)
   src/main/java/io/mcmaster/someonesperfectend/
     SomeonesPerfectEnd.java     common init (called by both loader entrypoints)
     registry/ModRegistries.java Architectury DeferredRegisters + creative tab + registration helpers
+    recolor/                    runtime texture recolor pipeline (see "Textures")
+    mixin/                      common mixins (someonesperfectend.mixins.json)
     gametest/                   GameTests shared by both loaders
   src/main/resources/
     assets/someonesperfectend/lang/en_us.json
+    assets/someonesperfectend/recolor/            texture recolor recipes (.json)
     data/someonesperfectend/structure/gametest/   GameTest structure templates (.nbt)
   src/test/java/                JUnit 5 unit tests (run by `./gradlew build`)
 fabric/               Fabric entrypoints, fabric.mod.json
@@ -60,6 +63,50 @@ Only 1.21.1 is built today. The plan for the 26.1 and 26.3 ports
 3. Keep version-sensitive code (registries, data components, rendering, worldgen, GameTest glue) in thin
    wrappers such as `ModRegistries` and `ModGameTests` so a port touches as few files as possible.
 4. Run `./gradlew build gameTestAll` once per version in CI.
+
+## Textures
+
+Mojang's textures are never committed or packaged. Placeholder textures are generated on the client at every
+resource reload by recoloring the player's own vanilla textures:
+
+1. Recipes are JSON files in `common/src/main/resources/assets/someonesperfectend/recolor/` (resource packs can
+   add or replace files there too).
+2. On every client resource reload, `ReloadableResourceManagerMixin` builds `RecolorPackResources`: for each
+   recipe it reads the source texture (and its `.png.mcmeta`, so animations are kept) from the highest-priority
+   pack that has it, applies the palette, and serves the result from an in-memory pack at the **lowest**
+   priority. The log reports `Recolor: generated N textures (M replaced by real PNGs, E errors)`.
+3. **Hand-drawn art wins:** if any pack (the mod's own assets or a user resource pack) has a real PNG at a
+   recipe's target, that recipe is not generated. To replace a placeholder, add
+   `assets/someonesperfectend/textures/<path>.png`; no code or recipe change is needed.
+
+A recipe file holds one recipe or a list sharing a palette:
+
+```json
+{
+  "palette": {"gradient": ["#241f52", "#6f6fcf", "#d8d0ff"]},
+  "recipes": [
+    {"source": "minecraft:block/bamboo_planks", "target": "someonesperfectend:block/astral_planks"},
+    {"source": "minecraft:block/bamboo_door_top", "target": "someonesperfectend:block/astral_door_top",
+     "palette": {"hsv": {"hue": 250, "saturation": 0.6}, "colors": {"#e3c16a": "#c9c6ff"}}}
+  ]
+}
+```
+
+`source` and `target` are texture ids (`namespace:path` under `textures/`, no `.png`; the namespace defaults to
+`minecraft`). A palette has at most one of:
+
+- `gradient`: colors spaced evenly from dark to light, or `{"at": 0..1, "color": "#rrggbb"}` stops. Each pixel's
+  luminance picks a color. With `"normalize": true` (the default) the source's darkest pixel maps to the first
+  stop and its brightest to the last.
+- `hsv`: `hue` (absolute degrees) or `hue_shift` (degrees), plus `saturation` and `value` multipliers.
+
+and optionally `colors`, exact `"#rrggbb": "#rrggbb"` replacements applied before the gradient or shift.
+Alpha is always kept and fully transparent pixels are left alone.
+
+`./gradlew exportRecoloredTextures` writes every recipe's output to `build/recolored-textures/` (git-ignored)
+from the vanilla client jar Loom downloaded (or `-PclientJar=<path>`), as a starting point for artists.
+`./gradlew build` runs `checkNoMojangTextures` in every module, which fails if any output jar or source tree
+contains `assets/minecraft/textures`.
 
 ## Quality gates
 

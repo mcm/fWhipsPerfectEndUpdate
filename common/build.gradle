@@ -21,3 +21,28 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+/*
+ * Dev-only: writes the recolored placeholder textures to <root>/build/recolored-textures/ (laid out like a
+ * resource pack) as a starting point for artists. Sources come from a local vanilla client jar: the one Loom
+ * already downloaded, or -PclientJar=/path/to/client.jar. Nothing here is packaged into the mod.
+ * Run with `./gradlew exportRecoloredTextures`.
+ */
+tasks.register('exportRecoloredTextures', JavaExec) {
+    group = 'someonesperfectend'
+    description = 'Writes the recolored textures from a local vanilla client jar to build/recolored-textures/'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.mcmaster.someonesperfectend.recolor.RecolorExport'
+    def output = rootProject.layout.buildDirectory.dir('recolored-textures').get().asFile
+    def resources = file('src/main/resources')
+    def clientJarPath = providers.gradleProperty('clientJar')
+            .orElse(providers.provider { loom.minecraftProvider.minecraftClientJar.absolutePath })
+    doFirst {
+        def clientJar = file(clientJarPath.get())
+        if (!clientJar.isFile()) {
+            throw new GradleException("Vanilla client jar not found at ${clientJar}; pass -PclientJar=<path>")
+        }
+        delete output
+        args clientJar.absolutePath, output.absolutePath, resources.absolutePath
+    }
+}
