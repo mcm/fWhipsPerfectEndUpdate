@@ -7,5 +7,10 @@
   "fluid.someonesperfectend.oasis_water": "Oasis Water",
   "fluid.someonesperfectend.flowing_oasis_water": "Oasis Water",
   "item.someonesperfectend.oasis_water_bucket": "Oasis Water Bucket",
-  "item.someonesperfectend.oasis_water_bottle": "Oasis Water Bottle"
+  "item.someonesperfectend.oasis_water_bottle": "Oasis Water Bottle",
+  "block.someonesperfectend.void_petals": "Void Petals",
+  "block.someonesperfectend.glowcap": "Glowcap",
+  "block.someonesperfectend.glowcap_block": "Glowcap Block",
+  "block.someonesperfectend.glowcap_stem": "Glowcap Stem",
+  "block.someonesperfectend.potted_glowcap": "Potted Glowcap"
 }

@@ -4,6 +4,7 @@ import io.mcmaster.someonesperfectend.alchemy.OasisPotions;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import io.mcmaster.someonesperfectend.worldgen.ModFeatures;
 import net.minecraft.resources.ResourceLocation;
 
 public final class SomeonesPerfectEnd {
@@ -17,6 +18,7 @@ public final class SomeonesPerfectEnd {
     public static void init() {
         ModBlocks.init();
         ModFluids.init();
+        ModFeatures.init();
         OasisPotions.init();
         ModRegistries.register();
     }

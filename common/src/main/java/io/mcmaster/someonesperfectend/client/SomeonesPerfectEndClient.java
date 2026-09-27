@@ -17,7 +17,8 @@ public final class SomeonesPerfectEndClient {
 
     private static void registerRenderTypes() {
         RenderTypeRegistry.register(RenderType.cutoutMipped(), ModBlocks.END_TURF.get());
-        RenderTypeRegistry.register(RenderType.cutout(), ModBlocks.SHORT_VOID_GRASS.get());
+        RenderTypeRegistry.register(RenderType.cutout(), ModBlocks.SHORT_VOID_GRASS.get(), ModBlocks.VOID_PETALS.get(),
+                ModBlocks.GLOWCAP.get(), ModBlocks.POTTED_GLOWCAP.get());
         RenderTypeRegistry.register(RenderType.translucent(), ModFluids.OASIS_WATER.get(),
                 ModFluids.FLOWING_OASIS_WATER.get());
     }
