@@ -2,5 +2,10 @@
   "itemGroup.someonesperfectend.main": "Someone's Perfect End Update",
   "block.someonesperfectend.end_turf": "End Turf",
   "block.someonesperfectend.short_void_grass": "Short Void Grass",
-  "block.someonesperfectend.voidsoil": "Voidsoil"
+  "block.someonesperfectend.voidsoil": "Voidsoil",
+  "block.someonesperfectend.oasis_water": "Oasis Water",
+  "fluid.someonesperfectend.oasis_water": "Oasis Water",
+  "fluid.someonesperfectend.flowing_oasis_water": "Oasis Water",
+  "item.someonesperfectend.oasis_water_bucket": "Oasis Water Bucket",
+  "item.someonesperfectend.oasis_water_bottle": "Oasis Water Bottle"
 }

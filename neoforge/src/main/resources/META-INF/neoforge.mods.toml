@@ -34,3 +34,6 @@ side = "BOTH"
 
 [[mixins]]
 config = "someonesperfectend.mixins.json"
+
+[[mixins]]
+config = "someonesperfectend-neoforge.mixins.json"

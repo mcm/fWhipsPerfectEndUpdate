@@ -25,17 +25,19 @@ common/               loader-independent code and resources (Mojang mappings)
     assets/someonesperfectend/recolor/            texture recolor recipes (.json)
     data/someonesperfectend/structure/gametest/   GameTest structure templates (.nbt)
   src/test/java/                JUnit 5 unit tests (run by `./gradlew build`)
-fabric/               Fabric entrypoints, fabric.mod.json
-neoforge/             NeoForge @Mod class, META-INF/neoforge.mods.toml
+fabric/               Fabric entrypoints, fabric.mod.json, @ExpectPlatform impls (`<package>.fabric.*Impl`)
+neoforge/             NeoForge @Mod class, META-INF/neoforge.mods.toml, @ExpectPlatform impls
+                      (`<package>.neoforge.*Impl`), NeoForge-only mixins (someonesperfectend-neoforge.mixins.json)
 ```
 
 All gameplay code goes in `common`. The loader modules only hold entrypoints, metadata and the small
-amount of loader-specific glue that Architectury cannot abstract.
+amount of loader-specific glue that Architectury cannot abstract. When common code needs a loader-specific
+object, use Architectury's `@ExpectPlatform` (see `fluid/OasisWaterPlatform`).
 
 ### Registering content
 
 `ModRegistries` holds one Architectury `DeferredRegister` per registry the mod uses (blocks, items, entity
-types, fluids, features, structure types, structure piece types, creative tabs). Content classes register
+types, fluids, potions, features, structure types, structure piece types, creative tabs). Content classes register
 through its helpers, for example:
 
 ```java

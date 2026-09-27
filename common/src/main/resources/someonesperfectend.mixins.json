@@ -3,9 +3,16 @@
   "package": "io.mcmaster.someonesperfectend.mixin",
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
-  "client": [
-  ],
+  "client": [],
   "mixins": [
+    "BottleItemMixin",
+    "BrewingStandBlockEntityMixin",
+    "BrewingStandPotionSlotMixin",
+    "LavaFluidMixin",
+    "LiquidBlockMixin",
+    "PotionBrewingBuilderMixin",
+    "PotionBrewingMixAccessor",
+    "PotionBrewingMixin",
     "ReloadableResourceManagerMixin"
   ],
   "injectors": {

@@ -14,6 +14,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.structure.StructureType;
@@ -29,6 +30,7 @@ public final class ModRegistries {
     public static final DeferredRegister<Item> ITEMS = create(Registries.ITEM);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = create(Registries.ENTITY_TYPE);
     public static final DeferredRegister<Fluid> FLUIDS = create(Registries.FLUID);
+    public static final DeferredRegister<Potion> POTIONS = create(Registries.POTION);
     public static final DeferredRegister<Feature<?>> FEATURES = create(Registries.FEATURE);
     public static final DeferredRegister<StructureType<?>> STRUCTURE_TYPES = create(Registries.STRUCTURE_TYPE);
     public static final DeferredRegister<StructurePieceType> STRUCTURE_PIECES = create(Registries.STRUCTURE_PIECE);
@@ -84,9 +86,11 @@ public final class ModRegistries {
             return;
         }
         registered = true;
-        BLOCKS.register();
+        // Fabric registers entries immediately, in this order: liquid blocks and buckets need their fluid.
         FLUIDS.register();
+        BLOCKS.register();
         ITEMS.register();
+        POTIONS.register();
         ENTITY_TYPES.register();
         FEATURES.register();
         STRUCTURE_TYPES.register();
