@@ -1,5 +1,6 @@
 package io.mcmaster.someonesperfectend;
 
+import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
 import net.minecraft.resources.ResourceLocation;
 
@@ -12,6 +13,7 @@ public final class SomeonesPerfectEnd {
 
     /** Common init; called from each loader's entrypoint during mod construction. */
     public static void init() {
+        ModBlocks.init();
         ModRegistries.register();
     }
 

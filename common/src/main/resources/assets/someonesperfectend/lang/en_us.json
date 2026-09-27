@@ -1,3 +1,6 @@
 {
-  "itemGroup.someonesperfectend.main": "Someone's Perfect End Update"
+  "itemGroup.someonesperfectend.main": "Someone's Perfect End Update",
+  "block.someonesperfectend.end_turf": "End Turf",
+  "block.someonesperfectend.short_void_grass": "Short Void Grass",
+  "block.someonesperfectend.voidsoil": "Voidsoil"
 }

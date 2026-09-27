@@ -4,6 +4,7 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
+import io.mcmaster.someonesperfectend.block.ModBlocks;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
@@ -13,7 +14,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.structure.StructureType;
@@ -36,10 +36,9 @@ public final class ModRegistries {
 
     public static final String TAB_TRANSLATION_KEY = "itemGroup." + SomeonesPerfectEnd.MOD_ID + ".main";
 
-    // Icon is a placeholder until the mod has its own items.
     public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_TABS.register("main",
             () -> CreativeTabRegistry.create(Component.translatable(TAB_TRANSLATION_KEY),
-                    () -> new ItemStack(Items.END_STONE)));
+                    () -> new ItemStack(ModBlocks.END_TURF.get())));
 
     private static boolean registered;
 
