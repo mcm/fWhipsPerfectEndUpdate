@@ -15,6 +15,10 @@ public final class InfusionRules {
     public static final int MAX_TIER = 4;
     /** A charge can store at most this many payments' worth of time. */
     public static final int MAX_PAYMENTS = 64;
+    /** Infused gear updates every this many ticks and uses up this much stored time when active (US-031). */
+    public static final int GEAR_INTERVAL = 20;
+    /** Duration of the effect active infused gear applies, refreshed every {@link #GEAR_INTERVAL} ticks. */
+    public static final int GEAR_EFFECT_TICKS = 80;
 
     private InfusionRules() {
     }
@@ -106,6 +110,19 @@ public final class InfusionRules {
         }
         int amplifier = current == null ? amplifierFor(effect, tier) : current.amplifier();
         return Optional.of(new Charge(effect, amplifier, Math.min(existing + chargeTicks(tier), cap)));
+    }
+
+    /**
+     * Whether infused gear pauses (no effect, no depletion) under a live tracked beacon effect of the same type:
+     * the beacon's level is the same or higher. {@code beaconAmplifier} is negative when there is none.
+     */
+    public static boolean pausedByBeacon(int amplifier, int beaconAmplifier) {
+        return beaconAmplifier >= amplifier;
+    }
+
+    /** Stored time left after one active gear update; the infusion is removed at 0. */
+    public static int deplete(int remainingTicks) {
+        return Math.max(remainingTicks - GEAR_INTERVAL, 0);
     }
 
     /** Formats a tick count as {@code m:ss}, e.g. 65280 ticks → {@code 54:24}. */

@@ -3,6 +3,7 @@ package io.mcmaster.someonesperfectend;
 import io.mcmaster.someonesperfectend.alchemy.OasisPotions;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
+import io.mcmaster.someonesperfectend.infuser.InfusedGear;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
 import io.mcmaster.someonesperfectend.item.ModItems;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
@@ -22,6 +23,7 @@ public final class SomeonesPerfectEnd {
         ModBlocks.init();
         ModFluids.init();
         Infusers.init();
+        InfusedGear.init();
         ModFeatures.init();
         OasisPotions.init();
         ModItems.init();

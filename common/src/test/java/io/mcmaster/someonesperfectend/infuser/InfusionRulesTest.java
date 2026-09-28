@@ -122,4 +122,19 @@ class InfusionRulesTest {
         assertEquals("0:05", InfusionRules.formatTime(119));
         assertEquals("0:00", InfusionRules.formatTime(0));
     }
+
+    @Test
+    void gearPausesUnderAnEqualOrStrongerBeacon() {
+        assertFalse(InfusionRules.pausedByBeacon(0, -1), "no beacon effect");
+        assertTrue(InfusionRules.pausedByBeacon(0, 0), "same level");
+        assertTrue(InfusionRules.pausedByBeacon(0, 1), "beacon higher");
+        assertFalse(InfusionRules.pausedByBeacon(1, 0), "gear higher");
+    }
+
+    @Test
+    void gearDepletesTwentyTicksPerUpdate() {
+        assertEquals(180, InfusionRules.deplete(200));
+        assertEquals(0, InfusionRules.deplete(20));
+        assertEquals(0, InfusionRules.deplete(5));
+    }
 }
