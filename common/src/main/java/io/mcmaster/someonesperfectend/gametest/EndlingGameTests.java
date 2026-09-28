@@ -70,7 +70,8 @@ public final class EndlingGameTests {
         helper.assertTrue(endling.getHealth() == 14.0F, "hits should hurt the endling, health " + endling.getHealth());
         helper.runAfterDelay(20, () -> {
             double moved = endling.position().distanceTo(start);
-            helper.assertTrue(moved < 4.0, "endling moved " + moved + " blocks after being hit; it should not teleport");
+            // Panicking for 20 ticks covers ~5 blocks; an Enderman teleport goes up to 32.
+            helper.assertTrue(moved < 8.0, "endling moved " + moved + " blocks after being hit; it should not teleport");
             helper.assertTrue(endling.getTarget() == null, "endling should never target the player");
             endling.discard();
             helper.succeed();

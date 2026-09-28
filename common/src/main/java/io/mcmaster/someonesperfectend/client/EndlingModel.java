@@ -1,7 +1,9 @@
 package io.mcmaster.someonesperfectend.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.entity.Endling;
+import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -12,6 +14,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.HumanoidArm;
 
 /**
  * Copper-Golem proportions: a wide, flat head on a stocky body with short legs and hanging arms, 19 pixels tall.
@@ -20,8 +23,11 @@ import net.minecraft.util.Mth;
  * part (head at 0,0; body at 32,16; limbs at 56,0) at a size that stays inside that part's opaque pixels, and is then
  * stretched to its real size with a per-axis {@link CubeDeformation}. The head's front face keeps the Enderman's eye
  * row, which lines up with the eyes layer.
+ *
+ * <p>While inspecting a barter item (US-022) it holds the item up in its right hand, cups it with the left, and bends
+ * its head over it, turning it slowly from side to side.
  */
-public class EndlingModel extends HierarchicalModel<Endling> {
+public class EndlingModel extends HierarchicalModel<Endling> implements ArmedModel {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(SomeonesPerfectEnd.id("endling"), "main");
 
     private final ModelPart root;
@@ -91,5 +97,23 @@ public class EndlingModel extends HierarchicalModel<Endling> {
         leftArm.xRot = swing * 0.8F;
         rightArm.zRot = 0.05F + idle;
         leftArm.zRot = -0.05F - idle;
+        rightArm.yRot = 0.0F;
+        leftArm.yRot = 0.0F;
+        if (entity.isInspecting()) {
+            float turn = Mth.sin(ageInTicks * 0.15F);
+            head.xRot = 0.6F;
+            head.yRot = turn * 0.35F;
+            rightArm.xRot = -1.1F + Mth.sin(ageInTicks * 0.3F) * 0.05F;
+            rightArm.yRot = -0.25F + turn * 0.15F;
+            rightArm.zRot = 0.0F;
+            leftArm.xRot = -0.9F;
+            leftArm.yRot = 0.45F;
+            leftArm.zRot = 0.0F;
+        }
+    }
+
+    @Override
+    public void translateToHand(HumanoidArm arm, PoseStack poseStack) {
+        (arm == HumanoidArm.RIGHT ? rightArm : leftArm).translateAndRotate(poseStack);
     }
 }

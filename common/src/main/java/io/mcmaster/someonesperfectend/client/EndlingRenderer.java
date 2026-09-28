@@ -8,11 +8,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 
 /**
  * Enderman-palette body with glowing purple eyes; a Lost endling uses a desaturated, hollow-eyed texture and no glow.
- * All textures are recolored from the Enderman's.
+ * All textures are recolored from the Enderman's. The held barter item is drawn in its hand while it inspects it.
  */
 public class EndlingRenderer extends MobRenderer<Endling, EndlingModel> {
     private static final ResourceLocation TEXTURE = SomeonesPerfectEnd.id("textures/entity/endling/endling.png");
@@ -39,6 +40,7 @@ public class EndlingRenderer extends MobRenderer<Endling, EndlingModel> {
                 }
             }
         });
+        addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
     }
 
     @Override

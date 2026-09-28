@@ -1,29 +1,42 @@
 package io.mcmaster.someonesperfectend.entity;
 
+import java.util.EnumSet;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -34,6 +47,11 @@ import org.jetbrains.annotations.Nullable;
  * it walk back when it strays. Like a Piglin zombifying outside the Nether, after {@link #LOST_DELAY} continuous ticks
  * outside the End an endling becomes {@linkplain #isLost() Lost} for good: it leaves its village, keeps its distance
  * from players, and never picks up items or barters (US-022), even back in the End.
+ *
+ * <p>Bartering (US-022): a non-Lost endling in the End walks to and picks up one {@linkplain EndlingBarters barter
+ * input} (dropped, or handed over with use-item), holds it in its main hand and inspects it for
+ * {@link #INSPECT_TICKS}, then throws a roll from the input's barter loot table toward the nearest player. It takes
+ * nothing else; its vanilla {@link #canPickUpLoot()} stays off.
  */
 public class Endling extends PathfinderMob {
     /** Continuous ticks outside the End before an endling becomes Lost (15 seconds). */
@@ -42,6 +60,10 @@ public class Endling extends PathfinderMob {
     public static final float LOST_FLEE_DISTANCE = 6.0F;
     /** How far a village endling may wander from its village point of interest. */
     public static final int VILLAGE_RADIUS = 16;
+    /** How long an endling inspects a barter item before paying out (6 seconds). */
+    public static final int INSPECT_TICKS = 120;
+    /** How far an endling looks for dropped barter items to walk to. */
+    public static final double BARTER_SEARCH_RANGE = 8.0;
 
     private static final EntityDataAccessor<Boolean> DATA_LOST =
             SynchedEntityData.defineId(Endling.class, EntityDataSerializers.BOOLEAN);
@@ -49,8 +71,11 @@ public class Endling extends PathfinderMob {
     private static final String TAG_TICKS_OUTSIDE_END = "TicksOutsideEnd";
     private static final String TAG_VILLAGE = "Village";
     private static final String TAG_VILLAGE_RADIUS = "VillageRadius";
+    private static final String TAG_INSPECT_TICKS = "InspectTicks";
+    private static final float DEFAULT_HAND_DROP_CHANCE = 0.085F;
 
     private int ticksOutsideEnd;
+    private int inspectTicks;
     @Nullable
     private BlockPos village;
 
@@ -82,6 +107,8 @@ public class Endling extends PathfinderMob {
                 return isLost() && super.canUse();
             }
         });
+        goalSelector.addGoal(3, new InspectGoal());
+        goalSelector.addGoal(4, new SeekBarterItemGoal());
         goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
         goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.8));
         goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -113,7 +140,88 @@ public class Endling extends PathfinderMob {
         super.tick();
         if (!level().isClientSide) {
             updateLostState(level().dimension() == Level.END);
+            if (isInspecting() && --inspectTicks <= 0) {
+                finishInspecting();
+            }
         }
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (!level().isClientSide && isAlive() && wantsToBarter()) {
+            // Same reach as vanilla mob item pickup.
+            for (ItemEntity item : level().getEntitiesOfClass(ItemEntity.class, getBoundingBox().inflate(1.0, 0.0, 1.0))) {
+                if (!item.isRemoved() && !item.hasPickUpDelay() && EndlingBarters.isInput(item.getItem())) {
+                    onItemPickup(item);
+                    take(item, 1);
+                    ItemStack one = item.getItem().split(1);
+                    if (item.getItem().isEmpty()) {
+                        item.discard();
+                    }
+                    startInspecting(one);
+                    break;
+                }
+            }
+        }
+    }
+
+    /** Whether this endling would take a barter item right now: it can barter, is an adult, and isn't busy. */
+    public boolean wantsToBarter() {
+        return canBarter() && !isBaby() && !isInspecting();
+    }
+
+    /** Whether this endling is holding a barter item and inspecting it (synced: it's the main-hand item). */
+    public boolean isInspecting() {
+        return !getMainHandItem().isEmpty();
+    }
+
+    public int inspectTicks() {
+        return inspectTicks;
+    }
+
+    private void startInspecting(ItemStack item) {
+        setItemSlot(EquipmentSlot.MAINHAND, item);
+        // Killed mid-inspection, it gives the item back.
+        setGuaranteedDrop(EquipmentSlot.MAINHAND);
+        inspectTicks = INSPECT_TICKS;
+        getNavigation().stop();
+    }
+
+    private void finishInspecting() {
+        ItemStack input = getMainHandItem();
+        setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        setDropChance(EquipmentSlot.MAINHAND, DEFAULT_HAND_DROP_CHANCE);
+        inspectTicks = 0;
+        ResourceKey<LootTable> table = EndlingBarters.lootTableFor(input);
+        // Lost or out of the End since it took the item: hand it back instead.
+        List<ItemStack> output = canBarter() && table != null ? EndlingBarters.roll(this, table) : List.of(input);
+        Player player = nearestPlayer(16.0);
+        Vec3 target = player != null ? player.position() : position().add(getLookAngle().scale(2.0));
+        for (ItemStack stack : output) {
+            BehaviorUtils.throwItem(this, stack, target.add(0.0, 1.0, 0.0));
+        }
+    }
+
+    /** Uses entity lookups (not {@code level.players()}) so GameTest mock players count. */
+    @Nullable
+    private Player nearestPlayer(double range) {
+        List<Player> players = level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(range),
+                p -> !p.isSpectator() && p.isAlive());
+        return level().getNearestEntity(players, TargetingConditions.forNonCombat().ignoreLineOfSight(), this, getX(), getY(), getZ());
+    }
+
+    /** Handing over a barter item with use-item gives it one (a creative player keeps theirs). */
+    @Override
+    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (EndlingBarters.isInput(stack) && wantsToBarter()) {
+            if (!level().isClientSide) {
+                startInspecting(stack.consumeAndReturn(1, player));
+            }
+            return InteractionResult.sidedSuccess(level().isClientSide);
+        }
+        return super.mobInteract(player, hand);
     }
 
     /** One tick of the End lock: in the End the timer resets; after {@link #LOST_DELAY} ticks elsewhere it's Lost. */
@@ -169,6 +277,7 @@ public class Endling extends PathfinderMob {
         super.addAdditionalSaveData(tag);
         tag.putBoolean(TAG_LOST, isLost());
         tag.putInt(TAG_TICKS_OUTSIDE_END, ticksOutsideEnd);
+        tag.putInt(TAG_INSPECT_TICKS, inspectTicks);
         if (village != null) {
             tag.put(TAG_VILLAGE, NbtUtils.writeBlockPos(village));
             tag.putInt(TAG_VILLAGE_RADIUS, (int) getRestrictRadius());
@@ -179,6 +288,7 @@ public class Endling extends PathfinderMob {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         ticksOutsideEnd = tag.getInt(TAG_TICKS_OUTSIDE_END);
+        inspectTicks = tag.getInt(TAG_INSPECT_TICKS);
         leaveVillage();
         if (tag.getBoolean(TAG_LOST)) {
             setLost();
@@ -223,5 +333,78 @@ public class Endling extends PathfinderMob {
     @Override
     public int getAmbientSoundInterval() {
         return 240;
+    }
+
+    /** Stands still and looks down at the held barter item while inspecting it. */
+    private final class InspectGoal extends Goal {
+        InspectGoal() {
+            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return isInspecting();
+        }
+
+        @Override
+        public void start() {
+            getNavigation().stop();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            Vec3 ahead = position().add(Vec3.directionFromRotation(0.0F, yBodyRot).scale(0.6));
+            getLookControl().setLookAt(ahead.x, getY() + 0.3, ahead.z);
+        }
+    }
+
+    /** Walks to the nearest dropped barter item it wants. */
+    private final class SeekBarterItemGoal extends Goal {
+        @Nullable
+        private ItemEntity target;
+
+        SeekBarterItemGoal() {
+            setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            if (!wantsToBarter() || getRandom().nextInt(reducedTickDelay(5)) != 0) {
+                return false;
+            }
+            List<ItemEntity> items = level().getEntitiesOfClass(ItemEntity.class,
+                    getBoundingBox().inflate(BARTER_SEARCH_RANGE, 4.0, BARTER_SEARCH_RANGE),
+                    item -> EndlingBarters.isInput(item.getItem()));
+            target = null;
+            double best = Double.MAX_VALUE;
+            for (ItemEntity item : items) {
+                double distance = distanceToSqr(item);
+                if (distance < best) {
+                    best = distance;
+                    target = item;
+                }
+            }
+            return target != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return target != null && target.isAlive() && wantsToBarter() && !getNavigation().isDone();
+        }
+
+        @Override
+        public void start() {
+            getNavigation().moveTo(target, 1.0);
+        }
+
+        @Override
+        public void stop() {
+            target = null;
+        }
     }
 }

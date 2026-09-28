@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:dirt",
+    "#minecraft:saplings",
+    "#minecraft:small_flowers",
+    "#minecraft:logs",
+    "minecraft:grass_block",
+    "minecraft:moss_block",
+    "#minecraft:sand"
+  ]
+}
