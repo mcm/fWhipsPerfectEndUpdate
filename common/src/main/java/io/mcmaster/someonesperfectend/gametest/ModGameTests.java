@@ -47,7 +47,8 @@ public final class ModGameTests {
             EffectTotemGameTests.class,
             TotemStackingGameTests.class,
             EndChanterGameTests.class,
-            VoidCleansingGameTests.class);
+            VoidCleansingGameTests.class,
+            ElevationBandGameTests.class);
 
     public ModGameTests() {
     }

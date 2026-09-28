@@ -30,6 +30,7 @@
     "PotionBrewingMixin",
     "ReloadableResourceManagerMixin",
     "ServerGamePacketListenerImplMixin",
+    "TheEndGatewayBlockEntityInvoker",
     "UniqueSlotHandlingMixin",
     "WoodTypeInvoker"
   ],

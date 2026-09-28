@@ -140,6 +140,19 @@ The single trinket slot is built on [Accessories](https://github.com/wisp-forest
 
   The `TrinketGameTests.trinketIsTheOnlyAccessorySlot` GameTest checks the player's slot list.
 
+## End terrain (elevation bands)
+
+The outer End (at least 1024 blocks from the origin) is split into three elevation bands: lower (surface
+about Y=40), middle (vanilla, about Y=62), and upper (about Y=100). The override of
+`data/minecraft/worldgen/noise_settings/end.json` is the vanilla file with the terrain density wrapped in
+`someonesperfectend:elevation_bands` (`worldgen/ElevationBandsFunction`, layout math in `ElevationBands`).
+The function divides the outer End into seeded Voronoi regions about 320 blocks across. It gives each region a
+band and moves that region's islands by the band's offset (−20, 0, or +40 blocks, multiples of the 4-block
+noise cell). A 24-block void strip separates regions with different bands, so an island is split, never
+sheared. Within 1024 blocks nothing changes. Regions near that circle are always middle band, so the central
+island, the void ring, and End Gateway exits stay vanilla. `ElevationBandGameTests` checks this against the
+vanilla `end.json` read from the vanilla data pack. The Overworld and Nether are not touched.
+
 ## Quality gates
 
 ```

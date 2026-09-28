@@ -1,5 +1,6 @@
 package io.mcmaster.someonesperfectend.worldgen;
 
+import com.mojang.serialization.MapCodec;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
@@ -8,13 +9,17 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 
-/** Feature types, plus keys of the data-driven configured features that code refers to. */
+/** Feature and density function types, plus keys of the data-driven configured features that code refers to. */
 public final class ModFeatures {
     public static final RegistrySupplier<HugeGlowcapFeature> HUGE_GLOWCAP = ModRegistries.FEATURES.register(
             "huge_glowcap", () -> new HugeGlowcapFeature(HugeMushroomFeatureConfiguration.CODEC));
 
     public static final RegistrySupplier<AstralTreeFeature> ASTRAL_TREE = ModRegistries.FEATURES.register(
             "astral_tree", () -> new AstralTreeFeature(AstralTreeConfiguration.CODEC));
+
+    /** Density function type used by the End noise settings override (US-012). */
+    public static final RegistrySupplier<MapCodec<ElevationBandsFunction>> ELEVATION_BANDS =
+            ModRegistries.DENSITY_FUNCTION_TYPES.register("elevation_bands", () -> ElevationBandsFunction.CODEC);
 
     /** {@code data/someonesperfectend/worldgen/configured_feature/huge_glowcap.json}. */
     public static final ResourceKey<ConfiguredFeature<?, ?>> HUGE_GLOWCAP_CONFIGURED = configured("huge_glowcap");

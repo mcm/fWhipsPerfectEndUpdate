@@ -1,5 +1,6 @@
 package io.mcmaster.someonesperfectend.registry;
 
+import com.mojang.serialization.MapCodec;
 import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -19,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
@@ -39,6 +41,8 @@ public final class ModRegistries {
             create(Registries.DATA_COMPONENT_TYPE);
     public static final DeferredRegister<Potion> POTIONS = create(Registries.POTION);
     public static final DeferredRegister<Feature<?>> FEATURES = create(Registries.FEATURE);
+    public static final DeferredRegister<MapCodec<? extends DensityFunction>> DENSITY_FUNCTION_TYPES =
+            create(Registries.DENSITY_FUNCTION_TYPE);
     public static final DeferredRegister<StructureType<?>> STRUCTURE_TYPES = create(Registries.STRUCTURE_TYPE);
     public static final DeferredRegister<StructurePieceType> STRUCTURE_PIECES = create(Registries.STRUCTURE_PIECE);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = create(Registries.CREATIVE_MODE_TAB);
@@ -103,6 +107,7 @@ public final class ModRegistries {
         POTIONS.register();
         ENTITY_TYPES.register();
         FEATURES.register();
+        DENSITY_FUNCTION_TYPES.register();
         STRUCTURE_TYPES.register();
         STRUCTURE_PIECES.register();
         CREATIVE_TABS.register();
