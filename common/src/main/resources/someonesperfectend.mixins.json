@@ -15,6 +15,7 @@
     "BottleItemMixin",
     "BrewingStandBlockEntityMixin",
     "BrewingStandPotionSlotMixin",
+    "EnchantmentMenuMixin",
     "InventoryMenuMixin",
     "LavaFluidMixin",
     "LiquidBlockMixin",
