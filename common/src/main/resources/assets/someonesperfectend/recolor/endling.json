@@ -1,0 +1,30 @@
+{
+  "recipes": [
+    {
+      "source": "minecraft:entity/enderman/enderman",
+      "target": "someonesperfectend:entity/endling/endling",
+      "palette": {"colors": {
+        "#000000": "#0d0912",
+        "#161616": "#241a2e",
+        "#ffffff": "#f2c4ff"
+      }}
+    },
+    {
+      "source": "minecraft:entity/enderman/enderman_eyes",
+      "target": "someonesperfectend:entity/endling/endling_eyes",
+      "palette": {"colors": {
+        "#e079fa": "#e993ff",
+        "#cc00fa": "#b21cff"
+      }}
+    },
+    {
+      "source": "minecraft:entity/enderman/enderman",
+      "target": "someonesperfectend:entity/endling/endling_lost",
+      "palette": {"colors": {
+        "#000000": "#2f2f33",
+        "#161616": "#4d4c52",
+        "#ffffff": "#050505"
+      }}
+    }
+  ]
+}

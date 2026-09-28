@@ -87,5 +87,7 @@
   "entity.someonesperfectend.driftjelly": "Driftjelly",
   "item.someonesperfectend.driftjelly_spawn_egg": "Driftjelly Spawn Egg",
   "item.someonesperfectend.driftjelly_gel": "Driftjelly Gel",
-  "item.someonesperfectend.cooked_driftjelly_gel": "Cooked Driftjelly Gel"
+  "item.someonesperfectend.cooked_driftjelly_gel": "Cooked Driftjelly Gel",
+  "entity.someonesperfectend.endling": "Endling",
+  "item.someonesperfectend.endling_spawn_egg": "Endling Spawn Egg"
 }

@@ -3,6 +3,7 @@ package io.mcmaster.someonesperfectend;
 import io.mcmaster.someonesperfectend.alchemy.OasisPotions;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.entity.Driftjellies;
+import io.mcmaster.someonesperfectend.entity.Endlings;
 import io.mcmaster.someonesperfectend.entity.ModBoats;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.infuser.InfusedGear;
@@ -34,6 +35,7 @@ public final class SomeonesPerfectEnd {
         ModRegistries.register();
         // Fabric resolves the entity type immediately when registering attributes and spawn placements.
         Driftjellies.init();
+        Endlings.init();
     }
 
     public static ResourceLocation id(String path) {

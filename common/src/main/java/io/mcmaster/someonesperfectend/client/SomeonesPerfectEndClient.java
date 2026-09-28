@@ -10,6 +10,7 @@ import dev.architectury.registry.menu.MenuRegistry;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.block.ModWoodTypes;
 import io.mcmaster.someonesperfectend.entity.Driftjellies;
+import io.mcmaster.someonesperfectend.entity.Endlings;
 import io.mcmaster.someonesperfectend.entity.ModBoatType;
 import io.mcmaster.someonesperfectend.entity.ModBoats;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
@@ -49,6 +50,8 @@ public final class SomeonesPerfectEndClient {
         registerBoatRenderers();
         EntityModelLayerRegistry.register(DriftjellyModel.LAYER, DriftjellyModel::createBodyLayer);
         EntityRendererRegistry.register(Driftjellies.TYPE, DriftjellyRenderer::new);
+        EntityModelLayerRegistry.register(EndlingModel.LAYER, EndlingModel::createBodyLayer);
+        EntityRendererRegistry.register(Endlings.TYPE, EndlingRenderer::new);
         ClientLifecycleEvent.CLIENT_SETUP.register(minecraft -> {
             registerRenderTypes();
             registerTrinketRenderers();
