@@ -79,6 +79,12 @@ subprojects {
             url = 'https://maven.wispforest.io/releases'
         }
         maven {
+            // TerraBlender (End biome placement, US-013)
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net/'
+            content { includeGroup 'com.github.glitchfiend' }
+        }
+        maven {
             // Forgified Fabric API modules that Accessories/owo-lib need on NeoForge
             name = 'Sinytra'
             url = 'https://maven.su5ed.dev/releases'

@@ -13,6 +13,9 @@ dependencies {
 
     // Accessories (trinket slot, US-024). Loader-specific jars are added in fabric/ and neoforge/.
     modCompileOnly "io.wispforest:accessories-common:$rootProject.accessories_version"
+
+    // TerraBlender (End biome placement, US-013). Loader-specific jars are added in fabric/ and neoforge/.
+    modCompileOnly "com.github.glitchfiend:TerraBlender-common:$rootProject.terrablender_version"
 }
 
 dependencies {

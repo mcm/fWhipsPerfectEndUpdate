@@ -16,6 +16,9 @@
     "client": [
       "io.mcmaster.someonesperfectend.fabric.client.SomeonesPerfectEndFabricClient"
     ],
+    "terrablender": [
+      "io.mcmaster.someonesperfectend.fabric.SomeonesPerfectEndTerraBlender"
+    ],
     "fabric-gametest": [
       "io.mcmaster.someonesperfectend.gametest.ModGameTests"
     ]
@@ -29,6 +32,7 @@
     "java": ">=21",
     "architectury": ">=13.0.11",
     "fabric-api": "*",
-    "accessories": "*"
+    "accessories": "*",
+    "terrablender": "*"
   }
 }

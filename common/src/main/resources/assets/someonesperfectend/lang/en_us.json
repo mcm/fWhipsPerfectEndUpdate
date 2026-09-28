@@ -80,5 +80,8 @@
   "item.someonesperfectend.voidvine_raft": "Voidvine Raft",
   "entity.someonesperfectend.voidvine_raft": "Voidvine Raft",
   "item.someonesperfectend.voidvine_chest_raft": "Voidvine Raft with Chest",
-  "entity.someonesperfectend.voidvine_chest_raft": "Voidvine Raft with Chest"
+  "entity.someonesperfectend.voidvine_chest_raft": "Voidvine Raft with Chest",
+  "biome.someonesperfectend.end_plains": "End Plains",
+  "biome.someonesperfectend.end_forest": "End Forest",
+  "biome.someonesperfectend.end_oasis": "End Oasis"
 }

@@ -153,6 +153,26 @@ sheared. Within 1024 blocks nothing changes. Regions near that circle are always
 island, the void ring, and End Gateway exits stay vanilla. `ElevationBandGameTests` checks this against the
 vanilla `end.json` read from the vanilla data pack. The Overworld and Nether are not touched.
 
+## End biomes
+
+`end_plains`, `end_forest`, and `end_oasis` are data (`data/someonesperfectend/worldgen/biome/`): vanilla End
+ambience (Endermen, mood sound, water colors, `end_gateway_return`) with pastel fog/sky colors and ambient
+particles. They are placed by [TerraBlender](https://github.com/Glitchfiend/TerraBlender) (required library):
+`ModBiomes.registerPlacement()` adds them to TerraBlender's End highlands and midlands lists (Fabric: the
+`terrablender` entrypoint; NeoForge: common setup). With vanilla's weight of 10 per category, the weights in
+`ModBiomes` give about 30% of outer-island positions (oasis rarest). TerraBlender's own weights and biome sizes are
+in its `config/terrablender.toml`.
+
+- **Surface rules** live in the same `end.json` override: `end_turf` on island tops in all three biomes, with
+  `voidsoil` patches (noise `someonesperfectend:voidsoil_patch`) in forest and oasis. Other biomes keep end stone.
+- **Purity:** with only TerraBlender, the Overworld and Nether use only vanilla's region, so their biomes are
+  exactly vanilla. TerraBlender 4.1 builds its End "small islands" area from the edge list, which would turn the
+  void between islands into `end_barrens`; `TheEndBiomeSourceMixin` (runs before TerraBlender) restores
+  `small_end_islands` there. `EndBiomeGameTests` checks all of this plus the coverage.
+- The biomes are also in `#minecraft:is_end`, `#c:is_end`, and `#minecraft:has_structure/end_city`, so End
+  Cities keep their vanilla frequency.
+- Like vanilla biome changes, only newly generated chunks use the new biomes; existing chunks are untouched.
+
 ## Quality gates
 
 ```

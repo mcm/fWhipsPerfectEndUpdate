@@ -38,6 +38,7 @@ dependencies {
     modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
 
     modImplementation "io.wispforest:accessories-neoforge:$rootProject.accessories_version"
+    modImplementation "com.github.glitchfiend:TerraBlender-neoforge:$rootProject.terrablender_version"
     // owo-lib (required by Accessories) jar-in-jars these plain libraries. In the dev/GameTest run jar-in-jar
     // isn't unpacked, so put the same versions on the game layer explicitly.
     forgeRuntimeLibrary('io.wispforest:endec:0.1.8.1') { transitive = false }

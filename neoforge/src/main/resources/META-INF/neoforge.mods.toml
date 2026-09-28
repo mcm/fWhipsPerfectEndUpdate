@@ -39,6 +39,13 @@ versionRange = "[1,)"
 ordering = "AFTER"
 side = "BOTH"
 
+[[dependencies.someonesperfectend]]
+modId = "terrablender"
+type = "required"
+versionRange = "[4.1,)"
+ordering = "AFTER"
+side = "BOTH"
+
 [[mixins]]
 config = "someonesperfectend.mixins.json"
 
