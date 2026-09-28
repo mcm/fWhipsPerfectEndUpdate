@@ -4,11 +4,13 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.infuser.InfusionEffect;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import io.mcmaster.someonesperfectend.trinket.Trinkets;
 import io.wispforest.accessories.api.AccessoriesAPI;
 import java.util.List;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Unit;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 
@@ -44,6 +46,12 @@ public final class EffectTotems {
 
     public static boolean isActive(ItemStack stack) {
         return stack.has(TOTEM_ACTIVATED.get());
+    }
+
+    /** Whether the entity wears an active effect totem in its trinket slot (it suppresses infused gear, US-033). */
+    public static boolean hasActiveTotemEquipped(LivingEntity entity) {
+        ItemStack stack = Trinkets.getEquipped(entity);
+        return stack.getItem() instanceof EffectTotemItem && isActive(stack);
     }
 
     /** An active copy of a totem, for creative use and tests. */

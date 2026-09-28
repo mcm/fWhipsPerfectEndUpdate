@@ -43,6 +43,16 @@ public final class BeaconEffectTracker {
         return byAmplifier.keySet().stream().mapToInt(Integer::intValue).max().orElse(NONE);
     }
 
+    /**
+     * Ticks until the tracked beacon effect of this type and amplifier expires, or 0 if there is none. Call
+     * {@link #highestAmplifier} first to pick the amplifier.
+     */
+    public static int remainingTicks(Player player, Holder<MobEffect> effect, int amplifier) {
+        Map<Integer, Long> byAmplifier = effects(player).get(effect);
+        Long expiry = byAmplifier == null ? null : byAmplifier.get(amplifier);
+        return expiry == null ? 0 : (int) Math.max(0, expiry - player.level().getGameTime());
+    }
+
     /** Forgets every tracked effect (for tests). */
     public static void clear(Player player) {
         effects(player).clear();

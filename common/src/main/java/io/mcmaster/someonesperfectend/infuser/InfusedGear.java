@@ -1,6 +1,7 @@
 package io.mcmaster.someonesperfectend.infuser;
 
 import dev.architectury.event.events.common.TickEvent;
+import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.core.Holder;
@@ -17,7 +18,8 @@ import net.minecraft.world.item.ItemStack;
  * Applies infused gear's effects (US-031). Every {@link InfusionRules#GEAR_INTERVAL} ticks on the server, infused
  * items in their valid positions (boots on the feet, chestplates on the chest, tools and weapons in either hand)
  * apply their effect and use up stored time, unless paused: the main hand wins over the off hand for the same
- * effect, and a live tracked beacon effect at the same or a higher level takes precedence.
+ * effect, and a live tracked beacon effect at the same or a higher level takes precedence. While the player wears an
+ * active effect totem, all infused gear is paused (US-033).
  */
 public final class InfusedGear {
     private InfusedGear() {
@@ -33,6 +35,9 @@ public final class InfusedGear {
 
     /** One update cycle for the player's gear. */
     public static void update(Player player) {
+        if (EffectTotems.hasActiveTotemEquipped(player)) {
+            return;
+        }
         Set<Holder<MobEffect>> claimed = new HashSet<>();
         update(player, player.getItemBySlot(EquipmentSlot.FEET), claimed, ItemTags.FOOT_ARMOR);
         update(player, player.getItemBySlot(EquipmentSlot.CHEST), claimed, ItemTags.CHEST_ARMOR);

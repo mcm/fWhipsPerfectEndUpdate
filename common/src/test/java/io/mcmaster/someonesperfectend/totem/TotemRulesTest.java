@@ -27,4 +27,18 @@ class TotemRulesTest {
         assertTrue(TotemRules.appliesOn(160));
         assertFalse(TotemRules.appliesOn(79));
     }
+
+    @Test
+    void totemStacksOneLevelAboveTheBeacon() {
+        assertEquals(0, TotemRules.amplifier(TotemRules.NO_BEACON), "no beacon: level I");
+        assertEquals(1, TotemRules.amplifier(0), "beacon level I: level II");
+        assertEquals(2, TotemRules.amplifier(1), "beacon level II: level III");
+    }
+
+    @Test
+    void stackedLevelNeverOutlastsTheBeaconEffect() {
+        assertEquals(40, TotemRules.stackedDuration(40));
+        assertEquals(340, TotemRules.stackedDuration(1000));
+        assertEquals(0, TotemRules.stackedDuration(-5));
+    }
 }

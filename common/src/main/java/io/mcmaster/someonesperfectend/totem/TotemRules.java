@@ -10,8 +10,10 @@ public final class TotemRules {
     public static final int EFFECT_INTERVAL = 80;
     /** Effect duration: (9 + 2 × 4) seconds, as a full-size beacon. */
     public static final int EFFECT_DURATION = InfusionRules.chargeTicks(ACTIVATION_TIER);
-    /** Totems give level I (beacon stacking is US-033). */
+    /** Totems give level I on their own. */
     public static final int AMPLIFIER = 0;
+    /** No live beacon effect (same value as {@code BeaconEffectTracker.NONE}). */
+    public static final int NO_BEACON = -1;
 
     private TotemRules() {
     }
@@ -27,5 +29,21 @@ public final class TotemRules {
     /** Whether an equipped active totem applies its effect on this game tick. */
     public static boolean appliesOn(long gameTime) {
         return gameTime % EFFECT_INTERVAL == 0;
+    }
+
+    /**
+     * The totem's amplifier (US-033): one level above the highest live beacon amplifier for its effect, or level I
+     * ({@link #AMPLIFIER}) with no matching beacon effect.
+     */
+    public static int amplifier(int beaconAmplifier) {
+        return beaconAmplifier <= NO_BEACON ? AMPLIFIER : beaconAmplifier + 1;
+    }
+
+    /**
+     * How long a stacked (above level I) application lasts: never past the beacon effect it stacks on, so the bonus
+     * ends when the tracked beacon effect expires.
+     */
+    public static int stackedDuration(int beaconRemainingTicks) {
+        return Math.max(0, Math.min(EFFECT_DURATION, beaconRemainingTicks));
     }
 }

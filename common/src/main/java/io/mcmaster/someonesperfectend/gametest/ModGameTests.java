@@ -38,7 +38,8 @@ public final class ModGameTests {
             TrinketGameTests.class,
             InfuserGameTests.class,
             InfusedGearGameTests.class,
-            EffectTotemGameTests.class);
+            EffectTotemGameTests.class,
+            TotemStackingGameTests.class);
 
     public ModGameTests() {
     }
