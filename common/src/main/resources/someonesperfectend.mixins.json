@@ -13,10 +13,13 @@
     "BeaconBlockEntityAccessor",
     "BeaconBlockEntityMixin",
     "BlockEntityAccessor",
+    "BlockEntityTypeMixin",
+    "BlockSetTypeInvoker",
     "BottleItemMixin",
     "BrewingStandBlockEntityMixin",
     "BrewingStandPotionSlotMixin",
     "EnchantmentMenuMixin",
+    "FireBlockInvoker",
     "InventoryMenuMixin",
     "LavaFluidMixin",
     "LiquidBlockMixin",
@@ -26,7 +29,8 @@
     "PotionBrewingMixin",
     "ReloadableResourceManagerMixin",
     "ServerGamePacketListenerImplMixin",
-    "UniqueSlotHandlingMixin"
+    "UniqueSlotHandlingMixin",
+    "WoodTypeInvoker"
   ],
   "injectors": {
     "defaultRequire": 1

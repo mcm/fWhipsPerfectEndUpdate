@@ -6,18 +6,24 @@ import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
+import io.mcmaster.someonesperfectend.block.ModWoodTypes;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
 import io.mcmaster.someonesperfectend.infuser.Infusion;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
 import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.world.level.block.state.properties.WoodType;
 
 /** Common client init; called from each loader's client entrypoint. */
 public final class SomeonesPerfectEndClient {
@@ -34,6 +40,7 @@ public final class SomeonesPerfectEndClient {
                 lines.add(Math.min(1, lines.size()), infusion.tooltip().copy().withStyle(ChatFormatting.BLUE));
             }
         });
+        registerSignMaterials();
         ClientLifecycleEvent.CLIENT_SETUP.register(minecraft -> {
             registerRenderTypes();
             registerTrinketRenderers();
@@ -47,10 +54,24 @@ public final class SomeonesPerfectEndClient {
         EffectTotems.ALL.forEach(totem -> AccessoriesRendererRegistry.registerRenderer(totem.get(), TrinketRenderer::new));
     }
 
+    /**
+     * {@link Sheets} snapshots {@link WoodType#values()} when it is first loaded, which may happen before our wood
+     * types are registered; add any that are missing.
+     */
+    private static void registerSignMaterials() {
+        for (WoodType type : List.of(ModWoodTypes.ASTRAL)) {
+            ResourceLocation id = ResourceLocation.parse(type.name());
+            Sheets.SIGN_MATERIALS.putIfAbsent(type, new Material(Sheets.SIGN_SHEET, id.withPrefix("entity/signs/")));
+            Sheets.HANGING_SIGN_MATERIALS.putIfAbsent(type,
+                    new Material(Sheets.SIGN_SHEET, id.withPrefix("entity/signs/hanging/")));
+        }
+    }
+
     private static void registerRenderTypes() {
         RenderTypeRegistry.register(RenderType.cutoutMipped(), ModBlocks.END_TURF.get());
         RenderTypeRegistry.register(RenderType.cutout(), ModBlocks.SHORT_VOID_GRASS.get(), ModBlocks.VOID_PETALS.get(),
-                ModBlocks.GLOWCAP.get(), ModBlocks.POTTED_GLOWCAP.get(), ModBlocks.INFUSER.get());
+                ModBlocks.GLOWCAP.get(), ModBlocks.POTTED_GLOWCAP.get(), ModBlocks.INFUSER.get(),
+                ModBlocks.ASTRAL_DOOR.get(), ModBlocks.ASTRAL_TRAPDOOR.get());
         RenderTypeRegistry.register(RenderType.translucent(), ModFluids.OASIS_WATER.get(),
                 ModFluids.FLOWING_OASIS_WATER.get());
     }

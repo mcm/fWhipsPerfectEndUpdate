@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_right_open",
+  "textures": {
+    "bottom": "someonesperfectend:block/astral_door_bottom",
+    "top": "someonesperfectend:block/astral_door_top"
+  }
+}

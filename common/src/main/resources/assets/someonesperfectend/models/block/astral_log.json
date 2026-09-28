@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "someonesperfectend:block/astral_log_top",
+    "side": "someonesperfectend:block/astral_log"
+  }
+}

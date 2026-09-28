@@ -1,13 +1,33 @@
 package io.mcmaster.someonesperfectend.block;
 
 import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.hooks.item.tool.AxeItemHooks;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.mcmaster.someonesperfectend.infuser.InfuserBlock;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import java.util.List;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DoubleHighBlockItem;
+import net.minecraft.world.item.HangingSignItem;
+import net.minecraft.world.item.SignItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.CeilingHangingSignBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.WallHangingSignBlock;
+import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.HugeMushroomBlock;
@@ -92,15 +112,131 @@ public final class ModBlocks {
             () -> new InfuserBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BEACON).mapColor(MapColor.COLOR_PURPLE)),
             block -> new BlockItem(block, ModRegistries.itemProperties().rarity(Rarity.RARE)));
 
+
+    // Astral wood set (US-004). Properties follow vanilla's cherry set; sounds come from ModWoodTypes.ASTRAL.
+    private static final MapColor ASTRAL_WOOD_COLOR = MapColor.COLOR_LIGHT_BLUE;
+    private static final MapColor ASTRAL_BARK_COLOR = MapColor.COLOR_PURPLE;
+
+    public static final RegistrySupplier<RotatedPillarBlock> ASTRAL_LOG = ModRegistries.block("astral_log",
+            () -> new RotatedPillarBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_BARK_COLOR)));
+    public static final RegistrySupplier<RotatedPillarBlock> ASTRAL_WOOD = ModRegistries.block("astral_wood",
+            () -> new RotatedPillarBlock(logProperties(ASTRAL_BARK_COLOR, ASTRAL_BARK_COLOR)));
+    public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_ASTRAL_LOG = ModRegistries.block(
+            "stripped_astral_log", () -> new RotatedPillarBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_WOOD_COLOR)));
+    public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_ASTRAL_WOOD = ModRegistries.block(
+            "stripped_astral_wood", () -> new RotatedPillarBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_WOOD_COLOR)));
+    public static final RegistrySupplier<Block> ASTRAL_PLANKS = ModRegistries.block("astral_planks",
+            () -> new Block(woodProperties(ASTRAL_WOOD_COLOR).strength(2.0F, 3.0F)));
+    public static final RegistrySupplier<StairBlock> ASTRAL_STAIRS = ModRegistries.block("astral_stairs",
+            () -> new StairBlock(ASTRAL_PLANKS.get().defaultBlockState(),
+                    BlockBehaviour.Properties.ofLegacyCopy(ASTRAL_PLANKS.get())));
+    public static final RegistrySupplier<SlabBlock> ASTRAL_SLAB = ModRegistries.block("astral_slab",
+            () -> new SlabBlock(woodProperties(ASTRAL_WOOD_COLOR).strength(2.0F, 3.0F)));
+    public static final RegistrySupplier<FenceBlock> ASTRAL_FENCE = ModRegistries.block("astral_fence",
+            () -> new FenceBlock(woodProperties(ASTRAL_WOOD_COLOR).forceSolidOn().strength(2.0F, 3.0F)));
+    public static final RegistrySupplier<FenceGateBlock> ASTRAL_FENCE_GATE = ModRegistries.block("astral_fence_gate",
+            () -> new FenceGateBlock(ModWoodTypes.ASTRAL,
+                    woodProperties(ASTRAL_WOOD_COLOR).forceSolidOn().strength(2.0F, 3.0F)));
+    public static final RegistrySupplier<DoorBlock> ASTRAL_DOOR = ModRegistries.block("astral_door",
+            () -> new DoorBlock(ModWoodTypes.ASTRAL_SET, BlockBehaviour.Properties.of()
+                    .mapColor(ASTRAL_WOOD_COLOR)
+                    .instrument(NoteBlockInstrument.BASS)
+                    .strength(3.0F)
+                    .noOcclusion()
+                    .ignitedByLava()
+                    .pushReaction(PushReaction.DESTROY)),
+            block -> new DoubleHighBlockItem(block, ModRegistries.itemProperties()));
+    public static final RegistrySupplier<TrapDoorBlock> ASTRAL_TRAPDOOR = ModRegistries.block("astral_trapdoor",
+            () -> new TrapDoorBlock(ModWoodTypes.ASTRAL_SET, BlockBehaviour.Properties.of()
+                    .mapColor(ASTRAL_WOOD_COLOR)
+                    .instrument(NoteBlockInstrument.BASS)
+                    .strength(3.0F)
+                    .noOcclusion()
+                    .isValidSpawn((state, level, pos, type) -> false)
+                    .ignitedByLava()));
+    public static final RegistrySupplier<ButtonBlock> ASTRAL_BUTTON = ModRegistries.block("astral_button",
+            () -> new ButtonBlock(ModWoodTypes.ASTRAL_SET, 30, BlockBehaviour.Properties.of()
+                    .noCollission()
+                    .strength(0.5F)
+                    .pushReaction(PushReaction.DESTROY)));
+    public static final RegistrySupplier<PressurePlateBlock> ASTRAL_PRESSURE_PLATE = ModRegistries.block(
+            "astral_pressure_plate",
+            () -> new PressurePlateBlock(ModWoodTypes.ASTRAL_SET, woodProperties(ASTRAL_WOOD_COLOR)
+                    .forceSolidOn()
+                    .noCollission()
+                    .strength(0.5F)
+                    .pushReaction(PushReaction.DESTROY)));
+    public static final RegistrySupplier<StandingSignBlock> ASTRAL_SIGN = ModRegistries.blockOnly("astral_sign",
+            () -> new StandingSignBlock(ModWoodTypes.ASTRAL, signProperties(ASTRAL_WOOD_COLOR)));
+    public static final RegistrySupplier<WallSignBlock> ASTRAL_WALL_SIGN = ModRegistries.blockOnly("astral_wall_sign",
+            () -> new WallSignBlock(ModWoodTypes.ASTRAL,
+                    signProperties(ASTRAL_WOOD_COLOR).dropsLike(ASTRAL_SIGN.get())));
+    public static final RegistrySupplier<CeilingHangingSignBlock> ASTRAL_HANGING_SIGN = ModRegistries.blockOnly(
+            "astral_hanging_sign",
+            () -> new CeilingHangingSignBlock(ModWoodTypes.ASTRAL, signProperties(ASTRAL_BARK_COLOR)));
+    public static final RegistrySupplier<WallHangingSignBlock> ASTRAL_WALL_HANGING_SIGN = ModRegistries.blockOnly(
+            "astral_wall_hanging_sign",
+            () -> new WallHangingSignBlock(ModWoodTypes.ASTRAL,
+                    signProperties(ASTRAL_BARK_COLOR).dropsLike(ASTRAL_HANGING_SIGN.get())));
+    public static final RegistrySupplier<SignItem> ASTRAL_SIGN_ITEM = ModRegistries.item("astral_sign",
+            () -> new SignItem(ModRegistries.itemProperties().stacksTo(16), ASTRAL_SIGN.get(), ASTRAL_WALL_SIGN.get()));
+    public static final RegistrySupplier<HangingSignItem> ASTRAL_HANGING_SIGN_ITEM = ModRegistries.item(
+            "astral_hanging_sign", () -> new HangingSignItem(ASTRAL_HANGING_SIGN.get(),
+                    ASTRAL_WALL_HANGING_SIGN.get(), ModRegistries.itemProperties().stacksTo(16)));
+
     private ModBlocks() {
+    }
+
+    private static BlockBehaviour.Properties logProperties(MapColor topColor, MapColor sideColor) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(state -> state.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? topColor : sideColor)
+                .instrument(NoteBlockInstrument.BASS)
+                .strength(2.0F)
+                .sound(ModWoodTypes.ASTRAL.soundType())
+                .ignitedByLava();
+    }
+
+    private static BlockBehaviour.Properties woodProperties(MapColor color) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .instrument(NoteBlockInstrument.BASS)
+                .sound(ModWoodTypes.ASTRAL.soundType())
+                .ignitedByLava();
+    }
+
+    private static BlockBehaviour.Properties signProperties(MapColor color) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .forceSolidOn()
+                .instrument(NoteBlockInstrument.BASS)
+                .noCollission()
+                .strength(1.0F)
+                .ignitedByLava();
     }
 
     /** Loads this class so its entries are added to the deferred registers. */
     public static void init() {
+        ModWoodTypes.init();
         // Fabric reads the vanilla map; NeoForge reads data/neoforge/data_maps/item/compostables.json instead.
         LifecycleEvent.SETUP.register(() -> {
             ComposterBlock.COMPOSTABLES.put(VOID_PETALS.get().asItem(), 0.3F);
             ComposterBlock.COMPOSTABLES.put(GLOWCAP.get().asItem(), 0.65F);
+            registerFlammables();
+            AxeItemHooks.addStrippable(ASTRAL_LOG.get(), STRIPPED_ASTRAL_LOG.get());
+            AxeItemHooks.addStrippable(ASTRAL_WOOD.get(), STRIPPED_ASTRAL_WOOD.get());
         });
+    }
+
+    /** Vanilla wood rates from {@code FireBlock.bootStrap}: planks and derived blocks 5/20, logs and wood 5/5. */
+    private static void registerFlammables() {
+        FireBlock fire = (FireBlock) Blocks.FIRE;
+        for (RegistrySupplier<? extends Block> block : List.of(ASTRAL_PLANKS, ASTRAL_SLAB, ASTRAL_STAIRS, ASTRAL_FENCE,
+                ASTRAL_FENCE_GATE)) {
+            fire.setFlammable(block.get(), 5, 20);
+        }
+        for (RegistrySupplier<? extends Block> block : List.of(ASTRAL_LOG, ASTRAL_WOOD, STRIPPED_ASTRAL_LOG,
+                STRIPPED_ASTRAL_WOOD)) {
+            fire.setFlammable(block.get(), 5, 5);
+        }
     }
 }

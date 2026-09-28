@@ -28,5 +28,22 @@
   "container.someonesperfectend.void_cleansing.description": "Lowers the item's repair cost",
   "container.someonesperfectend.infuser.locked": "Infusion only works in the End",
   "container.someonesperfectend.infuser.infusion": "Infusion",
-  "tooltip.someonesperfectend.infusion": "Infused: %s \u2014 %s remaining"
+  "tooltip.someonesperfectend.infusion": "Infused: %s \u2014 %s remaining",
+  "block.someonesperfectend.astral_log": "Astral Log",
+  "block.someonesperfectend.astral_wood": "Astral Wood",
+  "block.someonesperfectend.stripped_astral_log": "Stripped Astral Log",
+  "block.someonesperfectend.stripped_astral_wood": "Stripped Astral Wood",
+  "block.someonesperfectend.astral_planks": "Astral Planks",
+  "block.someonesperfectend.astral_stairs": "Astral Stairs",
+  "block.someonesperfectend.astral_slab": "Astral Slab",
+  "block.someonesperfectend.astral_fence": "Astral Fence",
+  "block.someonesperfectend.astral_fence_gate": "Astral Fence Gate",
+  "block.someonesperfectend.astral_door": "Astral Door",
+  "block.someonesperfectend.astral_trapdoor": "Astral Trapdoor",
+  "block.someonesperfectend.astral_button": "Astral Button",
+  "block.someonesperfectend.astral_pressure_plate": "Astral Pressure Plate",
+  "block.someonesperfectend.astral_sign": "Astral Sign",
+  "block.someonesperfectend.astral_wall_sign": "Astral Wall Sign",
+  "block.someonesperfectend.astral_hanging_sign": "Astral Hanging Sign",
+  "block.someonesperfectend.astral_wall_hanging_sign": "Astral Wall Hanging Sign"
 }

@@ -1,0 +1,75 @@
+{
+  "palette": {
+    "gradient": [
+      "#2a2659",
+      "#5d64b8",
+      "#98a4e6",
+      "#d4dbff"
+    ]
+  },
+  "recipes": [
+    {
+      "source": "minecraft:block/bamboo_planks",
+      "target": "someonesperfectend:block/astral_planks"
+    },
+    {
+      "source": "minecraft:block/bamboo_block",
+      "target": "someonesperfectend:block/astral_log",
+      "palette": {
+        "gradient": [
+          "#1f1a45",
+          "#4a3f8f",
+          "#8a7fd0"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:block/bamboo_block_top",
+      "target": "someonesperfectend:block/astral_log_top"
+    },
+    {
+      "source": "minecraft:block/stripped_bamboo_block",
+      "target": "someonesperfectend:block/stripped_astral_log"
+    },
+    {
+      "source": "minecraft:block/stripped_bamboo_block_top",
+      "target": "someonesperfectend:block/stripped_astral_log_top"
+    },
+    {
+      "source": "minecraft:block/bamboo_door_top",
+      "target": "someonesperfectend:block/astral_door_top"
+    },
+    {
+      "source": "minecraft:block/bamboo_door_bottom",
+      "target": "someonesperfectend:block/astral_door_bottom"
+    },
+    {
+      "source": "minecraft:block/bamboo_trapdoor",
+      "target": "someonesperfectend:block/astral_trapdoor"
+    },
+    {
+      "source": "minecraft:item/bamboo_door",
+      "target": "someonesperfectend:item/astral_door"
+    },
+    {
+      "source": "minecraft:item/bamboo_sign",
+      "target": "someonesperfectend:item/astral_sign"
+    },
+    {
+      "source": "minecraft:item/bamboo_hanging_sign",
+      "target": "someonesperfectend:item/astral_hanging_sign"
+    },
+    {
+      "source": "minecraft:entity/signs/bamboo",
+      "target": "someonesperfectend:entity/signs/astral"
+    },
+    {
+      "source": "minecraft:entity/signs/hanging/bamboo",
+      "target": "someonesperfectend:entity/signs/hanging/astral"
+    },
+    {
+      "source": "minecraft:gui/hanging_signs/bamboo",
+      "target": "someonesperfectend:gui/hanging_signs/astral"
+    }
+  ]
+}

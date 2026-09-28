@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "someonesperfectend:block/astral_slab"
+    },
+    "type=double": {
+      "model": "someonesperfectend:block/astral_planks"
+    },
+    "type=top": {
+      "model": "someonesperfectend:block/astral_slab_top"
+    }
+  }
+}

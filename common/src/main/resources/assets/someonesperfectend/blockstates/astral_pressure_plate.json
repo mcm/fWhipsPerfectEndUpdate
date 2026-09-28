@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "someonesperfectend:block/astral_pressure_plate"
+    },
+    "powered=true": {
+      "model": "someonesperfectend:block/astral_pressure_plate_down"
+    }
+  }
+}
