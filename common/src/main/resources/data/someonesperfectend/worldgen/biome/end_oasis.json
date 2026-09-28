@@ -31,7 +31,12 @@
     [],
     [],
     [],
-    []
+    [
+      "someonesperfectend:end_oasis_pools",
+      "someonesperfectend:end_oasis_huge_glowcaps",
+      "someonesperfectend:patch_short_void_grass",
+      "someonesperfectend:end_oasis_glowcaps"
+    ]
   ],
   "has_precipitation": false,
   "spawn_costs": {},

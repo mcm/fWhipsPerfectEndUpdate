@@ -166,7 +166,10 @@ public final class EndBiomeGameTests {
                             continue;
                         }
                         if (isTree(end.getBlockState(new BlockPos(bx, y, bz)))) {
-                            continue; // Astral tree canopies (US-015) hide the surface.
+                            continue; // Astral trees and huge glowcaps (US-015, US-016) hide the surface.
+                        }
+                        if (!end.getBlockState(new BlockPos(bx, y, bz)).getFluidState().isEmpty()) {
+                            continue; // Oasis pools (US-016) replace the surface.
                         }
                         // Look through decoration (US-014..017) to the surface block.
                         while (y > end.getMinBuildHeight() && isDecoration(end.getBlockState(new BlockPos(bx, y, bz)))) {
@@ -233,7 +236,8 @@ public final class EndBiomeGameTests {
 
     private static boolean isTree(BlockState state) {
         return state.is(ModBlockTags.ASTRAL_LOGS) || state.is(ModBlocks.ASTRAL_LEAVES.get())
-                || state.is(ModBlocks.FLOWERING_ASTRAL_LEAVES.get());
+                || state.is(ModBlocks.FLOWERING_ASTRAL_LEAVES.get()) || state.is(ModBlocks.GLOWCAP_BLOCK.get())
+                || state.is(ModBlocks.GLOWCAP_STEM.get());
     }
 
     private static boolean enoughChunks(Map<ResourceKey<Biome>, Integer> chunks) {
