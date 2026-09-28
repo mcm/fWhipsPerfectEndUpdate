@@ -180,6 +180,24 @@ in its `config/terrablender.toml`.
   Cities keep their vanilla frequency.
 - Like vanilla biome changes, only newly generated chunks use the new biomes; existing chunks are untouched.
 
+## Endling villages
+
+`someonesperfectend:endling_village` is a custom structure type (`worldgen/EndlingVillageStructure`) whose
+pieces are placed by code (`EndlingVillagePieces`); it uses no structure `.nbt` files. The plan
+(`EndlingVillageLayout`) has 1–3 `huge_glowcap`s near the center and a ring of 3–6 huts around them (Voidvine
+mosaic floor, Astral or Voidvine walls, glowcap-block roof, doorway facing the center). Each hut spawns one
+endling bound to the village center (`Endling#setVillage`). A start needs a column at least 1024 blocks (plus
+the village radius) from the origin, a biome in `#someonesperfectend:has_structure/endling_village`
+(`end_plains`, `end_forest`, `end_highlands`), and an island that reaches past the village radius all around,
+with hut and glowcap sites close to the center's height. Rarity is set in
+`worldgen/structure_set/endling_villages.json` (random spread, spacing 26 chunks, kept 3 chunks away from End
+City candidates). On the GameTest seed that gives about 1.2 villages per 1500×1500 blocks.
+
+The GameTest server creates its world with structure generation turned off, so its real chunks never get
+structure starts and `/locate` finds nothing there. `EndlingVillageGameTests` therefore runs vanilla's
+structure-start step (`ChunkGenerator#createStructures`) on a fresh proto chunk and places the start the way
+`/place structure` does.
+
 ## Quality gates
 
 ```

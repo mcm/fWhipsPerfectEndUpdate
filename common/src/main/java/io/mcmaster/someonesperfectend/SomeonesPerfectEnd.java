@@ -11,6 +11,7 @@ import io.mcmaster.someonesperfectend.infuser.Infusers;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
 import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import io.mcmaster.someonesperfectend.trinket.Trinkets;
+import io.mcmaster.someonesperfectend.worldgen.EndlingVillages;
 import io.mcmaster.someonesperfectend.worldgen.ModFeatures;
 import net.minecraft.resources.ResourceLocation;
 
@@ -29,6 +30,7 @@ public final class SomeonesPerfectEnd {
         Infusers.init();
         InfusedGear.init();
         ModFeatures.init();
+        EndlingVillages.init();
         OasisPotions.init();
         EffectTotems.init();
         Trinkets.init();
