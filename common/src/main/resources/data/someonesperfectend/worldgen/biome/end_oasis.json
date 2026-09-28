@@ -44,7 +44,14 @@
   "spawners": {
     "ambient": [],
     "axolotls": [],
-    "creature": [],
+    "creature": [
+      {
+        "type": "someonesperfectend:driftjelly",
+        "weight": 10,
+        "minCount": 2,
+        "maxCount": 4
+      }
+    ],
     "misc": [],
     "monster": [
       {

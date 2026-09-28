@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 100,
+  "experience": 0.35,
+  "ingredient": {
+    "item": "someonesperfectend:driftjelly_gel"
+  },
+  "result": {
+    "id": "someonesperfectend:cooked_driftjelly_gel"
+  }
+}

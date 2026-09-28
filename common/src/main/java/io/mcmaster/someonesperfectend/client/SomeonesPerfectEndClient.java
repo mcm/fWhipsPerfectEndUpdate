@@ -3,11 +3,13 @@ package io.mcmaster.someonesperfectend.client;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.client.ClientTooltipEvent;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
+import dev.architectury.registry.client.level.entity.EntityModelLayerRegistry;
 import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.block.ModWoodTypes;
+import io.mcmaster.someonesperfectend.entity.Driftjellies;
 import io.mcmaster.someonesperfectend.entity.ModBoatType;
 import io.mcmaster.someonesperfectend.entity.ModBoats;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
@@ -45,6 +47,8 @@ public final class SomeonesPerfectEndClient {
         });
         registerSignMaterials();
         registerBoatRenderers();
+        EntityModelLayerRegistry.register(DriftjellyModel.LAYER, DriftjellyModel::createBodyLayer);
+        EntityRendererRegistry.register(Driftjellies.TYPE, DriftjellyRenderer::new);
         ClientLifecycleEvent.CLIENT_SETUP.register(minecraft -> {
             registerRenderTypes();
             registerTrinketRenderers();

@@ -83,5 +83,9 @@
   "entity.someonesperfectend.voidvine_chest_raft": "Voidvine Raft with Chest",
   "biome.someonesperfectend.end_plains": "End Plains",
   "biome.someonesperfectend.end_forest": "End Forest",
-  "biome.someonesperfectend.end_oasis": "End Oasis"
+  "biome.someonesperfectend.end_oasis": "End Oasis",
+  "entity.someonesperfectend.driftjelly": "Driftjelly",
+  "item.someonesperfectend.driftjelly_spawn_egg": "Driftjelly Spawn Egg",
+  "item.someonesperfectend.driftjelly_gel": "Driftjelly Gel",
+  "item.someonesperfectend.cooked_driftjelly_gel": "Cooked Driftjelly Gel"
 }
