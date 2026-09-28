@@ -11,6 +11,9 @@ public final class ModBlockTags {
     /** End ground that End plants (Glowcap, Void Petals, ...) can be placed on: end turf, end stone, voidsoil. */
     public static final TagKey<Block> END_PLANT_SOIL = create("end_plant_soil");
 
+    /** Logs that keep Astral leaves from decaying. */
+    public static final TagKey<Block> ASTRAL_LOGS = create("astral_logs");
+
     private ModBlockTags() {
     }
 

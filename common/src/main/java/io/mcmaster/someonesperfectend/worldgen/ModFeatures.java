@@ -13,8 +13,13 @@ public final class ModFeatures {
     public static final RegistrySupplier<HugeGlowcapFeature> HUGE_GLOWCAP = ModRegistries.FEATURES.register(
             "huge_glowcap", () -> new HugeGlowcapFeature(HugeMushroomFeatureConfiguration.CODEC));
 
+    public static final RegistrySupplier<AstralTreeFeature> ASTRAL_TREE = ModRegistries.FEATURES.register(
+            "astral_tree", () -> new AstralTreeFeature(AstralTreeConfiguration.CODEC));
+
     /** {@code data/someonesperfectend/worldgen/configured_feature/huge_glowcap.json}. */
     public static final ResourceKey<ConfiguredFeature<?, ?>> HUGE_GLOWCAP_CONFIGURED = configured("huge_glowcap");
+    /** {@code data/someonesperfectend/worldgen/configured_feature/astral_tree.json}. */
+    public static final ResourceKey<ConfiguredFeature<?, ?>> ASTRAL_TREE_CONFIGURED = configured("astral_tree");
 
     private ModFeatures() {
     }

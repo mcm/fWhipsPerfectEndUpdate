@@ -68,10 +68,12 @@ public final class SomeonesPerfectEndClient {
     }
 
     private static void registerRenderTypes() {
-        RenderTypeRegistry.register(RenderType.cutoutMipped(), ModBlocks.END_TURF.get());
+        RenderTypeRegistry.register(RenderType.cutoutMipped(), ModBlocks.END_TURF.get(), ModBlocks.ASTRAL_LEAVES.get(),
+                ModBlocks.FLOWERING_ASTRAL_LEAVES.get());
         RenderTypeRegistry.register(RenderType.cutout(), ModBlocks.SHORT_VOID_GRASS.get(), ModBlocks.VOID_PETALS.get(),
                 ModBlocks.GLOWCAP.get(), ModBlocks.POTTED_GLOWCAP.get(), ModBlocks.INFUSER.get(),
-                ModBlocks.ASTRAL_DOOR.get(), ModBlocks.ASTRAL_TRAPDOOR.get());
+                ModBlocks.ASTRAL_DOOR.get(), ModBlocks.ASTRAL_TRAPDOOR.get(),
+                ModBlocks.ASTRAL_SAPLING.get(), ModBlocks.POTTED_ASTRAL_SAPLING.get());
         RenderTypeRegistry.register(RenderType.translucent(), ModFluids.OASIS_WATER.get(),
                 ModFluids.FLOWING_OASIS_WATER.get());
     }

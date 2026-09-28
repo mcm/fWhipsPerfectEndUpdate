@@ -32,6 +32,7 @@ public final class ModGameTests {
     public static final List<Class<?>> TEST_CLASSES = List.of(
             SmokeGameTests.class,
             AstralWoodGameTests.class,
+            AstralTreeGameTests.class,
             RecolorGameTests.class,
             EndGroundGameTests.class,
             OasisWaterGameTests.class,

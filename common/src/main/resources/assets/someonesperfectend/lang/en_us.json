@@ -45,5 +45,9 @@
   "block.someonesperfectend.astral_sign": "Astral Sign",
   "block.someonesperfectend.astral_wall_sign": "Astral Wall Sign",
   "block.someonesperfectend.astral_hanging_sign": "Astral Hanging Sign",
-  "block.someonesperfectend.astral_wall_hanging_sign": "Astral Wall Hanging Sign"
+  "block.someonesperfectend.astral_wall_hanging_sign": "Astral Wall Hanging Sign",
+  "block.someonesperfectend.astral_leaves": "Astral Leaves",
+  "block.someonesperfectend.flowering_astral_leaves": "Flowering Astral Leaves",
+  "block.someonesperfectend.astral_sapling": "Astral Sapling",
+  "block.someonesperfectend.potted_astral_sapling": "Potted Astral Sapling"
 }

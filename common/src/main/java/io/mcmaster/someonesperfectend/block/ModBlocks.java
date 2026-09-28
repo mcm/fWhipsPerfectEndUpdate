@@ -184,6 +184,26 @@ public final class ModBlocks {
             "astral_hanging_sign", () -> new HangingSignItem(ASTRAL_HANGING_SIGN.get(),
                     ASTRAL_WALL_HANGING_SIGN.get(), ModRegistries.itemProperties().stacksTo(16)));
 
+
+    // Astral trees (US-005). Leaves and sapling properties follow vanilla's cherry leaves and sapling.
+    public static final RegistrySupplier<AstralLeavesBlock> ASTRAL_LEAVES = ModRegistries.block("astral_leaves",
+            () -> new AstralLeavesBlock(leavesProperties(MapColor.COLOR_PURPLE)));
+    public static final RegistrySupplier<AstralLeavesBlock> FLOWERING_ASTRAL_LEAVES = ModRegistries.block(
+            "flowering_astral_leaves", () -> new AstralLeavesBlock(leavesProperties(MapColor.COLOR_PINK)));
+    public static final RegistrySupplier<AstralSaplingBlock> ASTRAL_SAPLING = ModRegistries.block("astral_sapling",
+            () -> new AstralSaplingBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_PURPLE)
+                    .noCollission()
+                    .randomTicks()
+                    .instabreak()
+                    .sound(SoundType.CHERRY_SAPLING)
+                    .pushReaction(PushReaction.DESTROY)));
+    public static final RegistrySupplier<FlowerPotBlock> POTTED_ASTRAL_SAPLING = ModRegistries.blockOnly(
+            "potted_astral_sapling", () -> new FlowerPotBlock(ASTRAL_SAPLING.get(), BlockBehaviour.Properties.of()
+                    .instabreak()
+                    .noOcclusion()
+                    .pushReaction(PushReaction.DESTROY)));
+
     private ModBlocks() {
     }
 
@@ -194,6 +214,21 @@ public final class ModBlocks {
                 .strength(2.0F)
                 .sound(ModWoodTypes.ASTRAL.soundType())
                 .ignitedByLava();
+    }
+
+    private static BlockBehaviour.Properties leavesProperties(MapColor color) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .strength(0.2F)
+                .randomTicks()
+                .sound(SoundType.CHERRY_LEAVES)
+                .noOcclusion()
+                .isValidSpawn((state, level, pos, type) -> false)
+                .isSuffocating((state, level, pos) -> false)
+                .isViewBlocking((state, level, pos) -> false)
+                .ignitedByLava()
+                .pushReaction(PushReaction.DESTROY)
+                .isRedstoneConductor((state, level, pos) -> false);
     }
 
     private static BlockBehaviour.Properties woodProperties(MapColor color) {
@@ -221,13 +256,18 @@ public final class ModBlocks {
         LifecycleEvent.SETUP.register(() -> {
             ComposterBlock.COMPOSTABLES.put(VOID_PETALS.get().asItem(), 0.3F);
             ComposterBlock.COMPOSTABLES.put(GLOWCAP.get().asItem(), 0.65F);
+            ComposterBlock.COMPOSTABLES.put(ASTRAL_LEAVES.get().asItem(), 0.3F);
+            ComposterBlock.COMPOSTABLES.put(FLOWERING_ASTRAL_LEAVES.get().asItem(), 0.3F);
+            ComposterBlock.COMPOSTABLES.put(ASTRAL_SAPLING.get().asItem(), 0.3F);
             registerFlammables();
             AxeItemHooks.addStrippable(ASTRAL_LOG.get(), STRIPPED_ASTRAL_LOG.get());
             AxeItemHooks.addStrippable(ASTRAL_WOOD.get(), STRIPPED_ASTRAL_WOOD.get());
         });
     }
 
-    /** Vanilla wood rates from {@code FireBlock.bootStrap}: planks and derived blocks 5/20, logs and wood 5/5. */
+    /**
+     * Vanilla rates from {@code FireBlock.bootStrap}: planks and derived blocks 5/20, logs and wood 5/5, leaves 30/60.
+     */
     private static void registerFlammables() {
         FireBlock fire = (FireBlock) Blocks.FIRE;
         for (RegistrySupplier<? extends Block> block : List.of(ASTRAL_PLANKS, ASTRAL_SLAB, ASTRAL_STAIRS, ASTRAL_FENCE,
@@ -238,5 +278,7 @@ public final class ModBlocks {
                 STRIPPED_ASTRAL_WOOD)) {
             fire.setFlammable(block.get(), 5, 5);
         }
+        fire.setFlammable(ASTRAL_LEAVES.get(), 30, 60);
+        fire.setFlammable(FLOWERING_ASTRAL_LEAVES.get(), 30, 60);
     }
 }
