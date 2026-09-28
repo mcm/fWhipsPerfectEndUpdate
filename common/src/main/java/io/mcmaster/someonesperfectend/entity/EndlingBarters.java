@@ -2,10 +2,14 @@ package io.mcmaster.someonesperfectend.entity;
 
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import java.util.List;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -20,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
  * <p>{@link #lootTableFor} is the single hook that decides whether an endling takes an item and what it gives back;
  * {@linkplain EndlingSpecialBarters data-driven special barters} (US-034: beacon, Totem of Undying, beds for Ender
  * Beds) plug in there.
+ *
+ * <p>Every barter is locked until the offering player has beaten the Ender Dragon (US-039, {@link #mayBarter}).
  */
 public final class EndlingBarters {
     /** Overworld life blocks endlings accept for the default barter. */
@@ -28,7 +34,23 @@ public final class EndlingBarters {
     public static final ResourceKey<LootTable> DEFAULT_LOOT_TABLE = ResourceKey.create(Registries.LOOT_TABLE,
             SomeonesPerfectEnd.id("gameplay/endling_bartering"));
 
+    /** The advancement a player needs before endlings barter with them (US-039). */
+    public static final ResourceLocation UNLOCK_ADVANCEMENT = ResourceLocation.withDefaultNamespace("end/kill_dragon");
+
     private EndlingBarters() {
+    }
+
+    /**
+     * Whether endlings barter with {@code offerer}: the player handing an item over, or the thrower of a dropped item.
+     * Only a server player with {@link #UNLOCK_ADVANCEMENT} qualifies, so items with no thrower (dispensers, hoppers,
+     * mob drops) or whose thrower is offline are refused.
+     */
+    public static boolean mayBarter(@Nullable Entity offerer) {
+        if (!(offerer instanceof ServerPlayer player)) {
+            return false;
+        }
+        AdvancementHolder advancement = player.server.getAdvancements().get(UNLOCK_ADVANCEMENT);
+        return advancement != null && player.getAdvancements().getOrStartProgress(advancement).isDone();
     }
 
     /** The loot table bartering {@code stack} rolls, or null if endlings don't take it. */

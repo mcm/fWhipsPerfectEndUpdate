@@ -5,15 +5,23 @@ import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.entity.Endling;
 import io.mcmaster.someonesperfectend.entity.EndlingBarters;
 import io.mcmaster.someonesperfectend.entity.Endlings;
+import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -23,15 +31,18 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * US-022: Endling bartering. Endlings only barter in the End, so most tests build a small platform in the real End
  * level's void ring (vanilla terrain, nothing generates there) and force-load its chunk so the endling ticks.
+ *
+ * <p>US-039: endlings only barter with players who have {@code minecraft:end/kill_dragon}, so offering players are
+ * detached {@link ServerPlayer}s ({@link #serverPlayerIn}) and dropped items get a thrower ({@link Site#drop}).
  */
 public final class EndlingBarterGameTests {
     private static final int TIMEOUT = 200;
@@ -48,8 +59,11 @@ public final class EndlingBarterGameTests {
         return items;
     }
 
-    /** A platform with an endling in the End, cleaned up with {@link #close}. Each test uses its own {@code slot}. */
-    record Site(ServerLevel end, BlockPos center, Endling endling) {
+    /**
+     * A platform with an endling in the End, cleaned up with {@link #close}. Each test uses its own {@code slot}.
+     * {@code player} has beaten the dragon and throws the items {@link #drop}ped here.
+     */
+    record Site(ServerLevel end, BlockPos center, Endling endling, ServerPlayer player) {
         static final int RADIUS = 6;
 
         static Site open(GameTestHelper helper, int slot) {
@@ -68,16 +82,25 @@ public final class EndlingBarterGameTests {
             Endling endling = Endlings.TYPE.get().create(end);
             endling.moveTo(Vec3.atBottomCenterOf(center));
             end.addFreshEntity(endling);
-            return new Site(end, center, endling);
+            return new Site(end, center, endling, serverPlayerIn(end, ItemStack.EMPTY, true));
         }
 
         AABB area() {
             return new AABB(center).inflate(24.0, 100.0, 24.0);
         }
 
+        /** Drops an item thrown by {@link #player}, who has beaten the dragon. */
         ItemEntity drop(ItemStack stack, double dx) {
+            return drop(stack, dx, player);
+        }
+
+        /** Drops an item thrown by {@code thrower}, or with no thrower (like a dispenser) if null. */
+        ItemEntity drop(ItemStack stack, double dx, @Nullable Entity thrower) {
             ItemEntity item = new ItemEntity(end, center.getX() + 0.5 + dx, center.getY(), center.getZ() + 0.5, stack,
                     0.0, 0.0, 0.0);
+            if (thrower != null) {
+                item.setThrower(thrower);
+            }
             end.addFreshEntity(item);
             return item;
         }
@@ -101,6 +124,28 @@ public final class EndlingBarterGameTests {
                 }
             }
         }
+    }
+
+    /**
+     * A real server player in {@code level}, not added to it (see {@code InfuserGameTests}), holding {@code held}, with
+     * the {@code minecraft:end/kill_dragon} advancement if {@code killedDragon}.
+     */
+    static ServerPlayer serverPlayerIn(ServerLevel level, ItemStack held, boolean killedDragon) {
+        MinecraftServer server = level.getServer();
+        CommonListenerCookie cookie = CommonListenerCookie.createInitial(
+                new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
+        ServerPlayer player = new ServerPlayer(server, level, cookie.gameProfile(), cookie.clientInformation());
+        Connection connection = new Connection(PacketFlow.SERVERBOUND);
+        new EmbeddedChannel(connection);
+        new ServerGamePacketListenerImpl(server, connection, player, cookie);
+        if (killedDragon) {
+            AdvancementHolder advancement = server.getAdvancements().get(EndlingBarters.UNLOCK_ADVANCEMENT);
+            for (String criterion : advancement.value().criteria().keySet()) {
+                player.getAdvancements().award(advancement, criterion);
+            }
+        }
+        player.setItemInHand(InteractionHand.MAIN_HAND, held);
+        return player;
     }
 
     static Player playerIn(Level level, ItemStack held) {
@@ -158,7 +203,7 @@ public final class EndlingBarterGameTests {
     @GameTest(timeoutTicks = TIMEOUT)
     public static void handedOverInputIsBartered(GameTestHelper helper) {
         Site site = Site.open(helper, 1);
-        Player player = playerIn(site.end(), new ItemStack(Items.OAK_LOG, 5));
+        Player player = serverPlayerIn(site.end(), new ItemStack(Items.OAK_LOG, 5), true);
         InteractionResult result = site.endling().interact(player, InteractionHand.MAIN_HAND);
         helper.assertTrue(result.consumesAction(), "handing over a log should succeed, got " + result);
         helper.assertTrue(player.getMainHandItem().getCount() == 4, "handing over should take exactly one log");
@@ -175,7 +220,7 @@ public final class EndlingBarterGameTests {
         Site site = Site.open(helper, 2);
         ItemEntity cobble = site.drop(new ItemStack(Items.COBBLESTONE), 0.0);
         ItemEntity diamond = site.drop(new ItemStack(Items.DIAMOND), 0.5);
-        Player player = playerIn(site.end(), new ItemStack(Items.END_STONE, 2));
+        Player player = serverPlayerIn(site.end(), new ItemStack(Items.END_STONE, 2), true);
         helper.assertFalse(site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "handing over end stone should do nothing");
         helper.assertTrue(player.getMainHandItem().getCount() == 2, "end stone should stay in the hand");
@@ -192,7 +237,7 @@ public final class EndlingBarterGameTests {
         Site site = Site.open(helper, 3);
         site.endling().setLost();
         ItemEntity dirt = site.drop(new ItemStack(Items.DIRT), 0.0);
-        Player player = playerIn(site.end(), new ItemStack(Items.DIRT));
+        Player player = serverPlayerIn(site.end(), new ItemStack(Items.DIRT), true);
         helper.assertFalse(site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "a Lost endling should refuse a hand-over");
         helper.assertTrue(player.getMainHandItem().getCount() == 1, "a Lost endling takes nothing");
@@ -201,6 +246,7 @@ public final class EndlingBarterGameTests {
             helper.assertTrue(dirt.isAlive(), "the dirt should stay on the ground");
             helper.assertTrue(site.items().stream().noneMatch(item -> barterOutputs().contains(item.getItem().getItem())),
                     "a Lost endling should give nothing");
+            helper.assertTrue(site.endling().refusals() == 0, "a Lost endling ignores items silently");
             site.close();
             helper.succeed();
         });
@@ -216,14 +262,15 @@ public final class EndlingBarterGameTests {
             }
         }
         Endling endling = helper.spawn(Endlings.TYPE.get(), new Vec3(3.5, 1.0, 3.5));
+        Player player = serverPlayerIn(helper.getLevel(), new ItemStack(Items.SAND), true);
         ItemEntity dirt = helper.spawnItem(Items.DIRT, 3.5F, 1.0F, 3.5F);
-        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.SAND));
+        dirt.setThrower(player);
         helper.assertFalse(endling.interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "an endling outside the End should refuse a hand-over");
         helper.runAfterDelay(60, () -> {
             helper.assertFalse(endling.isInspecting(), "an endling outside the End should not pick up barter items");
             helper.assertTrue(dirt.isAlive(), "the dirt should stay on the ground");
+            helper.assertTrue(endling.refusals() == 0, "an endling outside the End ignores items silently");
             endling.discard();
             dirt.discard();
             helper.succeed();
@@ -233,7 +280,7 @@ public final class EndlingBarterGameTests {
     @GameTest(timeoutTicks = TIMEOUT)
     public static void killedWhileInspectingDropsTheInput(GameTestHelper helper) {
         Site site = Site.open(helper, 4);
-        Player player = playerIn(site.end(), new ItemStack(Items.MOSS_BLOCK));
+        Player player = serverPlayerIn(site.end(), new ItemStack(Items.MOSS_BLOCK), true);
         site.endling().interact(player, InteractionHand.MAIN_HAND);
         helper.assertTrue(site.endling().isInspecting(), "the endling should take the moss block");
         site.endling().kill();
@@ -242,6 +289,81 @@ public final class EndlingBarterGameTests {
             helper.assertTrue(site.items().stream().anyMatch(item -> item.getItem().is(Items.MOSS_BLOCK)),
                     "a killed endling should drop the item it was inspecting");
             site.close();
+        });
+    }
+
+    /** US-039: a player without {@code minecraft:end/kill_dragon} is refused, dropped or handed over. */
+    @GameTest(timeoutTicks = TIMEOUT)
+    public static void playerWithoutDragonKillIsRefused(GameTestHelper helper) {
+        Site site = Site.open(helper, 9);
+        ServerPlayer locked = serverPlayerIn(site.end(), new ItemStack(Items.DIRT, 3), false);
+        ItemEntity dirt = site.drop(new ItemStack(Items.DIRT), 0.0, locked);
+        helper.assertTrue(EndlingBarters.mayBarter(site.player()) && !EndlingBarters.mayBarter(locked),
+                "only the player with the advancement may barter");
+        int[] tick = {0};
+        helper.onEachTick(() -> {
+            if (++tick[0] == 60) {
+                // Hand-over, after the drop's refusal cooldown has run out.
+                helper.assertFalse(site.endling().interact(locked, InteractionHand.MAIN_HAND).consumesAction(),
+                        "a player who hasn't beaten the dragon should be refused");
+                helper.assertTrue(locked.getMainHandItem().getCount() == 3, "a refused item stays in the hand");
+            }
+        });
+        helper.succeedWhen(() -> {
+            helper.assertTrue(tick[0] >= 100, "waiting");
+            helper.assertTrue(dirt.isAlive() && dirt.getItem().getCount() == 1, "the refused dirt stays on the ground");
+            helper.assertFalse(site.endling().isInspecting(), "the endling should not take a refused item");
+            helper.assertTrue(site.endling().refusals() == 2, "the endling should refuse the drop once and the "
+                    + "hand-over once, refused " + site.endling().refusals() + " times");
+            helper.assertTrue(site.items().stream().noneMatch(item -> barterOutputs().contains(item.getItem().getItem())),
+                    "a refused barter gives nothing");
+            site.close();
+        });
+    }
+
+    /** US-039: refusals show a head shake and are rate-limited, so a pile of items doesn't spam the sound. */
+    @GameTest(timeoutTicks = TIMEOUT)
+    public static void refusalsAreRateLimited(GameTestHelper helper) {
+        Site site = Site.open(helper, 10);
+        ServerPlayer locked = serverPlayerIn(site.end(), ItemStack.EMPTY, false);
+        for (int i = 0; i < 5; i++) {
+            site.drop(new ItemStack(Items.SAND), 0.1 * i, locked);
+        }
+        int[] tick = {0};
+        int[] firstRefusal = {-1};
+        helper.onEachTick(() -> {
+            tick[0]++;
+            if (firstRefusal[0] < 0 && site.endling().refusals() > 0) {
+                firstRefusal[0] = tick[0];
+                helper.assertTrue(site.endling().headShakeTicks() > 0, "a refusing endling should shake its head");
+            }
+            if (firstRefusal[0] > 0 && tick[0] < firstRefusal[0] + Endling.REFUSE_COOLDOWN) {
+                helper.assertTrue(site.endling().refusals() == 1,
+                        "an endling should refuse at most once every " + Endling.REFUSE_COOLDOWN + " ticks");
+            }
+        });
+        helper.succeedWhen(() -> {
+            helper.assertTrue(firstRefusal[0] > 0 && tick[0] >= firstRefusal[0] + 100, "waiting");
+            helper.assertTrue(site.endling().refusals() <= 1 + 100 / Endling.REFUSE_COOLDOWN,
+                    "too many refusals: " + site.endling().refusals());
+            helper.assertTrue(site.items().stream().filter(item -> item.getItem().is(Items.SAND))
+                    .mapToInt(item -> item.getItem().getCount()).sum() == 5, "all the sand stays on the ground");
+            site.close();
+        });
+    }
+
+    /** US-039: dropped items with no thrower (dispensers, hoppers, mob drops) are refused. */
+    @GameTest(timeoutTicks = TIMEOUT)
+    public static void itemWithoutThrowerIsRefused(GameTestHelper helper) {
+        Site site = Site.open(helper, 11);
+        ItemEntity log = site.drop(new ItemStack(Items.OAK_LOG), 0.0, null);
+        helper.runAfterDelay(100, () -> {
+            helper.assertTrue(log.isAlive() && log.getItem().getCount() == 1, "the log should stay on the ground");
+            helper.assertFalse(site.endling().isInspecting(), "the endling should not take an item with no thrower");
+            helper.assertTrue(site.endling().refusals() == 1, "the endling should refuse it once, refused "
+                    + site.endling().refusals() + " times");
+            site.close();
+            helper.succeed();
         });
     }
 

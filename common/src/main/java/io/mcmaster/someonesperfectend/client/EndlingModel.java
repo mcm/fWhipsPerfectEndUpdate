@@ -110,6 +110,11 @@ public class EndlingModel extends HierarchicalModel<Endling> implements ArmedMod
             leftArm.yRot = 0.45F;
             leftArm.zRot = 0.0F;
         }
+        if (entity.headShakeTicks() > 0) {
+            // Refusing a barter (US-039): shakes its head "no", like an unhappy villager.
+            head.xRot = 0.3F;
+            head.yRot = Mth.sin(ageInTicks * 0.9F) * 0.5F;
+        }
     }
 
     @Override

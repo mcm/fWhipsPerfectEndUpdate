@@ -80,7 +80,7 @@ public final class EndlingSpecialBarterGameTests {
     @GameTest(timeoutTicks = TIMEOUT)
     public static void handedOverTotemGivesInactiveEffectTotem(GameTestHelper helper) {
         Site site = Site.open(helper, 6);
-        Player player = EndlingBarterGameTests.playerIn(site.end(), new ItemStack(Items.TOTEM_OF_UNDYING));
+        Player player = EndlingBarterGameTests.serverPlayerIn(site.end(), new ItemStack(Items.TOTEM_OF_UNDYING), true);
         helper.assertTrue(site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "handing over a Totem of Undying should succeed");
         helper.assertTrue(player.getMainHandItem().isEmpty(), "the totem should be taken");
@@ -95,7 +95,7 @@ public final class EndlingSpecialBarterGameTests {
         Site site = Site.open(helper, 7);
         site.endling().setLost();
         ItemEntity dropped = site.drop(new ItemStack(Items.BEACON), 0.0);
-        Player player = EndlingBarterGameTests.playerIn(site.end(), new ItemStack(Items.BEACON));
+        Player player = EndlingBarterGameTests.serverPlayerIn(site.end(), new ItemStack(Items.BEACON), true);
         helper.assertFalse(site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "a Lost endling should refuse a beacon");
         helper.assertTrue(player.getMainHandItem().is(Items.BEACON), "a Lost endling takes nothing");
@@ -113,7 +113,7 @@ public final class EndlingSpecialBarterGameTests {
     @GameTest(template = ModGameTests.EMPTY_TEMPLATE)
     public static void endlingOutsideTheEndRefusesBeacon(GameTestHelper helper) {
         Endling endling = helper.spawn(Endlings.TYPE.get(), new Vec3(3.5, 1.0, 3.5));
-        Player player = EndlingBarterGameTests.playerIn(helper.getLevel(), new ItemStack(Items.BEACON));
+        Player player = EndlingBarterGameTests.serverPlayerIn(helper.getLevel(), new ItemStack(Items.BEACON), true);
         helper.assertFalse(endling.interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "an endling outside the End should refuse a beacon");
         endling.discard();

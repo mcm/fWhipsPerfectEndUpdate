@@ -1,7 +1,9 @@
 package io.mcmaster.someonesperfectend.entity;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -52,6 +54,11 @@ import org.jetbrains.annotations.Nullable;
  * input} (dropped, or handed over with use-item), holds it in its main hand and inspects it for
  * {@link #INSPECT_TICKS}, then throws a roll from the input's barter loot table toward the nearest player. It takes
  * nothing else; its vanilla {@link #canPickUpLoot()} stays off.
+ *
+ * <p>Barters are locked until the offering player (the one handing the item over, or the thrower of a dropped item)
+ * has beaten the Ender Dragon (US-039, {@link EndlingBarters#mayBarter}). Otherwise the endling leaves the item where it
+ * is, shakes its head, and says no, at most once per {@link #REFUSE_COOLDOWN}. Each dropped item is refused once; it
+ * isn't walked to again, but is still taken if its thrower unlocks bartering later.
  */
 public class Endling extends PathfinderMob {
     /** Continuous ticks outside the End before an endling becomes Lost (15 seconds). */
@@ -64,6 +71,12 @@ public class Endling extends PathfinderMob {
     public static final int INSPECT_TICKS = 120;
     /** How far an endling looks for dropped barter items to walk to. */
     public static final double BARTER_SEARCH_RANGE = 8.0;
+    /** Minimum ticks between two refusals (head shake + "no"), so a pile of items doesn't spam the sound. */
+    public static final int REFUSE_COOLDOWN = 40;
+    /** How long the refusal head shake lasts. */
+    public static final int HEAD_SHAKE_TICKS = 20;
+    /** Entity event telling clients to play the head shake (unused by vanilla living entities and mobs). */
+    private static final byte EVENT_SHAKE_HEAD = 64;
 
     private static final EntityDataAccessor<Boolean> DATA_LOST =
             SynchedEntityData.defineId(Endling.class, EntityDataSerializers.BOOLEAN);
@@ -76,6 +89,11 @@ public class Endling extends PathfinderMob {
 
     private int ticksOutsideEnd;
     private int inspectTicks;
+    private int refuseCooldown;
+    private int headShakeTicks;
+    private int refusals;
+    /** Ids of dropped items this endling has already refused, so it doesn't walk back to them or refuse them again. */
+    private final Set<Integer> refusedItems = new HashSet<>();
     @Nullable
     private BlockPos village;
 
@@ -138,10 +156,21 @@ public class Endling extends PathfinderMob {
     @Override
     public void tick() {
         super.tick();
+        if (headShakeTicks > 0) {
+            headShakeTicks--;
+        }
         if (!level().isClientSide) {
             updateLostState(level().dimension() == Level.END);
             if (isInspecting() && --inspectTicks <= 0) {
                 finishInspecting();
+            }
+            if (refuseCooldown > 0) {
+                refuseCooldown--;
+            }
+            if (!refusedItems.isEmpty() && tickCount % 20 == 0) {
+                double forget = BARTER_SEARCH_RANGE * 2.0;
+                refusedItems.removeIf(id -> !(level().getEntity(id) instanceof ItemEntity item) || item.isRemoved()
+                        || distanceToSqr(item) > forget * forget);
             }
         }
     }
@@ -153,6 +182,12 @@ public class Endling extends PathfinderMob {
             // Same reach as vanilla mob item pickup.
             for (ItemEntity item : level().getEntitiesOfClass(ItemEntity.class, getBoundingBox().inflate(1.0, 0.0, 1.0))) {
                 if (!item.isRemoved() && !item.hasPickUpDelay() && EndlingBarters.isInput(item.getItem())) {
+                    if (!EndlingBarters.mayBarter(item.getOwner())) {
+                        if (refusedItems.add(item.getId())) {
+                            refuse();
+                        }
+                        continue;
+                    }
                     onItemPickup(item);
                     take(item, 1);
                     ItemStack one = item.getItem().split(1);
@@ -178,6 +213,37 @@ public class Endling extends PathfinderMob {
 
     public int inspectTicks() {
         return inspectTicks;
+    }
+
+    /** Remaining ticks of the refusal head shake (on both sides; the client learns of it by entity event). */
+    public int headShakeTicks() {
+        return headShakeTicks;
+    }
+
+    /** How many times this endling has refused a barter (head shake + "no"), for tests. */
+    public int refusals() {
+        return refusals;
+    }
+
+    /** Refuses a barter from a player who hasn't beaten the dragon, unless it refused one less than 2 seconds ago. */
+    private void refuse() {
+        if (refuseCooldown > 0) {
+            return;
+        }
+        refuseCooldown = REFUSE_COOLDOWN;
+        headShakeTicks = HEAD_SHAKE_TICKS;
+        refusals++;
+        level().broadcastEntityEvent(this, EVENT_SHAKE_HEAD);
+        playSound(SoundEvents.VILLAGER_NO);
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (id == EVENT_SHAKE_HEAD) {
+            headShakeTicks = HEAD_SHAKE_TICKS;
+        } else {
+            super.handleEntityEvent(id);
+        }
     }
 
     private void startInspecting(ItemStack item) {
@@ -211,15 +277,24 @@ public class Endling extends PathfinderMob {
         return level().getNearestEntity(players, TargetingConditions.forNonCombat().ignoreLineOfSight(), this, getX(), getY(), getZ());
     }
 
-    /** Handing over a barter item with use-item gives it one (a creative player keeps theirs). */
+    /**
+     * Handing over a barter item with use-item gives it one (a creative player keeps theirs), if the player has beaten
+     * the dragon; otherwise the endling refuses and the player keeps the item. Clients can't see advancements, so the
+     * server decides.
+     */
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (EndlingBarters.isInput(stack) && wantsToBarter()) {
-            if (!level().isClientSide) {
-                startInspecting(stack.consumeAndReturn(1, player));
+            if (level().isClientSide) {
+                return InteractionResult.SUCCESS;
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            if (!EndlingBarters.mayBarter(player)) {
+                refuse();
+                return InteractionResult.FAIL;
+            }
+            startInspecting(stack.consumeAndReturn(1, player));
+            return InteractionResult.CONSUME;
         }
         return super.mobInteract(player, hand);
     }
@@ -379,7 +454,8 @@ public class Endling extends PathfinderMob {
             }
             List<ItemEntity> items = level().getEntitiesOfClass(ItemEntity.class,
                     getBoundingBox().inflate(BARTER_SEARCH_RANGE, 4.0, BARTER_SEARCH_RANGE),
-                    item -> EndlingBarters.isInput(item.getItem()));
+                    item -> EndlingBarters.isInput(item.getItem()) && (!refusedItems.contains(item.getId())
+                            || EndlingBarters.mayBarter(item.getOwner())));
             target = null;
             double best = Double.MAX_VALUE;
             for (ItemEntity item : items) {
