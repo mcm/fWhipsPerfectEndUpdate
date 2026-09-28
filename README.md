@@ -118,7 +118,7 @@ The single trinket slot is built on [Accessories](https://github.com/wisp-forest
 - The slot is an Accessories "unique slot" named `someonesperfectend:trinket` (`Trinkets.init()`), bound to
   players only, in strict mode (data packs can't resize it or change what it accepts). It accepts only items in
   `#someonesperfectend:trinkets`. An item's behavior comes from an Accessories `Accessory` registered for it
-  (see `item/ResonanceCharmItem`); its look on the player comes from an `AccessoryRenderer` registered in
+  (see `totem/EffectTotemItem`); its look on the player comes from an `AccessoryRenderer` registered in
   `SomeonesPerfectEndClient` (`TrinketRenderer` hangs it on the front of the belt). Register one for every new
   trinket item.
 - `InventoryMenuMixin` adds `TrinketSlot` to the vanilla player `InventoryMenu` after the vanilla slots (so it is

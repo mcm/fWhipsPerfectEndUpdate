@@ -5,8 +5,8 @@ import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.infuser.InfusedGear;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
-import io.mcmaster.someonesperfectend.item.ModItems;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import io.mcmaster.someonesperfectend.trinket.Trinkets;
 import io.mcmaster.someonesperfectend.worldgen.ModFeatures;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +26,7 @@ public final class SomeonesPerfectEnd {
         InfusedGear.init();
         ModFeatures.init();
         OasisPotions.init();
-        ModItems.init();
+        EffectTotems.init();
         Trinkets.init();
         ModRegistries.register();
     }

@@ -5,6 +5,7 @@ import io.mcmaster.someonesperfectend.infuser.InfusionEffect;
 import io.mcmaster.someonesperfectend.infuser.InfusionRules;
 import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
+import io.mcmaster.someonesperfectend.totem.EffectTotemItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
  * {@link InfuserMenu#hasPayment()}). With an item in the slot, the beacon's buttons are hidden and infusion buttons
  * take their place: one per effect the item may take, active only when the tier allows it, plus a confirm button
  * that sends the chosen effect as the beacon packet's primary effect and keeps the screen open for more charges.
+ * An effect totem shows only its own (fixed) effect, and confirm activates it.
  * Outside the End the slot is drawn dark and locked.
  */
 public class InfuserScreen extends BeaconScreen {
@@ -82,7 +84,8 @@ public class InfuserScreen extends BeaconScreen {
 
             @Override
             void update() {
-                active = infuserMenu.canInfuse(selected);
+                active = infuserMenu.infusionTotem() != null ? infuserMenu.canActivateTotem()
+                        : infuserMenu.canInfuse(selected);
             }
         });
         addInfusionWidget(new SpriteButton(leftPos + 190, topPos + 107, CANCEL_SPRITE, CommonComponents.GUI_CANCEL) {
@@ -125,6 +128,15 @@ public class InfuserScreen extends BeaconScreen {
             selected = null;
             return;
         }
+        EffectTotemItem totem = infuserMenu.infusionTotem();
+        if (totem != null) {
+            selected = totem.effect();
+            for (InfusionEffectButton button : effectButtons) {
+                button.update(button.effect == selected);
+            }
+            updateSpriteButtons();
+            return;
+        }
         Infusion existing = Infusion.get(infuserMenu.getInfusionSlot().getItem());
         InfusionEffect existingEffect = existing == null ? null : InfusionEffect.of(existing.effect());
         if (existingEffect != null) {
@@ -144,6 +156,10 @@ public class InfuserScreen extends BeaconScreen {
         for (InfusionEffectButton button : effectButtons) {
             button.update(offered.contains(button.effect));
         }
+        updateSpriteButtons();
+    }
+
+    private void updateSpriteButtons() {
         infusionWidgets.forEach(widget -> {
             if (widget instanceof SpriteButton button) {
                 button.update();
@@ -254,7 +270,8 @@ public class InfuserScreen extends BeaconScreen {
 
         void update(boolean offered) {
             visible = offered;
-            active = infuserMenu.canSelectInfusion(effect);
+            active = infuserMenu.infusionTotem() != null ? infuserMenu.canActivateTotem()
+                    : infuserMenu.canSelectInfusion(effect);
             chosen = effect == selected;
             int amplifier = infuserMenu.previewInfusion(effect).map(InfusionRules.Charge::amplifier).orElse(0);
             if (amplifier != shownAmplifier) {

@@ -10,7 +10,7 @@ import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
 import io.mcmaster.someonesperfectend.infuser.Infusion;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
-import io.mcmaster.someonesperfectend.item.ModItems;
+import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.RenderType;
@@ -44,7 +44,7 @@ public final class SomeonesPerfectEndClient {
 
     /** Every trinket item needs a renderer so it shows on the player model (see {@link TrinketRenderer}). */
     private static void registerTrinketRenderers() {
-        AccessoriesRendererRegistry.registerRenderer(ModItems.RESONANCE_CHARM.get(), TrinketRenderer::new);
+        EffectTotems.ALL.forEach(totem -> AccessoriesRendererRegistry.registerRenderer(totem.get(), TrinketRenderer::new));
     }
 
     private static void registerRenderTypes() {

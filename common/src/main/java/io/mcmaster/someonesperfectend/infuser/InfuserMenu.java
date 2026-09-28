@@ -1,6 +1,9 @@
 package io.mcmaster.someonesperfectend.infuser;
 
 import io.mcmaster.someonesperfectend.block.ModBlocks;
+import io.mcmaster.someonesperfectend.totem.EffectTotemItem;
+import io.mcmaster.someonesperfectend.totem.EffectTotems;
+import io.mcmaster.someonesperfectend.totem.TotemRules;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Holder;
@@ -15,7 +18,9 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -126,13 +131,49 @@ public class InfuserMenu extends BeaconMenu {
         return true;
     }
 
+    /** The effect totem in the infusion slot, or null if the slot holds something else. */
+    @Nullable
+    public EffectTotemItem infusionTotem() {
+        return infusionSlot.getItem().getItem() instanceof EffectTotemItem totem ? totem : null;
+    }
+
+    /**
+     * Whether confirming would activate the totem in the infusion slot: in the End, on a tier-4 pyramid, with a
+     * netherite ingot as payment, and only if the totem isn't already active.
+     */
+    public boolean canActivateTotem() {
+        return infusionTotem() != null && TotemRules.canActivate(infusionEnabled, getLevels(),
+                slots.get(PAYMENT_SLOT).getItem().is(Items.NETHERITE_INGOT),
+                EffectTotems.isActive(infusionSlot.getItem()));
+    }
+
+    /**
+     * Consumes one netherite ingot and permanently activates the totem in the infusion slot.
+     *
+     * @return whether the totem was activated
+     */
+    public boolean activateTotem() {
+        if (!canActivateTotem()) {
+            return false;
+        }
+        infusionSlot.getItem().set(EffectTotems.TOTEM_ACTIVATED.get(), Unit.INSTANCE);
+        slots.get(PAYMENT_SLOT).remove(1);
+        infusionSlot.setChanged();
+        return true;
+    }
+
     /**
      * With the infusion slot empty, confirm sets the beacon powers exactly like a beacon. With an item in it,
      * confirm infuses the item with the primary effect instead (the screen sends the chosen infusion effect as the
-     * beacon packet's primary effect).
+     * beacon packet's primary effect), or activates an effect totem (whose effect is fixed, so the packet's effect
+     * is ignored).
      */
     @Override
     public void updateEffects(Optional<Holder<MobEffect>> primary, Optional<Holder<MobEffect>> secondary) {
+        if (infusionTotem() != null) {
+            activateTotem();
+            return;
+        }
         if (hasInfusionItem()) {
             infuse(InfusionEffect.of(primary.orElse(null)));
             return;

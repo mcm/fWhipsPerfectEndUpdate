@@ -1,3 +1,9 @@
 {
-  "values": []
+  "values": [
+    "someonesperfectend:totem_of_speed",
+    "someonesperfectend:totem_of_haste",
+    "someonesperfectend:totem_of_resistance",
+    "someonesperfectend:totem_of_jump_boost",
+    "someonesperfectend:totem_of_strength"
+  ]
 }

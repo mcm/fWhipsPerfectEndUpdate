@@ -1,12 +1,13 @@
 package io.mcmaster.someonesperfectend.gametest;
 
-import io.mcmaster.someonesperfectend.item.ModItems;
+import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import io.mcmaster.someonesperfectend.trinket.TrinketSlot;
 import io.mcmaster.someonesperfectend.trinket.Trinkets;
 import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.data.EntitySlotLoader;
 import io.wispforest.accessories.impl.AccessoriesEventHandler;
 import java.util.Set;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -35,6 +36,11 @@ public final class TrinketGameTests {
      */
     private static void tickAccessories(Player player) {
         AccessoriesEventHandler.onLivingEntityTick(player);
+    }
+
+    /** An active Totem of Haste: Haste I while worn (replaced the US-024 test charm). */
+    private static ItemStack hasteTotem() {
+        return EffectTotems.activated(EffectTotems.TOTEM_OF_HASTE.get());
     }
 
     @GameTest
@@ -73,9 +79,9 @@ public final class TrinketGameTests {
     public static void onlyTaggedTrinketsFit(GameTestHelper helper) {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         Slot trinket = trinketSlot(helper, player);
-        ItemStack charm = new ItemStack(ModItems.RESONANCE_CHARM.get());
-        helper.assertTrue(charm.is(Trinkets.TRINKETS), "resonance charm should be tagged as a trinket");
-        helper.assertTrue(trinket.mayPlace(charm), "the trinket slot should accept the resonance charm");
+        ItemStack totem = hasteTotem();
+        helper.assertTrue(totem.is(Trinkets.TRINKETS), "the haste totem should be tagged as a trinket");
+        helper.assertTrue(trinket.mayPlace(totem), "the trinket slot should accept the haste totem");
         for (ItemStack other : new ItemStack[] {new ItemStack(Items.DIAMOND), new ItemStack(Items.TOTEM_OF_UNDYING),
                 new ItemStack(Items.SHIELD), new ItemStack(Items.IRON_CHESTPLATE)}) {
             helper.assertFalse(trinket.mayPlace(other), "the trinket slot should refuse " + other);
@@ -88,26 +94,26 @@ public final class TrinketGameTests {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         Slot trinket = trinketSlot(helper, player);
         InventoryMenu menu = player.inventoryMenu;
-        player.getInventory().setItem(9, new ItemStack(ModItems.RESONANCE_CHARM.get()));
+        player.getInventory().setItem(9, hasteTotem());
         int inventorySlot = 9; // inventory index 9 is menu slot 9 (first main-inventory slot)
 
         menu.quickMoveStack(player, inventorySlot);
-        helper.assertTrue(trinket.getItem().is(ModItems.RESONANCE_CHARM.get()), "shift-click should equip the charm");
-        helper.assertTrue(menu.getSlot(inventorySlot).getItem().isEmpty(), "the charm should leave the inventory");
+        helper.assertTrue(trinket.getItem().is(EffectTotems.TOTEM_OF_HASTE.get()), "shift-click should equip the totem");
+        helper.assertTrue(menu.getSlot(inventorySlot).getItem().isEmpty(), "the totem should leave the inventory");
         // The slot is backed by the Accessories container, so other mods using the library see the item.
-        helper.assertTrue(Trinkets.getEquipped(player).is(ModItems.RESONANCE_CHARM.get()),
-                "the charm should be in the Accessories trinket container");
+        helper.assertTrue(Trinkets.getEquipped(player).is(EffectTotems.TOTEM_OF_HASTE.get()),
+                "the totem should be in the Accessories trinket container");
 
         // With the slot full, another trinket stays in the inventory (vanilla shift-click rules move it instead).
-        player.getInventory().setItem(10, new ItemStack(ModItems.RESONANCE_CHARM.get()));
+        player.getInventory().setItem(10, hasteTotem());
         menu.quickMoveStack(player, 10);
         helper.assertTrue(Trinkets.getEquipped(player).getCount() == 1, "the trinket slot holds one item");
 
         // Shift-clicking out of the trinket slot puts it back into the inventory.
         menu.quickMoveStack(player, trinket.index);
-        helper.assertTrue(trinket.getItem().isEmpty(), "shift-click should unequip the charm");
-        helper.assertTrue(player.getInventory().countItem(ModItems.RESONANCE_CHARM.get()) == 2,
-                "both charms should be in the inventory");
+        helper.assertTrue(trinket.getItem().isEmpty(), "shift-click should unequip the totem");
+        helper.assertTrue(player.getInventory().countItem(EffectTotems.TOTEM_OF_HASTE.get()) == 2,
+                "both totems should be in the inventory");
 
         // Non-trinkets are never shift-clicked into the slot.
         player.getInventory().setItem(11, new ItemStack(Items.DIAMOND));
@@ -117,33 +123,35 @@ public final class TrinketGameTests {
     }
 
     @GameTest
-    public static void resonanceCharmGivesHasteWhileEquipped(GameTestHelper helper) {
+    public static void hasteTotemGivesHasteWhileEquipped(GameTestHelper helper) {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         Slot trinket = trinketSlot(helper, player);
 
-        trinket.setByPlayer(new ItemStack(ModItems.RESONANCE_CHARM.get()));
+        trinket.setByPlayer(hasteTotem());
         tickAccessories(player);
         MobEffectInstance haste = player.getEffect(MobEffects.DIG_SPEED);
-        helper.assertTrue(haste != null && haste.getAmplifier() == 0, "equipping the charm should give Haste I");
+        helper.assertTrue(haste != null && haste.getAmplifier() == 0, "equipping the totem should give Haste I");
 
         trinket.setByPlayer(ItemStack.EMPTY);
         tickAccessories(player);
-        helper.assertFalse(player.hasEffect(MobEffects.DIG_SPEED), "unequipping the charm should remove Haste");
+        helper.assertFalse(player.hasEffect(MobEffects.DIG_SPEED), "unequipping the totem should remove Haste");
         helper.succeed();
     }
 
-    @GameTest
-    public static void resonanceCharmKeepsHasteRefreshed(GameTestHelper helper) {
+    /** Worn in the level for longer than one application (340 ticks), the totem keeps re-applying Haste. */
+    @GameTest(timeoutTicks = 500)
+    public static void hasteTotemKeepsHasteRefreshed(GameTestHelper helper) {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-        trinketSlot(helper, player).setByPlayer(new ItemStack(ModItems.RESONANCE_CHARM.get()));
-        // Simulate 200 ticks of wearing it: the effect never runs out.
-        for (int tick = 0; tick < 200; tick++) {
-            tickAccessories(player);
+        trinketSlot(helper, player).setByPlayer(hasteTotem());
+        BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+        player.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+        helper.getLevel().addFreshEntity(player);
+        helper.runAfterDelay(420, () -> {
             MobEffectInstance haste = player.getEffect(MobEffects.DIG_SPEED);
-            helper.assertTrue(haste != null, "Haste should stay active while the charm is worn (tick " + tick + ")");
-            haste.tick(player, () -> {
-            });
-        }
-        helper.succeed();
+            boolean refreshed = haste != null && haste.getAmplifier() == 0 && haste.getDuration() > 340 - 80 - 2;
+            player.discard();
+            helper.assertTrue(refreshed, "Haste I should stay refreshed while the totem is worn, was " + haste);
+            helper.succeed();
+        });
     }
 }
