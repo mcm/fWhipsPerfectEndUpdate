@@ -49,7 +49,7 @@ public final class EndlingBarterGameTests {
     }
 
     /** A platform with an endling in the End, cleaned up with {@link #close}. Each test uses its own {@code slot}. */
-    private record Site(ServerLevel end, BlockPos center, Endling endling) {
+    record Site(ServerLevel end, BlockPos center, Endling endling) {
         static final int RADIUS = 6;
 
         static Site open(GameTestHelper helper, int slot) {
@@ -103,7 +103,7 @@ public final class EndlingBarterGameTests {
         }
     }
 
-    private static Player playerIn(Level level, ItemStack held) {
+    static Player playerIn(Level level, ItemStack held) {
         Player player = new Player(level, BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
             @Override
             public boolean isSpectator() {
@@ -256,8 +256,15 @@ public final class EndlingBarterGameTests {
                     item + " should roll the default barter table");
         }
         for (Item item : List.of(Items.COBBLESTONE, Items.END_STONE, Items.DIAMOND, Items.OAK_PLANKS, Items.GRAVEL,
-                Items.BEACON, Items.TOTEM_OF_UNDYING, Items.RED_BED, Items.AIR)) {
+                Items.AIR)) {
             helper.assertFalse(EndlingBarters.isInput(new ItemStack(item)), item + " should not be a barter input");
+        }
+        // Special barter inputs (US-034, US-025) are accepted, but never roll the default table.
+        for (Item item : List.of(Items.BEACON, Items.TOTEM_OF_UNDYING, Items.RED_BED)) {
+            ItemStack stack = new ItemStack(item);
+            helper.assertFalse(stack.is(EndlingBarters.INPUTS), item + " should not be in the barter input tag");
+            helper.assertFalse(EndlingBarters.DEFAULT_LOOT_TABLE.equals(EndlingBarters.lootTableFor(stack)),
+                    item + " should not roll the default barter table");
         }
         helper.succeed();
     }

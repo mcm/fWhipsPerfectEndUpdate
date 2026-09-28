@@ -18,7 +18,8 @@ import org.jetbrains.annotations.Nullable;
  * What endlings barter (US-022): one item from {@link #INPUTS} rolls the {@link #DEFAULT_LOOT_TABLE}.
  *
  * <p>{@link #lootTableFor} is the single hook that decides whether an endling takes an item and what it gives back;
- * data-driven special barters (US-034: beacon, Totem of Undying, beds for Ender Beds) plug in there.
+ * {@linkplain EndlingSpecialBarters data-driven special barters} (US-034: beacon, Totem of Undying, beds for Ender
+ * Beds) plug in there.
  */
 public final class EndlingBarters {
     /** Overworld life blocks endlings accept for the default barter. */
@@ -36,7 +37,7 @@ public final class EndlingBarters {
         if (stack.is(INPUTS)) {
             return DEFAULT_LOOT_TABLE;
         }
-        return null;
+        return EndlingSpecialBarters.lootTableFor(stack.getItem());
     }
 
     public static boolean isInput(ItemStack stack) {

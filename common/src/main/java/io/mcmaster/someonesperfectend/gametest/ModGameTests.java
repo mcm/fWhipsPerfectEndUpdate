@@ -57,6 +57,7 @@ public final class ModGameTests {
             DriftjellyGameTests.class, DriftjellyHusbandryGameTests.class,
             EndlingGameTests.class,
             EndlingBarterGameTests.class,
+            EndlingSpecialBarterGameTests.class,
             EndlingVillageGameTests.class,
             EndCityGameTests.class);
 

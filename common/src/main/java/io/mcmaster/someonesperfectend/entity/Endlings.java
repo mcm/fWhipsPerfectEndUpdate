@@ -1,9 +1,11 @@
 package io.mcmaster.someonesperfectend.entity;
 
 import dev.architectury.core.item.ArchitecturySpawnEggItem;
+import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.level.entity.EntityAttributeRegistry;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
@@ -23,5 +25,6 @@ public final class Endlings {
     /** Must run after {@code ModRegistries.register()}. */
     public static void init() {
         EntityAttributeRegistry.register(TYPE, Endling::createAttributes);
+        ReloadListenerRegistry.register(PackType.SERVER_DATA, new EndlingSpecialBarters(), EndlingSpecialBarters.ID);
     }
 }
