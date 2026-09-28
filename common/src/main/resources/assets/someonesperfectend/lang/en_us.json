@@ -68,5 +68,13 @@
   "block.someonesperfectend.voidvine_wall_sign": "Voidvine Wall Sign",
   "block.someonesperfectend.voidvine_hanging_sign": "Voidvine Hanging Sign",
   "block.someonesperfectend.voidvine_wall_hanging_sign": "Voidvine Wall Hanging Sign",
-  "item.someonesperfectend.voidvine": "Voidvine"
+  "item.someonesperfectend.voidvine": "Voidvine",
+  "item.someonesperfectend.astral_boat": "Astral Boat",
+  "entity.someonesperfectend.astral_boat": "Astral Boat",
+  "item.someonesperfectend.astral_chest_boat": "Astral Boat with Chest",
+  "entity.someonesperfectend.astral_chest_boat": "Astral Boat with Chest",
+  "item.someonesperfectend.voidvine_raft": "Voidvine Raft",
+  "entity.someonesperfectend.voidvine_raft": "Voidvine Raft",
+  "item.someonesperfectend.voidvine_chest_raft": "Voidvine Raft with Chest",
+  "entity.someonesperfectend.voidvine_chest_raft": "Voidvine Raft with Chest"
 }

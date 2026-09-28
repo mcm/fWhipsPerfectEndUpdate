@@ -94,6 +94,22 @@
     {
       "source": "minecraft:gui/hanging_signs/bamboo",
       "target": "someonesperfectend:gui/hanging_signs/voidvine"
+    },
+    {
+      "source": "minecraft:entity/boat/bamboo",
+      "target": "someonesperfectend:entity/boat/voidvine"
+    },
+    {
+      "source": "minecraft:entity/chest_boat/bamboo",
+      "target": "someonesperfectend:entity/chest_boat/voidvine"
+    },
+    {
+      "source": "minecraft:item/bamboo_raft",
+      "target": "someonesperfectend:item/voidvine_raft"
+    },
+    {
+      "source": "minecraft:item/bamboo_chest_raft",
+      "target": "someonesperfectend:item/voidvine_chest_raft"
     }
   ]
 }

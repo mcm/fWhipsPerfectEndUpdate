@@ -3,10 +3,13 @@ package io.mcmaster.someonesperfectend.client;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.client.ClientTooltipEvent;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
+import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.block.ModWoodTypes;
+import io.mcmaster.someonesperfectend.entity.ModBoatType;
+import io.mcmaster.someonesperfectend.entity.ModBoats;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
 import io.mcmaster.someonesperfectend.infuser.Infusion;
@@ -41,6 +44,7 @@ public final class SomeonesPerfectEndClient {
             }
         });
         registerSignMaterials();
+        registerBoatRenderers();
         ClientLifecycleEvent.CLIENT_SETUP.register(minecraft -> {
             registerRenderTypes();
             registerTrinketRenderers();
@@ -52,6 +56,15 @@ public final class SomeonesPerfectEndClient {
     /** Every trinket item needs a renderer so it shows on the player model (see {@link TrinketRenderer}). */
     private static void registerTrinketRenderers() {
         EffectTotems.ALL.forEach(totem -> AccessoriesRendererRegistry.registerRenderer(totem.get(), TrinketRenderer::new));
+    }
+
+    private static void registerBoatRenderers() {
+        for (ModBoatType type : ModBoatType.values()) {
+            for (boolean chest : new boolean[] {false, true}) {
+                EntityRendererRegistry.register(ModBoats.entityType(type, chest),
+                        context -> new ModBoatRenderer(context, type, chest));
+            }
+        }
     }
 
     /**

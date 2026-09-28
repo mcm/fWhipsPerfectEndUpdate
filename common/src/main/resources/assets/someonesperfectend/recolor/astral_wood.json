@@ -70,6 +70,22 @@
     {
       "source": "minecraft:gui/hanging_signs/bamboo",
       "target": "someonesperfectend:gui/hanging_signs/astral"
+    },
+    {
+      "source": "minecraft:entity/boat/cherry",
+      "target": "someonesperfectend:entity/boat/astral"
+    },
+    {
+      "source": "minecraft:entity/chest_boat/cherry",
+      "target": "someonesperfectend:entity/chest_boat/astral"
+    },
+    {
+      "source": "minecraft:item/cherry_boat",
+      "target": "someonesperfectend:item/astral_boat"
+    },
+    {
+      "source": "minecraft:item/cherry_chest_boat",
+      "target": "someonesperfectend:item/astral_chest_boat"
     }
   ]
 }

@@ -2,6 +2,7 @@ package io.mcmaster.someonesperfectend;
 
 import io.mcmaster.someonesperfectend.alchemy.OasisPotions;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
+import io.mcmaster.someonesperfectend.entity.ModBoats;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.infuser.InfusedGear;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
@@ -21,6 +22,7 @@ public final class SomeonesPerfectEnd {
     /** Common init; called from each loader's entrypoint during mod construction. */
     public static void init() {
         ModBlocks.init();
+        ModBoats.init();
         ModFluids.init();
         Infusers.init();
         InfusedGear.init();

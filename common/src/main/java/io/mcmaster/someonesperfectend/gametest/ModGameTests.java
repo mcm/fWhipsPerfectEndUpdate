@@ -33,6 +33,7 @@ public final class ModGameTests {
             SmokeGameTests.class,
             AstralWoodGameTests.class,
             VoidvineWoodGameTests.class,
+            BoatGameTests.class,
             AstralTreeGameTests.class,
             RecolorGameTests.class,
             EndGroundGameTests.class,
