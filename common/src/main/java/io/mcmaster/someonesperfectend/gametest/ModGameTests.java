@@ -49,7 +49,8 @@ public final class ModGameTests {
             EndChanterGameTests.class,
             VoidCleansingGameTests.class,
             ElevationBandGameTests.class,
-            EndBiomeGameTests.class);
+            EndBiomeGameTests.class,
+            EndPlainsGameTests.class);
 
     public ModGameTests() {
     }

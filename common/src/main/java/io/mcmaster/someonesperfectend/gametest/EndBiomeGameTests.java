@@ -164,6 +164,10 @@ public final class EndBiomeGameTests {
                         if (y <= end.getMinBuildHeight()) {
                             continue;
                         }
+                        // Look through decoration (US-014..017) to the surface block.
+                        while (y > end.getMinBuildHeight() && isDecoration(end.getBlockState(new BlockPos(bx, y, bz)))) {
+                            y--;
+                        }
                         BlockPos top = new BlockPos(bx, y, bz);
                         ResourceKey<Biome> here = biomeKey(end.getBiome(top));
                         tops.computeIfAbsent(here, k -> new HashMap<>()).merge(end.getBlockState(top), 1,
@@ -203,6 +207,11 @@ public final class EndBiomeGameTests {
         helper.assertTrue(!highlands.containsKey(turf) && !highlands.containsKey(voidsoil),
                 "Vanilla End Highlands got our surface: " + highlands);
         helper.succeed();
+    }
+
+    private static boolean isDecoration(BlockState state) {
+        return state.is(ModBlocks.SHORT_VOID_GRASS.get()) || state.is(ModBlocks.VOID_PETALS.get())
+                || state.is(ModBlocks.BOUNCE_CAP.get());
     }
 
     private static boolean enoughChunks(Map<ResourceKey<Biome>, Integer> chunks) {

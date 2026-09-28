@@ -17,6 +17,9 @@ public final class ModFeatures {
     public static final RegistrySupplier<AstralTreeFeature> ASTRAL_TREE = ModRegistries.FEATURES.register(
             "astral_tree", () -> new AstralTreeFeature(AstralTreeConfiguration.CODEC));
 
+    public static final RegistrySupplier<BounceCapClusterFeature> BOUNCE_CAP_CLUSTER = ModRegistries.FEATURES.register(
+            "bounce_cap_cluster", () -> new BounceCapClusterFeature(BounceCapClusterConfiguration.CODEC));
+
     /** Density function type used by the End noise settings override (US-012). */
     public static final RegistrySupplier<MapCodec<ElevationBandsFunction>> ELEVATION_BANDS =
             ModRegistries.DENSITY_FUNCTION_TYPES.register("elevation_bands", () -> ElevationBandsFunction.CODEC);
@@ -25,6 +28,10 @@ public final class ModFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> HUGE_GLOWCAP_CONFIGURED = configured("huge_glowcap");
     /** {@code data/someonesperfectend/worldgen/configured_feature/astral_tree.json}. */
     public static final ResourceKey<ConfiguredFeature<?, ?>> ASTRAL_TREE_CONFIGURED = configured("astral_tree");
+
+    /** {@code data/someonesperfectend/worldgen/configured_feature/bounce_cap_cluster.json}. */
+    public static final ResourceKey<ConfiguredFeature<?, ?>> BOUNCE_CAP_CLUSTER_CONFIGURED =
+            configured("bounce_cap_cluster");
 
     private ModFeatures() {
     }
