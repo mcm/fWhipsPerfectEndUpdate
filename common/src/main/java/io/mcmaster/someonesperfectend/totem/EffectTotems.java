@@ -54,6 +54,15 @@ public final class EffectTotems {
         return stack.getItem() instanceof EffectTotemItem && isActive(stack);
     }
 
+    /**
+     * Whether the entity wears an active copy of {@code totem} in its trinket slot. Accessories syncs the slot, so
+     * this reads the same on the client and the server.
+     */
+    public static boolean hasActiveTotemEquipped(LivingEntity entity, EffectTotemItem totem) {
+        ItemStack stack = Trinkets.getEquipped(entity);
+        return stack.is(totem) && isActive(stack);
+    }
+
     /** An active copy of a totem, for creative use and tests. */
     public static ItemStack activated(EffectTotemItem item) {
         ItemStack stack = new ItemStack(item);
