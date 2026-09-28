@@ -5,7 +5,10 @@ import io.mcmaster.someonesperfectend.block.EnderBedBlock;
 import io.mcmaster.someonesperfectend.block.EnderBedLocations;
 import io.mcmaster.someonesperfectend.block.EnderBedRules;
 import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.util.AttributeKey;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
@@ -18,6 +21,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,7 +42,7 @@ public final class EnderBedRespawnGameTests {
     }
 
     /** A real {@link ServerPlayer} (not in the level or player list) whose sent packets land in {@link #channel}. */
-    private record Detached(ServerPlayer player, EmbeddedChannel channel) {
+    record Detached(ServerPlayer player, EmbeddedChannel channel) {
         static Detached in(ServerLevel level) {
             MinecraftServer server = level.getServer();
             CommonListenerCookie cookie = CommonListenerCookie.createInitial(
@@ -46,6 +50,11 @@ public final class EnderBedRespawnGameTests {
             ServerPlayer player = new ServerPlayer(server, level, cookie.gameProfile(), cookie.clientInformation());
             Connection connection = new Connection(PacketFlow.SERVERBOUND);
             EmbeddedChannel channel = new EmbeddedChannel(connection);
+            // On NeoForge, only payloads on negotiated channels may be sent; Accessories syncs on its own channel
+            // (e.g. on a dimension change). NeoForge reads ad-hoc channels from this Netty attribute (a no-op on
+            // Fabric).
+            channel.attr(AttributeKey.<Set<ResourceLocation>>valueOf("neoforge:adhoc_channels"))
+                    .set(new HashSet<>(Set.of(ResourceLocation.fromNamespaceAndPath("accessories", "main"))));
             new ServerGamePacketListenerImpl(server, connection, player, cookie);
             return new Detached(player, channel);
         }
@@ -68,7 +77,7 @@ public final class EnderBedRespawnGameTests {
         }
     }
 
-    private static ServerLevel end(GameTestHelper helper) {
+    static ServerLevel end(GameTestHelper helper) {
         return helper.getLevel().getServer().getLevel(Level.END);
     }
 

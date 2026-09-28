@@ -107,5 +107,6 @@
   "block.someonesperfectend.red_ender_bed": "Red Ender Bed",
   "block.someonesperfectend.black_ender_bed": "Black Ender Bed",
   "message.someonesperfectend.ender_bed_end_set": "End spawn point set",
-  "message.someonesperfectend.ender_bed_overworld_set": "Ender Bed location set"
+  "message.someonesperfectend.ender_bed_overworld_set": "Ender Bed location set",
+  "message.someonesperfectend.ender_bed_missing": "Your Ender Bed was missing or obstructed"
 }

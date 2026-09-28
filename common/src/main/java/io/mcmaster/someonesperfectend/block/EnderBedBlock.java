@@ -6,6 +6,7 @@ import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -32,7 +33,8 @@ import org.jetbrains.annotations.Nullable;
  * A vanilla-style two-block bed that only hangs: both halves need a block with a sturdy bottom face directly
  * above them. It renders upside down through a plain block model (no block entity), so both loaders draw it the
  * same way. Explodes like a vanilla bed in the Nether when used outside the Overworld and the End (US-025); in
- * those two, using it stores it as the player's End or Overworld Ender Bed (US-037).
+ * those two, using it stores it as the player's End or Overworld Ender Bed (US-037) and, if the other dimension's
+ * bed is stored, lies the player down to travel there (US-038, {@link EnderBedTravel}).
  */
 public class EnderBedBlock extends BedBlock {
     public static final MapCodec<EnderBedBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -118,12 +120,15 @@ public class EnderBedBlock extends BedBlock {
             return InteractionResult.SUCCESS;
         }
         storeLocation(level, pos, player);
+        if (player instanceof ServerPlayer serverPlayer) {
+            EnderBedTravel.tryStart(serverPlayer, pos);
+        }
         return InteractionResult.SUCCESS;
     }
 
     /**
      * Stores the bed (its head half) as the player's End or Overworld Ender Bed (US-037). Never touches the vanilla
-     * respawn point, and doesn't sleep, so it can't skip the night or count toward the sleeping percentage.
+     * respawn point. Travel sleep (US-038) never skips the night or counts toward the sleeping percentage.
      */
     private static void storeLocation(Level level, BlockPos head, Player player) {
         EnderBedLocations.of(player).set(level.dimension(), head);
