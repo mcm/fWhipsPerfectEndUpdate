@@ -40,7 +40,8 @@ public final class ModGameTests {
             InfusedGearGameTests.class,
             EffectTotemGameTests.class,
             TotemStackingGameTests.class,
-            EndChanterGameTests.class);
+            EndChanterGameTests.class,
+            VoidCleansingGameTests.class);
 
     public ModGameTests() {
     }

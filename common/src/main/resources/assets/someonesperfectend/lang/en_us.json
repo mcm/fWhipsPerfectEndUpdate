@@ -23,6 +23,9 @@
   "accessories.slot.someonesperfectend.trinket": "Trinket",
   "block.someonesperfectend.infuser": "Infuser",
   "container.someonesperfectend.infuser": "Infuser",
+  "container.someonesperfectend.void_cleansing": "Void Cleansing",
+  "container.someonesperfectend.void_cleansing.breath": "1 Dragon's Breath",
+  "container.someonesperfectend.void_cleansing.description": "Lowers the item's repair cost",
   "container.someonesperfectend.infuser.locked": "Infusion only works in the End",
   "container.someonesperfectend.infuser.infusion": "Infusion",
   "tooltip.someonesperfectend.infusion": "Infused: %s \u2014 %s remaining"

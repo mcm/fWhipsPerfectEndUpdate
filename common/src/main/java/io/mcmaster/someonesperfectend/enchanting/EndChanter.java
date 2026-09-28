@@ -41,6 +41,25 @@ public final class EndChanter {
         return false;
     }
 
+    /**
+     * The table's enchanting power as the number of valid bookshelves around it (vanilla's rule; on NeoForge,
+     * blocks with any enchanting power bonus).
+     */
+    public static int bookshelfPower(Level level, BlockPos table) {
+        int power = 0;
+        for (BlockPos offset : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
+            if (EnchantingTableBlock.isValidBookShelf(level, table, offset)) {
+                power++;
+            }
+        }
+        return power;
+    }
+
+    /** Whether the lapis slot holds Void Cleansing fuel (dragon's breath, US-036). */
+    public static boolean isVoidCleansingFuel(ItemStack stack) {
+        return stack.is(Items.DRAGON_BREATH);
+    }
+
     /** Whether the stack is an already-enchanted item (not a book) that the End-chanter would re-enchant. */
     public static boolean isReEnchantable(ItemStack stack) {
         return !stack.isEmpty() && !stack.is(Items.BOOK) && !stack.is(Items.ENCHANTED_BOOK)

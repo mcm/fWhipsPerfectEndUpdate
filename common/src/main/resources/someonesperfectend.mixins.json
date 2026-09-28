@@ -6,6 +6,7 @@
   "client": [
     "client.AccessoriesClientMixin",
     "client.CreativeModeInventoryScreenMixin",
+    "client.EnchantmentScreenMixin",
     "client.InventoryScreenMixin"
   ],
   "mixins": [
