@@ -87,7 +87,8 @@ public final class SomeonesPerfectEndClient {
                 ModBlocks.GLOWCAP.get(), ModBlocks.POTTED_GLOWCAP.get(), ModBlocks.INFUSER.get(),
                 ModBlocks.ASTRAL_DOOR.get(), ModBlocks.ASTRAL_TRAPDOOR.get(),
                 ModBlocks.VOIDVINE_DOOR.get(), ModBlocks.VOIDVINE_TRAPDOOR.get(),
-                ModBlocks.ASTRAL_SAPLING.get(), ModBlocks.POTTED_ASTRAL_SAPLING.get());
+                ModBlocks.ASTRAL_SAPLING.get(), ModBlocks.POTTED_ASTRAL_SAPLING.get(),
+                ModBlocks.VOIDVINE_HEAD.get(), ModBlocks.VOIDVINE_BODY.get());
         RenderTypeRegistry.register(RenderType.translucent(), ModFluids.OASIS_WATER.get(),
                 ModFluids.FLOWING_OASIS_WATER.get());
     }

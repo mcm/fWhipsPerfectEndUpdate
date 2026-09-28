@@ -1,0 +1,40 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "someonesperfectend:voidvine"
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "block": "someonesperfectend:voidvine",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "berries": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "someonesperfectend:voidfruit"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "someonesperfectend:blocks/voidvine"
+}

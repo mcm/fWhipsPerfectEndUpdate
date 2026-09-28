@@ -14,6 +14,9 @@
     },
     "someonesperfectend:astral_sapling": {
       "chance": 0.3
+    },
+    "someonesperfectend:voidfruit": {
+      "chance": 0.3
     }
   }
 }

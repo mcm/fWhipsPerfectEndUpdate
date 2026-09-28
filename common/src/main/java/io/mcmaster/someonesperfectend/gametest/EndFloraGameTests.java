@@ -154,7 +154,7 @@ public final class EndFloraGameTests {
     }
 
     /** Inserts the item into a fresh composter up to 50 times; true once the fill level goes up. */
-    private static boolean composts(GameTestHelper helper, Item item) {
+    static boolean composts(GameTestHelper helper, Item item) {
         BlockPos pos = new BlockPos(1, 1, 1);
         BlockPos abs = helper.absolutePos(pos);
         for (int i = 0; i < 50; i++) {

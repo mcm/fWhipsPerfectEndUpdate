@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "berries=false": {
+      "model": "someonesperfectend:block/voidvine"
+    },
+    "berries=true": {
+      "model": "someonesperfectend:block/voidvine_lit"
+    }
+  }
+}

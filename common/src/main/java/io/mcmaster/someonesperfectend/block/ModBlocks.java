@@ -12,8 +12,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.HangingSignItem;
+import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.SignItem;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
@@ -192,11 +194,21 @@ public final class ModBlocks {
     private static final MapColor VOIDVINE_WOOD_COLOR = MapColor.COLOR_GREEN;
     private static final MapColor VOIDVINE_BARK_COLOR = MapColor.TERRACOTTA_GREEN;
 
-    /**
-     * The Voidvine stalk, used by the recipes below. A plain item for now; US-008 turns it into the item that
-     * plants the {@code voidvine} plant (like bamboo), keeping the id.
-     */
-    public static final RegistrySupplier<Item> VOIDVINE = ModRegistries.simpleItem("voidvine");
+    // Voidvine plant (US-008). Properties follow vanilla's cave vines; the stalk item plants the head block.
+    /** The growing, lowest segment of a hanging Voidvine (block id {@code voidvine}). */
+    public static final RegistrySupplier<VoidvineBlock> VOIDVINE_HEAD = ModRegistries.blockOnly("voidvine",
+            () -> new VoidvineBlock(voidvineProperties()));
+    /** Every Voidvine segment above the head (block id {@code voidvine_plant}). */
+    public static final RegistrySupplier<VoidvinePlantBlock> VOIDVINE_BODY = ModRegistries.blockOnly(
+            "voidvine_plant", () -> new VoidvinePlantBlock(voidvineProperties()));
+    /** The Voidvine stalk: dropped by every segment, used by the wood-set recipes below, planted under Voidsoil. */
+    public static final RegistrySupplier<Item> VOIDVINE = ModRegistries.item("voidvine",
+            () -> new ItemNameBlockItem(VOIDVINE_HEAD.get(), ModRegistries.itemProperties()));
+    /** Food grown on Voidvines. Unlike chorus fruit it never teleports. */
+    public static final RegistrySupplier<Item> VOIDFRUIT = ModRegistries.item("voidfruit",
+            () -> new Item(ModRegistries.itemProperties()
+                    .food(new FoodProperties.Builder().nutrition(4).saturationModifier(0.6F).build())));
+
     public static final RegistrySupplier<RotatedPillarBlock> VOIDVINE_BLOCK = ModRegistries.block("voidvine_block",
             () -> new RotatedPillarBlock(logProperties(VOIDVINE_WOOD_COLOR, VOIDVINE_BARK_COLOR, ModWoodTypes.VOIDVINE)));
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_VOIDVINE_BLOCK = ModRegistries.block(
@@ -302,6 +314,17 @@ public final class ModBlocks {
                 .ignitedByLava();
     }
 
+    private static BlockBehaviour.Properties voidvineProperties() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.PLANT)
+                .randomTicks()
+                .noCollission()
+                .lightLevel(state -> state.getValue(Voidvines.FRUIT) ? Voidvines.FRUIT_LIGHT : 0)
+                .instabreak()
+                .sound(SoundType.CAVE_VINES)
+                .pushReaction(PushReaction.DESTROY);
+    }
+
     private static BlockBehaviour.Properties leavesProperties(MapColor color) {
         return BlockBehaviour.Properties.of()
                 .mapColor(color)
@@ -345,6 +368,7 @@ public final class ModBlocks {
             ComposterBlock.COMPOSTABLES.put(ASTRAL_LEAVES.get().asItem(), 0.3F);
             ComposterBlock.COMPOSTABLES.put(FLOWERING_ASTRAL_LEAVES.get().asItem(), 0.3F);
             ComposterBlock.COMPOSTABLES.put(ASTRAL_SAPLING.get().asItem(), 0.3F);
+            ComposterBlock.COMPOSTABLES.put(VOIDFRUIT.get(), 0.3F);
             registerFlammables();
             AxeItemHooks.addStrippable(ASTRAL_LOG.get(), STRIPPED_ASTRAL_LOG.get());
             AxeItemHooks.addStrippable(ASTRAL_WOOD.get(), STRIPPED_ASTRAL_WOOD.get());

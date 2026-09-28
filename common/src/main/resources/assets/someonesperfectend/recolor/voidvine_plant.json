@@ -1,0 +1,58 @@
+{
+  "palette": {
+    "gradient": [
+      "#0f2616",
+      "#24522e",
+      "#3d7d45",
+      "#76b371"
+    ],
+    "colors": {
+      "#a46422": "#157a86",
+      "#eb8931": "#3fd3dd",
+      "#f7e26b": "#c6fbff"
+    }
+  },
+  "recipes": [
+    {
+      "source": "minecraft:block/bamboo_stalk",
+      "target": "someonesperfectend:block/voidvine_stalk"
+    },
+    {
+      "source": "minecraft:block/cave_vines",
+      "target": "someonesperfectend:block/voidvine"
+    },
+    {
+      "source": "minecraft:block/cave_vines_lit",
+      "target": "someonesperfectend:block/voidvine_lit"
+    },
+    {
+      "source": "minecraft:block/cave_vines_plant",
+      "target": "someonesperfectend:block/voidvine_plant"
+    },
+    {
+      "source": "minecraft:block/cave_vines_plant_lit",
+      "target": "someonesperfectend:block/voidvine_plant_lit"
+    },
+    {
+      "source": "minecraft:item/glow_berries",
+      "target": "someonesperfectend:item/voidfruit",
+      "palette": {
+        "gradient": [
+          "#0f2616",
+          "#24522e",
+          "#3d7d45",
+          "#76b371"
+        ],
+        "colors": {
+          "#92441a": "#0d5560",
+          "#bf6717": "#157a86",
+          "#d57219": "#1f98a4",
+          "#f19645": "#3fd3dd",
+          "#f4c05e": "#8becf2",
+          "#f7e26b": "#c6fbff",
+          "#c3c62f": "#8becf2"
+        }
+      }
+    }
+  ]
+}
