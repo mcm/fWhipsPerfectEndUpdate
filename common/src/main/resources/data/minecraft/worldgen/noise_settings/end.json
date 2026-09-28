@@ -9,7 +9,7 @@
   "disable_mob_generation": true,
   "legacy_random_source": true,
   "noise": {
-    "height": 128,
+    "height": 192,
     "min_y": 0,
     "size_horizontal": 2,
     "size_vertical": 1
@@ -36,6 +36,7 @@
             "argument": {
               "type": "someonesperfectend:elevation_bands",
               "noise": "someonesperfectend:elevation_bands",
+              "jitter_noise": "someonesperfectend:elevation_jitter",
               "argument": {
                 "type": "minecraft:add",
                 "argument1": -0.234375,
@@ -83,6 +84,7 @@
     "initial_density_without_jaggedness": {
       "type": "someonesperfectend:elevation_bands",
       "noise": "someonesperfectend:elevation_bands",
+      "jitter_noise": "someonesperfectend:elevation_jitter",
       "argument": {
         "type": "minecraft:add",
         "argument1": -0.234375,

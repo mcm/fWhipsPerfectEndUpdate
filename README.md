@@ -142,23 +142,46 @@ The single trinket slot is built on [Accessories](https://github.com/wisp-forest
 
 ## End terrain (elevation bands)
 
-The outer End (at least 1024 blocks from the origin) is split into three elevation bands: lower (surface
-about Y=40), middle (vanilla, about Y=62), and upper (about Y=100). The override of
-`data/minecraft/worldgen/noise_settings/end.json` is the vanilla file with the terrain density wrapped in
-`someonesperfectend:elevation_bands` (`worldgen/ElevationBandsFunction`, layout math in `ElevationBands`).
-The function divides the outer End into seeded Voronoi regions about 320 blocks across. It gives each region a
-band and moves that region's islands by the band's offset (−20, 0, or +40 blocks, multiples of the 4-block
-noise cell). A 24-block void strip separates regions with different bands, so an island is split, never
-sheared. Within 1024 blocks nothing changes. Regions near that circle are always middle band, so the central
-island, the void ring, and End Gateway exits stay vanilla. `ElevationBandGameTests` checks this against the
-vanilla `end.json` read from the vanilla data pack. The Overworld and Nether are not touched.
+The outer End (at least 1024 blocks from the origin) is split into three elevation bands: lower, middle
+(vanilla, surface about Y=57–62), and upper. The override of `data/minecraft/worldgen/noise_settings/end.json`
+is the vanilla file with the terrain density wrapped in `someonesperfectend:elevation_bands`
+(`worldgen/ElevationBandsFunction`, layout math in `ElevationBands`), and with the noise height raised from 128
+to 192 so raised islands fit.
+
+- **Regions:** the function divides the outer End into seeded Voronoi regions about 160 blocks across and gives
+  each region a band. A 16-block void strip separates regions with different bands, so an island is split,
+  never sheared.
+- **Offsets grow with distance:** for a region whose point is `d` blocks from the origin,
+  `s = clamp(1 + 0.5 × (d − 1184) / (8000 − 1184), 1, 1.5)`. The lower band moves islands by `round(−32 × s)`
+  and the upper band by `round(56 × s)`: −32/+56 just past the first gateways, −39/+68 at 4,000 blocks, and
+  −48/+84 from 8,000 blocks on.
+- **Per-island jitter:** inside a region, the noise `someonesperfectend:elevation_jitter`
+  (`data/someonesperfectend/worldgen/noise/elevation_jitter.json`, features about 64 blocks across) adds up to
+  ±`round((6 + 6t) × s)` whole blocks, where `t` grows linearly from 0 at 1,184 blocks to 1 at 8,000 blocks:
+  ±6 at 1,184 blocks, ±10 at 4,000, and ±18 from 8,000 on. Islands in one band therefore sit at different heights.
+- **Vanilla center:** within 1024 blocks nothing changes, and neither do the next 16 blocks, which covers terrain
+  interpolation. Regions whose point is within 1,184 blocks (1024 + one region) are always middle band with no
+  jitter. Other regions reaching the circle are split from it by a void strip. So the central island, the void
+  ring, and End Gateway exits stay vanilla, and bands start right past the first gateways.
+- **Build height clamp:** the total offset is clamped to −48…+119 (`ElevationBands.clampOffset`, unit tested).
+  Vanilla outer terrain tops out at Y=66, so raised islands stay inside the 192-block noise. The defaults never
+  exceed +102, and jitter never sinks an island below the deepest band. Lowered terrain gets a floor slide at its
+  real Y (Y 0→16, shorter than vanilla's 4→32) that trims undersides reaching the floor, so nothing leaves the
+  build height.
+
+`ElevationBandGameTests` checks this on a fixed seed. The inner End matches the vanilla `end.json`, read from the
+vanilla data pack, block for block. Over a 4096×4096 outer area, every band holds at least 15% of island columns
+and at least 50% of columns are void. Within 1,184 to 1,600 blocks, at least 2 bands appear. Moved islands follow
+their offset. The Overworld and Nether are not touched.
 
 End Cities use the vanilla structure, structure set, and pieces unchanged. Vanilla starts a city only where
-its footprint's lowest corner is at Y ≥ 60; `EndCityStructureMixin` moves that threshold by the band offset of
-the start column (`worldgen/EndCities`) and rejects starts in band gaps. As a result, the islands that would
-host a city in vanilla host one at their band's height. `EndCityGameTests` finds starts in all three bands of a
-fixed-seed 4096×4096 area. Over 8192×8192 it counts 52 starts against 61 with vanilla terrain; the gaps
-between bands account for the difference, which is inside the ±20% target.
+its footprint's lowest corner is at Y ≥ 60. `EndCityStructureMixin` (`worldgen/EndCities`) measures that
+corner again with the bands bypassed (`ElevationBandsFunction.withoutBands`), so a city starts exactly where
+it would on vanilla terrain, at its moved height. The moved corner must still be within 4 blocks of
+`60 + offset` of the start column, and starts in band gaps are rejected, so no city starts over the void.
+`EndCityGameTests` finds starts in all three bands of a fixed-seed 4096×4096 area. Over 8192×8192 it counts 49
+starts against 61 with vanilla terrain. Every missing city has a footprint corner in a void gap between bands,
+and the difference is inside the ±20% target.
 
 ## End biomes
 
