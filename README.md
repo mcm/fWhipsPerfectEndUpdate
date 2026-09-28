@@ -110,6 +110,36 @@ from the vanilla client jar Loom downloaded (or `-PclientJar=<path>`), as a star
 `./gradlew build` runs `checkNoMojangTextures` in every module, which fails if any output jar or source tree
 contains `assets/minecraft/textures`.
 
+## Trinket slot
+
+The single trinket slot is built on [Accessories](https://github.com/wisp-forest/Accessories) (Wisp Forest,
+`io.wispforest:accessories-*`, which also pulls in owo-lib). Code is in `common/.../trinket/`.
+
+- The slot is an Accessories "unique slot" named `someonesperfectend:trinket` (`Trinkets.init()`), bound to
+  players only, in strict mode (data packs can't resize it or change what it accepts). It accepts only items in
+  `#someonesperfectend:trinkets`. An item's behavior comes from an Accessories `Accessory` registered for it
+  (see `item/ResonanceCharmItem`); its look on the player comes from an `AccessoryRenderer` registered in
+  `SomeonesPerfectEndClient` (`TrinketRenderer` hangs it on the front of the belt). Register one for every new
+  trinket item.
+- `InventoryMenuMixin` adds `TrinketSlot` to the vanilla player `InventoryMenu` after the vanilla slots (so it is
+  slot 46 and vanilla indices don't move), directly above the off-hand slot. The slot reads and writes the
+  Accessories container, so other mods using Accessories see the equipped item. Shift-clicking a trinket from the
+  inventory, hotbar, or off hand moves it into the empty slot.
+- **Creative inventory:** directly above the off-hand slot would overlap the window's top border, so in the
+  creative "Survival Inventory" tab the slot sits **immediately to the left of the off-hand slot** (x=16, y=20).
+  `ServerGamePacketListenerImplMixin` lets the creative slot-sync packet write to it (vanilla only accepts slots
+  1–45).
+- **Purity:** with only this mod and its libraries installed, the trinket slot is the only accessory slot:
+  - `data/accessories/accessories/entity/default.json` (replace) binds none of the library's default slots
+    (hat, ring, belt, ...) to any entity, and `data/accessories/tags/entity_type/defaulted_targets.json` is
+    emptied;
+  - `UniqueSlotHandlingMixin` unbinds the library's own cosmetic-armor unique slots (`accessories:head`,
+    `accessories:chest`, ...) from every entity;
+  - `AccessoriesClientMixin` removes the library's inventory button and makes its screen and key binding do
+    nothing.
+
+  The `TrinketGameTests.trinketIsTheOnlyAccessorySlot` GameTest checks the player's slot list.
+
 ## Quality gates
 
 ```

@@ -34,7 +34,8 @@ public final class ModGameTests {
             RecolorGameTests.class,
             EndGroundGameTests.class,
             OasisWaterGameTests.class,
-            EndFloraGameTests.class);
+            EndFloraGameTests.class,
+            TrinketGameTests.class);
 
     public ModGameTests() {
     }

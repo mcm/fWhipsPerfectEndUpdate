@@ -3,17 +3,24 @@
   "package": "io.mcmaster.someonesperfectend.mixin",
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
-  "client": [],
+  "client": [
+    "client.AccessoriesClientMixin",
+    "client.CreativeModeInventoryScreenMixin",
+    "client.InventoryScreenMixin"
+  ],
   "mixins": [
     "BottleItemMixin",
     "BrewingStandBlockEntityMixin",
     "BrewingStandPotionSlotMixin",
+    "InventoryMenuMixin",
     "LavaFluidMixin",
     "LiquidBlockMixin",
     "PotionBrewingBuilderMixin",
     "PotionBrewingMixAccessor",
     "PotionBrewingMixin",
-    "ReloadableResourceManagerMixin"
+    "ReloadableResourceManagerMixin",
+    "ServerGamePacketListenerImplMixin",
+    "UniqueSlotHandlingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

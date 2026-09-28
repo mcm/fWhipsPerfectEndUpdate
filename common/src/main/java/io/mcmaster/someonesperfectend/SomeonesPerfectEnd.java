@@ -3,7 +3,9 @@ package io.mcmaster.someonesperfectend;
 import io.mcmaster.someonesperfectend.alchemy.OasisPotions;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
+import io.mcmaster.someonesperfectend.item.ModItems;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import io.mcmaster.someonesperfectend.trinket.Trinkets;
 import io.mcmaster.someonesperfectend.worldgen.ModFeatures;
 import net.minecraft.resources.ResourceLocation;
 
@@ -20,6 +22,8 @@ public final class SomeonesPerfectEnd {
         ModFluids.init();
         ModFeatures.init();
         OasisPotions.init();
+        ModItems.init();
+        Trinkets.init();
         ModRegistries.register();
     }
 

@@ -32,6 +32,13 @@ versionRange = "[13.0.11,)"
 ordering = "AFTER"
 side = "BOTH"
 
+[[dependencies.someonesperfectend]]
+modId = "accessories"
+type = "required"
+versionRange = "[1,)"
+ordering = "AFTER"
+side = "BOTH"
+
 [[mixins]]
 config = "someonesperfectend.mixins.json"
 

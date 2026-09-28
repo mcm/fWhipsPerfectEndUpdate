@@ -37,6 +37,15 @@ dependencies {
     // Architectury API. This is optional, and you can comment it out if you don't need it.
     modImplementation "dev.architectury:architectury-neoforge:$rootProject.architectury_api_version"
 
+    modImplementation "io.wispforest:accessories-neoforge:$rootProject.accessories_version"
+    // owo-lib (required by Accessories) jar-in-jars these plain libraries. In the dev/GameTest run jar-in-jar
+    // isn't unpacked, so put the same versions on the game layer explicitly.
+    forgeRuntimeLibrary('io.wispforest:endec:0.1.8.1') { transitive = false }
+    forgeRuntimeLibrary('io.wispforest.endec:gson:0.1.5.1') { transitive = false }
+    forgeRuntimeLibrary('io.wispforest.endec:jankson:0.1.5.1') { transitive = false }
+    forgeRuntimeLibrary('io.wispforest.endec:netty:0.1.4.1') { transitive = false }
+    forgeRuntimeLibrary('blue.endless:jankson:1.2.2') { transitive = false }
+
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 }
@@ -59,6 +68,12 @@ remapJar {
 }
 
 loom {
+    // Interface injection from dependency mods (owo-lib, Forgified Fabric API) crashes Arch Loom's NeoForge setup
+    // ("Cannot get MojangMappedMinecraftProvider before it has been setup"); we don't need those interfaces.
+    interfaceInjection {
+        enableDependencyInterfaceInjection = false
+    }
+
     runs {
         // Headless GameTest server: `./gradlew :neoforge:runGameTestServer` (or `gameTestAll` at the root).
         gameTestServer {

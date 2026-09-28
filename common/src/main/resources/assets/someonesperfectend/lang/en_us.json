@@ -12,5 +12,7 @@
   "block.someonesperfectend.glowcap": "Glowcap",
   "block.someonesperfectend.glowcap_block": "Glowcap Block",
   "block.someonesperfectend.glowcap_stem": "Glowcap Stem",
-  "block.someonesperfectend.potted_glowcap": "Potted Glowcap"
+  "block.someonesperfectend.potted_glowcap": "Potted Glowcap",
+  "item.someonesperfectend.resonance_charm": "Resonance Charm",
+  "accessories.slot.someonesperfectend.trinket": "Trinket"
 }

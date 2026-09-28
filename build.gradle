@@ -73,6 +73,16 @@ subprojects {
         // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
         // See https://docs.gradle.org/current/userguide/declaring_repositories.html
         // for more information about repositories.
+        maven {
+            // Accessories (trinket slot) and its owo-lib dependency
+            name = 'WispForest'
+            url = 'https://maven.wispforest.io/releases'
+        }
+        maven {
+            // Forgified Fabric API modules that Accessories/owo-lib need on NeoForge
+            name = 'Sinytra'
+            url = 'https://maven.su5ed.dev/releases'
+        }
     }
 
     loom {
