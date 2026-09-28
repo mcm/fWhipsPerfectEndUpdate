@@ -1,0 +1,124 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "#bed"
+  },
+  "elements": [
+    {
+      "from": [0, 7, 0],
+      "to": [16, 13, 16],
+      "faces": {
+        "down": {
+          "uv": [1.5, 7, 5.5, 11],
+          "texture": "#bed",
+          "rotation": 180
+        },
+        "up": {
+          "uv": [7, 7, 11, 11],
+          "texture": "#bed"
+        },
+        "north": {
+          "uv": [1.5, 5.5, 5.5, 7],
+          "texture": "#bed",
+          "cullface": "north"
+        },
+        "south": {
+          "uv": [5.5, 7, 9.5, 5.5],
+          "texture": "#bed",
+          "rotation": 180,
+          "cullface": "south"
+        },
+        "west": {
+          "uv": [5.5, 7, 7, 11],
+          "texture": "#bed",
+          "rotation": 270,
+          "cullface": "west"
+        },
+        "east": {
+          "uv": [0, 7, 1.5, 11],
+          "texture": "#bed",
+          "rotation": 90,
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [13, 13, 13],
+      "to": [16, 16, 16],
+      "faces": {
+        "down": {
+          "uv": [13.25, 0, 14, 0.75],
+          "texture": "#bed",
+          "rotation": 180
+        },
+        "up": {
+          "uv": [14, 0.75, 14.75, 0],
+          "texture": "#bed",
+          "rotation": 180,
+          "cullface": "up"
+        },
+        "north": {
+          "uv": [14.75, 0.75, 15.5, 1.5],
+          "texture": "#bed",
+          "rotation": 180
+        },
+        "south": {
+          "uv": [13.25, 0.75, 14, 1.5],
+          "texture": "#bed",
+          "rotation": 180,
+          "cullface": "south"
+        },
+        "west": {
+          "uv": [14, 0.75, 14.75, 1.5],
+          "texture": "#bed",
+          "rotation": 180
+        },
+        "east": {
+          "uv": [12.5, 0.75, 13.25, 1.5],
+          "texture": "#bed",
+          "rotation": 180,
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [0, 13, 13],
+      "to": [3, 16, 16],
+      "faces": {
+        "down": {
+          "uv": [13.25, 3, 14, 3.75],
+          "texture": "#bed",
+          "rotation": 90
+        },
+        "up": {
+          "uv": [14, 3.75, 14.75, 3],
+          "texture": "#bed",
+          "rotation": 270,
+          "cullface": "up"
+        },
+        "north": {
+          "uv": [14, 3.75, 14.75, 4.5],
+          "texture": "#bed",
+          "rotation": 180
+        },
+        "south": {
+          "uv": [12.5, 3.75, 13.25, 4.5],
+          "texture": "#bed",
+          "rotation": 180,
+          "cullface": "south"
+        },
+        "west": {
+          "uv": [13.25, 3.75, 14, 4.5],
+          "texture": "#bed",
+          "rotation": 180,
+          "cullface": "west"
+        },
+        "east": {
+          "uv": [14.75, 3.75, 15.5, 4.5],
+          "texture": "#bed",
+          "rotation": 180
+        }
+      }
+    }
+  ]
+}

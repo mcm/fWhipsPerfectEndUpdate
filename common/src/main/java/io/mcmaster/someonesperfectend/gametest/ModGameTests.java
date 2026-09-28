@@ -58,6 +58,7 @@ public final class ModGameTests {
             EndlingGameTests.class,
             EndlingBarterGameTests.class,
             EndlingSpecialBarterGameTests.class,
+            EnderBedGameTests.class,
             EndlingVillageGameTests.class,
             EndCityGameTests.class);
 

@@ -89,5 +89,21 @@
   "item.someonesperfectend.driftjelly_gel": "Driftjelly Gel",
   "item.someonesperfectend.cooked_driftjelly_gel": "Cooked Driftjelly Gel",
   "entity.someonesperfectend.endling": "Endling",
-  "item.someonesperfectend.endling_spawn_egg": "Endling Spawn Egg"
+  "item.someonesperfectend.endling_spawn_egg": "Endling Spawn Egg",
+  "block.someonesperfectend.white_ender_bed": "White Ender Bed",
+  "block.someonesperfectend.orange_ender_bed": "Orange Ender Bed",
+  "block.someonesperfectend.magenta_ender_bed": "Magenta Ender Bed",
+  "block.someonesperfectend.light_blue_ender_bed": "Light Blue Ender Bed",
+  "block.someonesperfectend.yellow_ender_bed": "Yellow Ender Bed",
+  "block.someonesperfectend.lime_ender_bed": "Lime Ender Bed",
+  "block.someonesperfectend.pink_ender_bed": "Pink Ender Bed",
+  "block.someonesperfectend.gray_ender_bed": "Gray Ender Bed",
+  "block.someonesperfectend.light_gray_ender_bed": "Light Gray Ender Bed",
+  "block.someonesperfectend.cyan_ender_bed": "Cyan Ender Bed",
+  "block.someonesperfectend.purple_ender_bed": "Purple Ender Bed",
+  "block.someonesperfectend.blue_ender_bed": "Blue Ender Bed",
+  "block.someonesperfectend.brown_ender_bed": "Brown Ender Bed",
+  "block.someonesperfectend.green_ender_bed": "Green Ender Bed",
+  "block.someonesperfectend.red_ender_bed": "Red Ender Bed",
+  "block.someonesperfectend.black_ender_bed": "Black Ender Bed"
 }

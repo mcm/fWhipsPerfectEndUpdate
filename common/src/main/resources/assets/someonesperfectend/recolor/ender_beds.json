@@ -1,0 +1,84 @@
+{
+  "palette": {
+    "colors": {
+      "#67502c": "#2e1c45",
+      "#695433": "#34204d",
+      "#7e6237": "#4e316f",
+      "#7c623e": "#4e3270",
+      "#967441": "#724e9b",
+      "#9b7742": "#7854a2",
+      "#9f844d": "#8c66ba",
+      "#b38c51": "#a37ecd",
+      "#af8f55": "#a580cf",
+      "#b8945f": "#b390da",
+      "#bc9862": "#ba98e0",
+      "#c29d62": "#c4a3e8"
+    }
+  },
+  "recipes": [
+    {
+      "source": "minecraft:entity/bed/white",
+      "target": "someonesperfectend:block/ender_bed/white"
+    },
+    {
+      "source": "minecraft:entity/bed/orange",
+      "target": "someonesperfectend:block/ender_bed/orange"
+    },
+    {
+      "source": "minecraft:entity/bed/magenta",
+      "target": "someonesperfectend:block/ender_bed/magenta"
+    },
+    {
+      "source": "minecraft:entity/bed/light_blue",
+      "target": "someonesperfectend:block/ender_bed/light_blue"
+    },
+    {
+      "source": "minecraft:entity/bed/yellow",
+      "target": "someonesperfectend:block/ender_bed/yellow"
+    },
+    {
+      "source": "minecraft:entity/bed/lime",
+      "target": "someonesperfectend:block/ender_bed/lime"
+    },
+    {
+      "source": "minecraft:entity/bed/pink",
+      "target": "someonesperfectend:block/ender_bed/pink"
+    },
+    {
+      "source": "minecraft:entity/bed/gray",
+      "target": "someonesperfectend:block/ender_bed/gray"
+    },
+    {
+      "source": "minecraft:entity/bed/light_gray",
+      "target": "someonesperfectend:block/ender_bed/light_gray"
+    },
+    {
+      "source": "minecraft:entity/bed/cyan",
+      "target": "someonesperfectend:block/ender_bed/cyan"
+    },
+    {
+      "source": "minecraft:entity/bed/purple",
+      "target": "someonesperfectend:block/ender_bed/purple"
+    },
+    {
+      "source": "minecraft:entity/bed/blue",
+      "target": "someonesperfectend:block/ender_bed/blue"
+    },
+    {
+      "source": "minecraft:entity/bed/brown",
+      "target": "someonesperfectend:block/ender_bed/brown"
+    },
+    {
+      "source": "minecraft:entity/bed/green",
+      "target": "someonesperfectend:block/ender_bed/green"
+    },
+    {
+      "source": "minecraft:entity/bed/red",
+      "target": "someonesperfectend:block/ender_bed/red"
+    },
+    {
+      "source": "minecraft:entity/bed/black",
+      "target": "someonesperfectend:block/ender_bed/black"
+    }
+  ]
+}

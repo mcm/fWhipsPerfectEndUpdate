@@ -1,0 +1,7 @@
+{
+  "parent": "someonesperfectend:block/template_ender_bed_foot",
+  "textures": {
+    "bed": "someonesperfectend:block/ender_bed/light_gray",
+    "particle": "minecraft:block/light_gray_wool"
+  }
+}
