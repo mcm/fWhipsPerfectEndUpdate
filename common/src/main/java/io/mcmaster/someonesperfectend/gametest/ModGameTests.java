@@ -45,6 +45,7 @@ public final class ModGameTests {
             InfuserGameTests.class,
             InfusedGearGameTests.class,
             EffectTotemGameTests.class,
+            HasteBoostGameTests.class,
             TotemStackingGameTests.class,
             EndChanterGameTests.class,
             VoidCleansingGameTests.class,

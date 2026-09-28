@@ -174,6 +174,20 @@ The single trinket slot is built on [Accessories](https://github.com/wisp-forest
 
   The `TrinketGameTests.trinketIsTheOnlyAccessorySlot` GameTest checks the player's slot list.
 
+### Totem of Haste mining boost
+
+Haste III or higher mines much faster **only while an activated Totem of Haste** (one with the
+`someonesperfectend:totem_activated` component) is worn in the trinket slot, e.g. a Haste II beacon plus the
+totem. The Haste multiplier becomes `1 + 0.6 × (amplifier + 1)` instead of vanilla's `1 + 0.2 × (amplifier + 1)`,
+so Efficiency V with Haste III breaks end stone and deepslate instantly (Efficiency IV does not). Haste II with the
+totem, and Haste III from anywhere else (commands, other mods) without the totem, stay vanilla.
+
+- The rules are in `totem/HasteRules` (unit-tested). `PlayerMixin` swaps vanilla's 0.2 per level in
+  `Player#getDestroySpeed` (NeoForge: `getDigSpeed`) for the boosted value, so Mining Fatigue, underwater, not on
+  the ground, the block-break-speed attribute, and Conduit Power alone are unchanged.
+- The totem is read from the Accessories slot, which is synced, so the client and server agree on mining speed.
+- GameTests: `HasteBoostGameTests`.
+
 ## End terrain (elevation bands)
 
 The outer End (at least 1024 blocks from the origin) is split into three elevation bands: lower, middle
