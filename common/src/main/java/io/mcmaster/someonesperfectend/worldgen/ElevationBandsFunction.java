@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
+import java.util.function.IntSupplier;
 import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.DensityFunction;
@@ -28,9 +29,10 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 public final class ElevationBandsFunction implements DensityFunction {
     /** Density of the void gaps; below the vanilla End's lowest value of {@code -0.234375} near the floor. */
     private static final double GAP_DENSITY = -1.0;
-    // The vanilla End's bottom slide (y 4 -> 32, towards -0.234375), reapplied at the real Y for the lower band.
-    private static final int BOTTOM_SLIDE_FROM = 4;
-    private static final int BOTTOM_SLIDE_TO = 32;
+    // A floor slide like the vanilla End's (towards -0.234375), reapplied at the real Y for lowered terrain. It is
+    // shorter than vanilla's (y 4 -> 32) so the deepest lower-band islands keep their tops and only lose undersides.
+    public static final int BOTTOM_SLIDE_FROM = 0;
+    public static final int BOTTOM_SLIDE_TO = 16;
     private static final double BOTTOM_SLIDE_VALUE = -0.234375;
 
     public static final MapCodec<ElevationBandsFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -145,9 +147,27 @@ public final class ElevationBandsFunction implements DensityFunction {
         return layout;
     }
 
+    /**
+     * Runs {@code action} with every elevation bands function on this thread returning its argument unchanged,
+     * so terrain queried inside (e.g. heights) is the vanilla terrain.
+     */
+    public static int withoutBands(IntSupplier action) {
+        ColumnCache cache = CACHE.get();
+        boolean previous = cache.bypass;
+        cache.bypass = true;
+        try {
+            return action.getAsInt();
+        } finally {
+            cache.bypass = previous;
+        }
+    }
+
     /** The column's offset, or {@link ElevationBands#GAP}. */
     public int offsetAt(int x, int z) {
-        ColumnCache cache = CACHE.get();
+        return offsetAt(CACHE.get(), x, z);
+    }
+
+    private int offsetAt(ColumnCache cache, int x, int z) {
         if (cache.owner != this || cache.x != x || cache.z != z) {
             cache.owner = this;
             cache.x = x;
@@ -159,7 +179,11 @@ public final class ElevationBandsFunction implements DensityFunction {
 
     @Override
     public double compute(FunctionContext context) {
-        int offset = offsetAt(context.blockX(), context.blockZ());
+        ColumnCache cache = CACHE.get();
+        if (cache.bypass) {
+            return argument.compute(context);
+        }
+        int offset = offsetAt(cache, context.blockX(), context.blockZ());
         if (offset == 0) {
             return argument.compute(context);
         }
@@ -213,5 +237,6 @@ public final class ElevationBandsFunction implements DensityFunction {
         private int x;
         private int z;
         private int offset;
+        private boolean bypass;
     }
 }
