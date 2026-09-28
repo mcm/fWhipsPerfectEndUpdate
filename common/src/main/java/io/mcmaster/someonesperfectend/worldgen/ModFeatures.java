@@ -1,13 +1,17 @@
 package io.mcmaster.someonesperfectend.worldgen;
 
 import com.mojang.serialization.MapCodec;
+import dev.architectury.registry.level.biome.BiomeModifications;
 import dev.architectury.registry.registries.RegistrySupplier;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 /** Feature and density function types, plus keys of the data-driven configured features that code refers to. */
 public final class ModFeatures {
@@ -22,6 +26,10 @@ public final class ModFeatures {
 
     public static final RegistrySupplier<OasisPoolFeature> OASIS_POOL = ModRegistries.FEATURES.register(
             "oasis_pool", () -> new OasisPoolFeature(OasisPoolConfiguration.CODEC));
+
+    public static final RegistrySupplier<UnderIslandFoliageFeature> UNDER_ISLAND_FOLIAGE =
+            ModRegistries.FEATURES.register("under_island_foliage",
+                    () -> new UnderIslandFoliageFeature(UnderIslandFoliageConfiguration.CODEC));
 
     /** Density function type used by the End noise settings override (US-012). */
     public static final RegistrySupplier<MapCodec<ElevationBandsFunction>> ELEVATION_BANDS =
@@ -42,6 +50,14 @@ public final class ModFeatures {
     /** {@code data/someonesperfectend/worldgen/configured_feature/oasis_pool.json} (US-016). */
     public static final ResourceKey<ConfiguredFeature<?, ?>> OASIS_POOL_CONFIGURED = configured("oasis_pool");
 
+    /** {@code data/someonesperfectend/worldgen/configured_feature/under_island_foliage.json} (US-017). */
+    public static final ResourceKey<ConfiguredFeature<?, ?>> UNDER_ISLAND_FOLIAGE_CONFIGURED =
+            configured("under_island_foliage");
+
+    /** Placed in about 10% of vanilla {@code end_highlands} regions through a biome modification (US-017). */
+    public static final ResourceKey<PlacedFeature> END_HIGHLANDS_UNDER_ISLAND_FOLIAGE = ResourceKey.create(
+            Registries.PLACED_FEATURE, SomeonesPerfectEnd.id("end_highlands_under_island_foliage"));
+
     private ModFeatures() {
     }
 
@@ -49,7 +65,10 @@ public final class ModFeatures {
         return ResourceKey.create(Registries.CONFIGURED_FEATURE, SomeonesPerfectEnd.id(name));
     }
 
-    /** Loads this class so its entries are added to the deferred registers. */
+    /** Loads this class so its entries are added to the deferred registers, and adds features to vanilla biomes. */
     public static void init() {
+        BiomeModifications.addProperties(context -> context.getKey().filter(Biomes.END_HIGHLANDS.location()::equals)
+                .isPresent(), (context, properties) -> properties.getGenerationProperties().addFeature(
+                        GenerationStep.Decoration.VEGETAL_DECORATION, END_HIGHLANDS_UNDER_ISLAND_FOLIAGE));
     }
 }

@@ -35,7 +35,8 @@
       "someonesperfectend:end_oasis_pools",
       "someonesperfectend:end_oasis_huge_glowcaps",
       "someonesperfectend:patch_short_void_grass",
-      "someonesperfectend:end_oasis_glowcaps"
+      "someonesperfectend:end_oasis_glowcaps",
+      "someonesperfectend:under_island_foliage"
     ]
   ],
   "has_precipitation": false,

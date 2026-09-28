@@ -88,7 +88,7 @@ public class VoidvineBlock extends GrowingPlantHeadBlock {
     private boolean canGrow(LevelReader level, BlockPos pos) {
         return canGrowInto(level.getBlockState(pos.below()))
                 && Voidvines.lengthAbove(level, pos) < Voidvines.MAX_LENGTH
-                && !level.isOutsideBuildHeight(pos.below());
+                && pos.getY() - 1 >= level.getMinBuildHeight() + Voidvines.MIN_HEIGHT_ABOVE_BOTTOM;
     }
 
     @Override

@@ -52,7 +52,8 @@ public final class ModGameTests {
             EndBiomeGameTests.class,
             EndPlainsGameTests.class,
             EndForestGameTests.class,
-            EndOasisGameTests.class);
+            EndOasisGameTests.class,
+            UnderIslandFoliageGameTests.class);
 
     public ModGameTests() {
     }
