@@ -26,12 +26,13 @@ public class DriftjellyDriftGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        return jelly.getNavigation().isDone() && jelly.getRandom().nextInt(reducedTickDelay(60)) == 0;
+        return !jelly.isDormant() && jelly.getNavigation().isDone()
+                && jelly.getRandom().nextInt(reducedTickDelay(60)) == 0;
     }
 
     @Override
     public boolean canContinueToUse() {
-        return jelly.getNavigation().isInProgress();
+        return !jelly.isDormant() && jelly.getNavigation().isInProgress();
     }
 
     @Override
