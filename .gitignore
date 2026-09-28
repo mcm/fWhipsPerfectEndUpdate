@@ -12,3 +12,4 @@ runs/
 .settings/
 bin/
 .architectury-transformer/
+logs/

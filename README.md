@@ -221,6 +221,9 @@ structure-start step (`ChunkGenerator#createStructures`) on a fresh proto chunk 
   exits with the number of failed required tests), if the log does not report at least one passing required
   test, or if the run takes longer than 15 minutes. `gameTestAll` depends on both and runs them one after
   another.
+- The run directory has no `eula.txt` after `clean`. owo-lib (a dependency of Accessories) then asks for the EULA on
+  stdin and crashes the server on empty input. The task pipes `false` into stdin, which declines the prompt.
+  GameTest servers don't need an accepted EULA, so nothing is accepted on your behalf.
 - Fabric also writes a JUnit report to `fabric/build/gametest/junit.xml`.
 
 ### Measured cost in the 4-core / 16 GB container
@@ -233,6 +236,10 @@ Peak memory is the peak sum of RSS for all Java processes (Gradle daemon plus ga
 | Cold (Gradle daemon stopped first) | 71 s | 2.6 GB |
 | Warm daemon, run 1 | 59 s | 2.6 GB |
 | Warm daemon, run 2 | 58 s | 2.9 GB |
+| MVP suite, 227 tests per loader (2026-09-28, US-029, `--no-daemon`) | 347 s | 10.2 GB |
+
+The last row was re-measured for the final validation (US-029). Its peak also covers the preceding
+`./gradlew build` (a separate `--no-daemon` build, sampled the same way).
 
 The loaders never run at the same time. Each game server is capped at `-Xmx3G` (`gametest_max_heap` in
 `gradle.properties`) and the Gradle daemon at `-Xmx3G`. This fits the 16 GB budget with plenty of headroom, so

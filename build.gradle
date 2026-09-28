@@ -24,6 +24,9 @@ ext.configureGameTestTask = { Project p, String taskName ->
         // A misconfigured run can start a normal dedicated server that never exits.
         t.timeout = java.time.Duration.ofMinutes(15)
         def runDir = p.file('build/gametest')
+        // owo-lib (via Accessories) prompts on stdin for the EULA when eula.txt is missing (e.g. after
+        // `clean`) and crashes on empty stdin. Decline the prompt; GameTest servers don't need the EULA.
+        t.standardInput = new ByteArrayInputStream('false\n'.bytes)
         t.doFirst {
             ['world', 'gametestworld', 'logs', 'junit.xml'].each { p.delete(new File(runDir, it)) }
         }
