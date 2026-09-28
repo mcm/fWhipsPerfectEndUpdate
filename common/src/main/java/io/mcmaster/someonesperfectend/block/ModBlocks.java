@@ -112,6 +112,16 @@ public final class ModBlocks {
                     .lightLevel(state -> GLOWCAP_LIGHT)
                     .pushReaction(PushReaction.DESTROY)));
 
+    public static final RegistrySupplier<BounceCapBlock> BOUNCE_CAP = ModRegistries.block("bounce_cap",
+            () -> new BounceCapBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_MAGENTA)
+                    .instrument(NoteBlockInstrument.BASS)
+                    .strength(0.2F)
+                    .sound(SoundType.FUNGUS)
+                    .noOcclusion()
+                    .ignitedByLava()
+                    .pushReaction(PushReaction.DESTROY)));
+
     /** Beacon copy (light 15, hardness 3, mined by hand); not craftable, bartered from Endlings (US-034). */
     public static final RegistrySupplier<InfuserBlock> INFUSER = ModRegistries.block("infuser",
             () -> new InfuserBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BEACON).mapColor(MapColor.COLOR_PURPLE)),

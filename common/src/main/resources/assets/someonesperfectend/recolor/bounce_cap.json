@@ -1,0 +1,35 @@
+{
+  "palette": {
+    "gradient": [
+      "#3d0f4f",
+      "#a02fb8",
+      "#f39cf0"
+    ]
+  },
+  "recipes": [
+    {
+      "source": "minecraft:block/red_mushroom_block",
+      "target": "someonesperfectend:block/bounce_cap"
+    },
+    {
+      "source": "minecraft:block/mushroom_block_inside",
+      "target": "someonesperfectend:block/bounce_cap_inside",
+      "palette": {
+        "gradient": [
+          "#b89ac4",
+          "#f2e2f6"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:block/mushroom_stem",
+      "target": "someonesperfectend:block/bounce_cap_stem",
+      "palette": {
+        "gradient": [
+          "#b3a3c4",
+          "#efe6f7"
+        ]
+      }
+    }
+  ]
+}

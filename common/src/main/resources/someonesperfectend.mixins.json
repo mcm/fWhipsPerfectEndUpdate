@@ -23,6 +23,7 @@
     "InventoryMenuMixin",
     "LavaFluidMixin",
     "LiquidBlockMixin",
+    "LivingEntityMixin",
     "PlayerMixin",
     "PotionBrewingBuilderMixin",
     "PotionBrewingMixAccessor",
