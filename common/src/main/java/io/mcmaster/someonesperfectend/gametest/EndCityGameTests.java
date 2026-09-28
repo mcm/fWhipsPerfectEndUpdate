@@ -3,6 +3,7 @@ package io.mcmaster.someonesperfectend.gametest;
 import com.mojang.logging.LogUtils;
 import io.mcmaster.someonesperfectend.worldgen.ElevationBands;
 import io.mcmaster.someonesperfectend.worldgen.ElevationBandsFunction;
+import io.mcmaster.someonesperfectend.worldgen.EndCities;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,9 +52,11 @@ public final class EndCityGameTests {
         for (BlockPos start : ours.starts(2048, -2048, 4096)) {
             int offset = bands.offsetAt(start.getX(), start.getZ());
             helper.assertTrue(offset != ElevationBands.GAP, "End City start in a band gap: " + start);
-            int band = offset < 0 ? 0 : offset == 0 ? 1 : 2;
+            int band = bands.layout().groupAt(start.getX(), start.getZ()).band().ordinal();
             // The start sits on the island surface, moved with the band (vanilla requires Y >= 60 unmoved).
-            helper.assertTrue(start.getY() >= 60 + offset, "End City start below its band's minimum: " + start);
+            helper.assertTrue(
+                    start.getY() >= EndCities.minimumY(60, offset, 60),
+                    "End City start below its band's minimum: " + start);
             counts[band]++;
             sums[band] += start.getY();
         }

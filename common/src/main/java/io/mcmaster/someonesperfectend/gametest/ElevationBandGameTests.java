@@ -5,11 +5,14 @@ import com.google.gson.JsonParser;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import io.mcmaster.someonesperfectend.mixin.TheEndGatewayBlockEntityInvoker;
+import io.mcmaster.someonesperfectend.worldgen.ElevationBandLayout;
 import io.mcmaster.someonesperfectend.worldgen.ElevationBands;
 import io.mcmaster.someonesperfectend.worldgen.ElevationBandsFunction;
 import java.io.Reader;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -31,12 +34,15 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.RandomState;
 import org.slf4j.Logger;
 
-/** US-012, MOD-71: outer-End elevation bands move whole islands; vanilla terrain near the origin; End Gateway exits. */
+/**
+ * US-012, MOD-47, MOD-71: outer-End elevation bands move whole islands; vanilla terrain near the origin; End Gateway
+ * exits.
+ */
 public final class ElevationBandGameTests {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long SEED = 20260928L;
-    /** Top of the vanilla End's bottom slide, which {@code elevation_bands} reapplies to lowered islands. */
-    private static final int BOTTOM_SLIDE_TOP = 32;
+    /** Top of the floor slide that {@code elevation_bands} reapplies to lowered islands. */
+    private static final int BOTTOM_SLIDE_TOP = ElevationBandsFunction.BOTTOM_SLIDE_TO;
 
     private static final LevelHeightAccessor END_HEIGHT = LevelHeightAccessor.create(0, 256);
     private static final ResourceLocation END_SETTINGS_FILE =
@@ -61,7 +67,7 @@ public final class ElevationBandGameTests {
             int z = (int) (Math.sin(angle) * radius);
             NoiseColumn expected = reference.column(x, z);
             NoiseColumn actual = ours.column(x, z);
-            for (int y = 0; y < 128; y++) {
+            for (int y = 0; y < END_HEIGHT.getMaxBuildHeight(); y++) {
                 if (expected.getBlock(y) != actual.getBlock(y)) {
                     helper.fail("Column " + x + "," + z + " differs from vanilla at y=" + y + ": " + actual.getBlock(y)
                             + " (vanilla " + expected.getBlock(y) + ")");
@@ -81,32 +87,39 @@ public final class ElevationBandGameTests {
     public static void outerIslandsFormThreeBands(GameTestHelper helper) {
         MinecraftServer server = helper.getLevel().getServer();
         Generator ours = new Generator(server, modEndSettings(server).value());
-        int voidColumns = 0;
-        int[] counts = new int[3];
-        long[] sums = new long[3];
+        BandCounts counts = new BandCounts();
         for (int i = 0; i < 20; i++) {
             for (int j = 0; j < 20; j++) {
-                int x = 2048 + i * 4096 / 20 + 37;
-                int z = -2048 + j * 4096 / 20 + 53;
-                int surface = ours.surface(x, z);
-                if (surface <= 0) {
-                    voidColumns++;
-                    continue;
-                }
-                int band = surface < 52 ? 0 : surface <= 82 ? 1 : 2;
-                counts[band]++;
-                sums[band] += surface;
+                counts.add(ours, 2048 + i * 4096 / 20 + 37, -2048 + j * 4096 / 20 + 53);
             }
         }
-        int islands = counts[0] + counts[1] + counts[2];
-        String stats = "void=" + voidColumns + "/400, lower=" + counts[0] + " (mean y " + mean(sums[0], counts[0])
-                + "), middle=" + counts[1] + " (mean y " + mean(sums[1], counts[1]) + "), upper=" + counts[2]
-                + " (mean y " + mean(sums[2], counts[2]) + ")";
-        LOGGER.info("Elevation bands: {}", stats);
-        helper.assertTrue(voidColumns >= 200, "Less than 50% void: " + stats);
-        for (int count : counts) {
-            helper.assertTrue(islands > 0 && count >= 0.15 * islands, "A band has < 15% of islands: " + stats);
+        LOGGER.info("Elevation bands: {}", counts);
+        helper.assertTrue(counts.voidColumns >= 200, "Less than 50% void: " + counts);
+        for (int count : counts.counts) {
+            helper.assertTrue(
+                    counts.islands() > 0 && count >= 0.15 * counts.islands(), "A band has < 15% of islands: " + counts);
         }
+        helper.succeed();
+    }
+
+    /** MOD-47: just past the always-middle zone (1184 to 1600 blocks out) islands already sit in at least 2 bands. */
+    @GameTest(timeoutTicks = 400)
+    public static void bandsStartNearTheFirstGateway(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        Generator ours = new Generator(server, modEndSettings(server).value());
+        BandCounts counts = new BandCounts();
+        Random random = new Random(SEED);
+        for (int i = 0; i < 400; i++) {
+            double radius = 1184 + random.nextDouble() * (1600 - 1184);
+            double angle = random.nextDouble() * Math.PI * 2;
+            counts.add(ours, (int) (Math.cos(angle) * radius), (int) (Math.sin(angle) * radius));
+        }
+        LOGGER.info("Elevation bands at 1184-1600: {}", counts);
+        int bands = 0;
+        for (int count : counts.counts) {
+            bands += count > 0 ? 1 : 0;
+        }
+        helper.assertTrue(bands >= 2, "Fewer than 2 bands within 1184-1600 blocks: " + counts);
         helper.succeed();
     }
 
@@ -130,7 +143,7 @@ public final class ElevationBandGameTests {
             // In a moved region the column is the vanilla column shifted by the offset (above the floor slide).
             NoiseColumn expected = reference.column(x, z);
             NoiseColumn actual = ours.column(x, z);
-            for (int y = 40; y < 128; y++) {
+            for (int y = 40; y < END_HEIGHT.getMaxBuildHeight(); y++) {
                 int source = y - offset;
                 if (source < 32 || source >= 128) {
                     continue;
@@ -150,7 +163,8 @@ public final class ElevationBandGameTests {
     /**
      * MOD-71: no island is broken apart. Every vanilla island column of the outer End (at noise cell corners, where
      * the terrain is sampled) is still land, at its vanilla height moved by its group's band, and the columns of
-     * one island along a line all move by the same offset.
+     * one island along a line all move by the same offset. MOD-47: island groups jitter, so moved islands sit at
+     * more heights than the two band offsets.
      */
     @GameTest(timeoutTicks = 400)
     public static void islandsAreNeverSplit(GameTestHelper helper) {
@@ -160,6 +174,7 @@ public final class ElevationBandGameTests {
         ElevationBandsFunction bands = ours.bands();
         int islandColumns = 0;
         int moved = 0;
+        Set<Integer> movedOffsets = new HashSet<>();
         for (int line = 0; line < 4; line++) {
             int z = -3000 + line * 2000;
             int previousSurface = 0;
@@ -175,22 +190,27 @@ public final class ElevationBandGameTests {
                 helper.assertTrue(offset != ElevationBands.GAP, "Void cuts through an island at " + x + "," + z);
                 int surface = ours.surface(x, z);
                 int expected = vanillaSurface + offset;
-                // Lowered below the bottom slide, an island is tapered like vanilla's lowest islands: never higher.
+                // With its top block (expected - 1) in the floor slide, an island is tapered like vanilla's lowest
+                // islands: never higher, and gone if it is moved below the floor.
                 helper.assertTrue(
-                        expected < BOTTOM_SLIDE_TOP ? surface <= expected : surface == expected,
+                        expected - 1 < BOTTOM_SLIDE_TOP ? surface <= Math.max(expected, 0) : surface == expected,
                         "Island column " + x + "," + z + " is at " + surface + ", not vanilla " + vanillaSurface
                                 + " moved by " + offset);
                 helper.assertTrue(
                         previousSurface <= 0 || previousOffset == offset,
                         "Island sheared between " + (x - 8) + "," + z + " and " + x + "," + z);
                 moved += offset != 0 ? 1 : 0;
+                if (offset != 0) {
+                    movedOffsets.add(offset);
+                }
                 previousSurface = surface;
                 previousOffset = offset;
             }
         }
-        LOGGER.info("Island columns checked: {}, moved: {}", islandColumns, moved);
+        LOGGER.info("Island columns checked: {}, moved: {}, offsets: {}", islandColumns, moved, movedOffsets);
         helper.assertTrue(islandColumns >= 50, "Too few island columns sampled: " + islandColumns);
         helper.assertTrue(moved > 0, "No moved island columns sampled");
+        helper.assertTrue(movedOffsets.size() >= 3, "Moved islands do not vary in height: " + movedOffsets);
         helper.succeed();
     }
 
@@ -228,6 +248,35 @@ public final class ElevationBandGameTests {
 
     private static String mean(long sum, int count) {
         return count == 0 ? "-" : Long.toString(sum / count);
+    }
+
+    /** Void and island columns sampled from a generator, by the band of their island group. */
+    private static final class BandCounts {
+        private final int[] counts = new int[3];
+        private final long[] sums = new long[3];
+        private int voidColumns;
+
+        void add(Generator generator, int x, int z) {
+            int surface = generator.surface(x, z);
+            ElevationBandLayout.Group group = generator.bands().layout().groupAt(x, z);
+            if (surface <= 0 || group == null) {
+                voidColumns++;
+                return;
+            }
+            counts[group.band().ordinal()]++;
+            sums[group.band().ordinal()] += surface;
+        }
+
+        int islands() {
+            return counts[0] + counts[1] + counts[2];
+        }
+
+        @Override
+        public String toString() {
+            return "void=" + voidColumns + "/" + (voidColumns + islands()) + ", lower=" + counts[0] + " (mean y "
+                    + mean(sums[0], counts[0]) + "), middle=" + counts[1] + " (mean y " + mean(sums[1], counts[1])
+                    + "), upper=" + counts[2] + " (mean y " + mean(sums[2], counts[2]) + ")";
+        }
     }
 
     private static Holder<NoiseGeneratorSettings> modEndSettings(MinecraftServer server) {

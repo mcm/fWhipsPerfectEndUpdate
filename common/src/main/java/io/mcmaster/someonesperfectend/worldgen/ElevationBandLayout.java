@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 /**
- * Which elevation band each outer-End column is in (MOD-71): whole islands move, they are never split.
+ * Which elevation band each outer-End column is in (MOD-47, MOD-71): whole islands move, they are never split.
  *
  * <p>Vanilla's {@code minecraft:end_islands} places island centers on a 16-block grid and gives each a round
  * island: its height value falls off as {@code 100 - distance × falloff} (distance in 8-block noise cells), and
@@ -19,8 +19,9 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
  *       the highest value there, its <em>owner</em>.
  *   <li>Two centers are in the same <em>island group</em> when their islands, cut at {@code islandThreshold},
  *       come within {@code linkMargin} blocks of each other. Groups are found by flood fill and cached.
- *   <li>A group's band is rolled from its lowest center, so every corner of it agrees. Groups with a center
- *       within {@code middleDistance} of the origin are middle band.
+ *   <li>A group's band and jitter are rolled from its lowest center, so every corner of it agrees. Its offset
+ *       scales with the distance of its center nearest the origin ({@link ElevationBands#groupOffset}). Groups
+ *       with a center within {@code middleDistance} of the origin are middle band with no jitter.
  *   <li>A corner next to a corner of a group with another offset is forced to void, so the 8-block cells
  *       between them are not sheared. Such corners are in the void between islands by construction (2).
  * </ol>
@@ -49,7 +50,7 @@ public final class ElevationBandLayout {
     private final double linkCells;
 
     private final Map<Long, Tile> tiles = new ConcurrentHashMap<>();
-    private final Map<Long, Integer> groupOffsets = new ConcurrentHashMap<>();
+    private final Map<Long, Group> groups = new ConcurrentHashMap<>();
     private final ThreadLocal<OwnerCache> owners = ThreadLocal.withInitial(OwnerCache::new);
 
     ElevationBandLayout(
@@ -73,29 +74,38 @@ public final class ElevationBandLayout {
 
     /** Vertical offset of the terrain at column (x, z), or {@link ElevationBands#GAP} if it must be void. */
     public int offsetAt(int x, int z) {
+        Group group = groupAt(x, z);
+        return group == null ? ElevationBands.GAP : group.offset();
+    }
+
+    /**
+     * The island group that column (x, z) moves with, {@link Group#VANILLA} where nothing moves, or null if the
+     * column is in a void seam between groups with different offsets.
+     */
+    public Group groupAt(int x, int z) {
         int minDistance = settings.minDistance();
         if ((long) x * x + (long) z * z < (long) minDistance * minDistance) {
-            return 0;
+            return Group.VANILLA;
         }
         int cellX = x / 8;
         int cellZ = z / 8;
         long owner = owner(cellX, cellZ);
         if (owner == NONE) {
-            return 0;
+            return Group.VANILLA;
         }
-        int offset = groupOffset(owner);
+        Group group = group(owner);
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 if (dx == 0 && dz == 0) {
                     continue;
                 }
                 long neighbor = owner(cellX + dx, cellZ + dz);
-                if (neighbor != NONE && neighbor != owner && groupOffset(neighbor) != offset) {
-                    return ElevationBands.GAP;
+                if (neighbor != NONE && neighbor != owner && group(neighbor).offset() != group.offset()) {
+                    return null;
                 }
             }
         }
-        return offset;
+        return group;
     }
 
     /**
@@ -149,9 +159,9 @@ public final class ElevationBandLayout {
         return best;
     }
 
-    /** The offset of the island group of a center. */
-    private int groupOffset(long center) {
-        Integer cached = groupOffsets.get(center);
+    /** The island group of a center. */
+    private Group group(long center) {
+        Group cached = groups.get(center);
         if (cached != null) {
             return cached;
         }
@@ -160,13 +170,13 @@ public final class ElevationBandLayout {
         members.add(center);
         queue.add(center);
         long lowest = center;
-        boolean nearOrigin = false;
+        double nearest = Double.MAX_VALUE;
         while (!queue.isEmpty() && members.size() <= MAX_GROUP) {
             long current = queue.poll();
             int gx = gridX(current);
             int gz = gridZ(current);
             double gridDistance = Math.sqrt((double) gx * gx + (double) gz * gz) * 16;
-            nearOrigin |= gridDistance < settings.middleDistance();
+            nearest = Math.min(nearest, gridDistance);
             if (gx < gridX(lowest) || (gx == gridX(lowest) && gz < gridZ(lowest))) {
                 lowest = current;
             }
@@ -191,23 +201,24 @@ public final class ElevationBandLayout {
                 }
             }
         }
-        ElevationBands.Band band;
-        if (nearOrigin || members.size() > MAX_GROUP) {
-            band = ElevationBands.Band.MIDDLE;
+        Group group;
+        if (nearest < settings.middleDistance() || members.size() > MAX_GROUP) {
+            group = new Group(ElevationBands.Band.MIDDLE, nearest, 0, true);
         } else {
             double roll = random.value(gridX(lowest), gridZ(lowest), 2);
-            band = roll < 1 / 3.0
+            ElevationBands.Band band = roll < 1 / 3.0
                     ? ElevationBands.Band.LOWER
                     : roll < 2 / 3.0 ? ElevationBands.Band.MIDDLE : ElevationBands.Band.UPPER;
+            double jitter = 2 * random.value(gridX(lowest), gridZ(lowest), 3) - 1;
+            group = new Group(band, nearest, settings.groupOffset(band, nearest, jitter), false);
         }
-        int offset = settings.offset(band);
-        if (groupOffsets.size() + members.size() > MAX_GROUP_ENTRIES) {
-            groupOffsets.clear();
+        if (groups.size() + members.size() > MAX_GROUP_ENTRIES) {
+            groups.clear();
         }
         for (long member : members) {
-            groupOffsets.put(member, offset);
+            groups.put(member, group);
         }
-        return offset;
+        return group;
     }
 
     private boolean isCenter(int gridX, int gridZ) {
@@ -271,6 +282,15 @@ public final class ElevationBandLayout {
 
     private static int gridZ(long key) {
         return (int) key;
+    }
+
+    /**
+     * An island group: its band, the distance of its center nearest the origin, its total offset (band offset
+     * plus jitter, snapped and clamped), and whether it is fixed middle band near the origin.
+     */
+    public record Group(ElevationBands.Band band, double distance, int offset, boolean alwaysMiddle) {
+        /** Columns that keep their vanilla terrain: near the origin, or with no island center around. */
+        public static final Group VANILLA = new Group(ElevationBands.Band.MIDDLE, 0, 0, true);
     }
 
     /** Island centers of a tile: a bit per grid cell, and the indices of the set bits. */
