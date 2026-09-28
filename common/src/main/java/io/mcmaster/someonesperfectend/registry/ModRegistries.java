@@ -7,6 +7,7 @@ import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
@@ -34,6 +35,8 @@ public final class ModRegistries {
     public static final DeferredRegister<MenuType<?>> MENUS = create(Registries.MENU);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = create(Registries.ENTITY_TYPE);
     public static final DeferredRegister<Fluid> FLUIDS = create(Registries.FLUID);
+    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES =
+            create(Registries.DATA_COMPONENT_TYPE);
     public static final DeferredRegister<Potion> POTIONS = create(Registries.POTION);
     public static final DeferredRegister<Feature<?>> FEATURES = create(Registries.FEATURE);
     public static final DeferredRegister<StructureType<?>> STRUCTURE_TYPES = create(Registries.STRUCTURE_TYPE);
@@ -92,6 +95,7 @@ public final class ModRegistries {
         registered = true;
         // Fabric registers entries immediately, in this order: liquid blocks and buckets need their fluid.
         FLUIDS.register();
+        DATA_COMPONENT_TYPES.register();
         BLOCKS.register();
         ITEMS.register();
         BLOCK_ENTITY_TYPES.register();

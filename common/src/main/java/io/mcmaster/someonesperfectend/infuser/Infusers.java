@@ -4,6 +4,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlags;
@@ -20,6 +21,8 @@ public final class Infusers {
             SomeonesPerfectEnd.id("effect_totems"));
 
     public static final String LOCKED_TOOLTIP_KEY = "container." + SomeonesPerfectEnd.MOD_ID + ".infuser.locked";
+    /** The screen's label while an item is in the infusion slot. */
+    public static final String INFUSION_LABEL_KEY = "container." + SomeonesPerfectEnd.MOD_ID + ".infuser.infusion";
 
     @SuppressWarnings("DataFlowIssue") // the data fixer type is nullable
     public static final RegistrySupplier<BlockEntityType<InfuserBlockEntity>> BLOCK_ENTITY =
@@ -28,6 +31,11 @@ public final class Infusers {
 
     public static final RegistrySupplier<MenuType<InfuserMenu>> MENU = ModRegistries.MENUS.register("infuser",
             () -> new MenuType<>(InfuserMenu::new, FeatureFlags.VANILLA_SET));
+
+    /** Infused gear: effect, amplifier, and stored time (US-030). Saved and synced to clients. */
+    public static final RegistrySupplier<DataComponentType<Infusion>> INFUSION =
+            ModRegistries.DATA_COMPONENT_TYPES.register("infusion", () -> DataComponentType.<Infusion>builder()
+                    .persistent(Infusion.CODEC).networkSynchronized(Infusion.STREAM_CODEC).build());
 
     private Infusers() {
     }

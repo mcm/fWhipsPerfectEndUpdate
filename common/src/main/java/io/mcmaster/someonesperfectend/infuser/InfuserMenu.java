@@ -1,6 +1,7 @@
 package io.mcmaster.someonesperfectend.infuser;
 
 import io.mcmaster.someonesperfectend.block.ModBlocks;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.world.Container;
@@ -83,19 +84,63 @@ public class InfuserMenu extends BeaconMenu {
         return stillValid(access, player, ModBlocks.INFUSER.get());
     }
 
+    /** Effects the infusion item may take, ignoring tier (empty without an item). */
+    public List<InfusionEffect> infusionEffects() {
+        return InfusionRules.allowedEffects(Infusion.kindsOf(infusionSlot.getItem()));
+    }
+
+    /** Whether the screen offers this effect: valid for the item, the current tier, and any existing infusion. */
+    public boolean canSelectInfusion(InfusionEffect effect) {
+        ItemStack stack = infusionSlot.getItem();
+        return infusionEnabled && !stack.isEmpty() && InfusionRules.canSelect(Infusion.kindsOf(stack),
+                Infusion.currentOf(stack), effect, getLevels());
+    }
+
+    /** What confirming would write to the infusion item, ignoring the payment; empty if it can't be charged. */
+    public Optional<InfusionRules.Charge> previewInfusion(InfusionEffect effect) {
+        ItemStack stack = infusionSlot.getItem();
+        if (!infusionEnabled || stack.isEmpty()) {
+            return Optional.empty();
+        }
+        return InfusionRules.charge(Infusion.kindsOf(stack), Infusion.currentOf(stack), effect, getLevels());
+    }
+
+    /** Whether confirming with this effect would infuse: a payment item is present and the item can be charged. */
+    public boolean canInfuse(@Nullable InfusionEffect effect) {
+        return effect != null && super.hasPayment() && previewInfusion(effect).isPresent();
+    }
+
+    /**
+     * Consumes one payment item and charges the infusion item with the effect. Never touches the beacon powers.
+     *
+     * @return whether the item was infused
+     */
+    public boolean infuse(@Nullable InfusionEffect effect) {
+        if (!canInfuse(effect)) {
+            return false;
+        }
+        InfusionRules.Charge charge = previewInfusion(effect).orElseThrow();
+        infusionSlot.getItem().set(Infusers.INFUSION.get(), Infusion.of(charge));
+        slots.get(PAYMENT_SLOT).remove(1);
+        infusionSlot.setChanged();
+        return true;
+    }
+
     /**
      * With the infusion slot empty, confirm sets the beacon powers exactly like a beacon. With an item in it,
-     * confirm does nothing until infusing lands (US-030).
+     * confirm infuses the item with the primary effect instead (the screen sends the chosen infusion effect as the
+     * beacon packet's primary effect).
      */
     @Override
     public void updateEffects(Optional<Holder<MobEffect>> primary, Optional<Holder<MobEffect>> secondary) {
         if (hasInfusionItem()) {
+            infuse(InfusionEffect.of(primary.orElse(null)));
             return;
         }
         super.updateEffects(primary, secondary);
     }
 
-    /** Enables the screen's confirm button; see {@link #updateEffects}. */
+    /** Enables the beacon's own confirm button, which only sets beacon powers; see {@link #updateEffects}. */
     @Override
     public boolean hasPayment() {
         return super.hasPayment() && !hasInfusionItem();

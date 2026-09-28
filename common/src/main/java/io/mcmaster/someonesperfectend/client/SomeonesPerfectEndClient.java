@@ -1,15 +1,18 @@
 package io.mcmaster.someonesperfectend.client;
 
 import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.client.ClientTooltipEvent;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
+import io.mcmaster.someonesperfectend.infuser.Infusion;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
 import io.mcmaster.someonesperfectend.item.ModItems;
 import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -25,6 +28,12 @@ public final class SomeonesPerfectEndClient {
         // NeoForge collects screens in RegisterMenuScreensEvent, which can fire before CLIENT_SETUP.
         Infusers.MENU.listen(type -> MenuRegistry.<BeaconMenu, InfuserScreen>registerScreenFactory(type,
                 (menu, inventory, title) -> new InfuserScreen((InfuserMenu) menu, inventory, title)));
+        ClientTooltipEvent.ITEM.register((stack, lines, context, flag) -> {
+            Infusion infusion = Infusion.get(stack);
+            if (infusion != null) {
+                lines.add(Math.min(1, lines.size()), infusion.tooltip().copy().withStyle(ChatFormatting.BLUE));
+            }
+        });
         ClientLifecycleEvent.CLIENT_SETUP.register(minecraft -> {
             registerRenderTypes();
             registerTrinketRenderers();
