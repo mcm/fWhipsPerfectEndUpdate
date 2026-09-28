@@ -2,7 +2,7 @@ package io.mcmaster.someonesperfectend.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 
-/** Client helpers for drawing the trinket slot on vanilla inventory screens. */
+/** Client helpers for drawing the trinket slot on vanilla inventory screens (and other extra slots). */
 public final class TrinketSlotClient {
     /**
      * Trinket slot position in the creative inventory tab. Directly above the off hand (35, 20) would overlap

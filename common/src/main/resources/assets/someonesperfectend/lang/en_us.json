@@ -14,5 +14,8 @@
   "block.someonesperfectend.glowcap_stem": "Glowcap Stem",
   "block.someonesperfectend.potted_glowcap": "Potted Glowcap",
   "item.someonesperfectend.resonance_charm": "Resonance Charm",
-  "accessories.slot.someonesperfectend.trinket": "Trinket"
+  "accessories.slot.someonesperfectend.trinket": "Trinket",
+  "block.someonesperfectend.infuser": "Infuser",
+  "container.someonesperfectend.infuser": "Infuser",
+  "container.someonesperfectend.infuser.locked": "Infusion only works in the End"
 }

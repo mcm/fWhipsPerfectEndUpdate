@@ -2,8 +2,12 @@ package io.mcmaster.someonesperfectend.block;
 
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.registry.registries.RegistrySupplier;
+import io.mcmaster.someonesperfectend.infuser.InfuserBlock;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.HugeMushroomBlock;
@@ -82,6 +86,11 @@ public final class ModBlocks {
                     .noOcclusion()
                     .lightLevel(state -> GLOWCAP_LIGHT)
                     .pushReaction(PushReaction.DESTROY)));
+
+    /** Beacon copy (light 15, hardness 3, mined by hand); not craftable, bartered from Endlings (US-034). */
+    public static final RegistrySupplier<InfuserBlock> INFUSER = ModRegistries.block("infuser",
+            () -> new InfuserBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BEACON).mapColor(MapColor.COLOR_PURPLE)),
+            block -> new BlockItem(block, ModRegistries.itemProperties().rarity(Rarity.RARE)));
 
     private ModBlocks() {
     }

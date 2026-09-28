@@ -9,6 +9,8 @@
     "client.InventoryScreenMixin"
   ],
   "mixins": [
+    "BeaconBlockEntityAccessor",
+    "BlockEntityAccessor",
     "BottleItemMixin",
     "BrewingStandBlockEntityMixin",
     "BrewingStandPotionSlotMixin",
