@@ -4,8 +4,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.KeyDispatchDataCodec;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.WeakHashMap;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.RandomState;
 
 /**
  * Density function {@code someonesperfectend:elevation_bands}: evaluates {@code argument} moved up or down by
@@ -47,6 +52,10 @@ public final class ElevationBandsFunction implements DensityFunction {
     /** Last column looked up on this thread; the noise chunk evaluates a column at many Y values in a row. */
     private static final ThreadLocal<ColumnCache> CACHE = ThreadLocal.withInitial(ColumnCache::new);
 
+    /** The seeded function found in each {@link RandomState}'s final density (or none, e.g. other dimensions). */
+    private static final Map<RandomState, Optional<ElevationBandsFunction>> BY_RANDOM_STATE =
+            Collections.synchronizedMap(new WeakHashMap<>());
+
     private final DensityFunction argument;
     private final NoiseHolder noise;
     private final ElevationBands layout;
@@ -58,6 +67,23 @@ public final class ElevationBandsFunction implements DensityFunction {
         this.layout = layout;
         this.cellRandom = (cellX, cellZ, channel) -> ElevationBands.mix(
                 noise.getValue(cellX + 0.37, channel * 0.71 + 0.13, cellZ + 0.59), cellX, cellZ, channel);
+    }
+
+    /** The seeded elevation bands of a generator's random state, if its final density uses them. */
+    public static Optional<ElevationBandsFunction> find(RandomState randomState) {
+        return BY_RANDOM_STATE.computeIfAbsent(randomState, state -> {
+            ElevationBandsFunction[] found = new ElevationBandsFunction[1];
+            state.router().finalDensity().mapAll(new Visitor() {
+                @Override
+                public DensityFunction apply(DensityFunction function) {
+                    if (found[0] == null && function instanceof ElevationBandsFunction bands) {
+                        found[0] = bands;
+                    }
+                    return function;
+                }
+            });
+            return Optional.ofNullable(found[0]);
+        });
     }
 
     public DensityFunction argument() {

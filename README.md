@@ -153,6 +153,13 @@ sheared. Within 1024 blocks nothing changes. Regions near that circle are always
 island, the void ring, and End Gateway exits stay vanilla. `ElevationBandGameTests` checks this against the
 vanilla `end.json` read from the vanilla data pack. The Overworld and Nether are not touched.
 
+End Cities use the vanilla structure, structure set, and pieces unchanged. Vanilla starts a city only where
+its footprint's lowest corner is at Y ≥ 60; `EndCityStructureMixin` moves that threshold by the band offset of
+the start column (`worldgen/EndCities`) and rejects starts in band gaps. As a result, the islands that would
+host a city in vanilla host one at their band's height. `EndCityGameTests` finds starts in all three bands of a
+fixed-seed 4096×4096 area. Over 8192×8192 it counts 52 starts against 61 with vanilla terrain; the gaps
+between bands account for the difference, which is inside the ±20% target.
+
 ## End biomes
 
 `end_plains`, `end_forest`, and `end_oasis` are data (`data/someonesperfectend/worldgen/biome/`): vanilla End

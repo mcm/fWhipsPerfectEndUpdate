@@ -25,7 +25,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
@@ -183,7 +182,7 @@ public final class ElevationBandGameTests {
     }
 
     /** {@code minecraft:end} as shipped in the vanilla data pack (our override replaces it in the registry). */
-    private static NoiseGeneratorSettings vanillaEndSettings(MinecraftServer server) {
+    static NoiseGeneratorSettings vanillaEndSettings(MinecraftServer server) {
         List<Resource> stack = server.getResourceManager().getResourceStack(END_SETTINGS_FILE);
         Resource vanilla = stack.stream().filter(r -> r.sourcePackId().equals("vanilla")).findFirst()
                 .orElseThrow(() -> new IllegalStateException("No vanilla end.json in " + stack.stream()
@@ -219,20 +218,8 @@ public final class ElevationBandGameTests {
         }
 
         ElevationBandsFunction bands() {
-            ElevationBandsFunction[] found = new ElevationBandsFunction[1];
-            randomState.router().finalDensity().mapAll(new DensityFunction.Visitor() {
-                @Override
-                public DensityFunction apply(DensityFunction function) {
-                    if (function instanceof ElevationBandsFunction bands) {
-                        found[0] = bands;
-                    }
-                    return function;
-                }
-            });
-            if (found[0] == null) {
-                throw new IllegalStateException("The End noise settings have no elevation_bands function");
-            }
-            return found[0];
+            return ElevationBandsFunction.find(randomState).orElseThrow(
+                    () -> new IllegalStateException("The End noise settings have no elevation_bands function"));
         }
     }
 }

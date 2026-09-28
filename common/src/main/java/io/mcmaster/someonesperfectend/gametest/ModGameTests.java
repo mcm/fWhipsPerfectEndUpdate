@@ -54,7 +54,8 @@ public final class ModGameTests {
             EndForestGameTests.class,
             EndOasisGameTests.class,
             UnderIslandFoliageGameTests.class,
-            DriftjellyGameTests.class, DriftjellyHusbandryGameTests.class);
+            DriftjellyGameTests.class, DriftjellyHusbandryGameTests.class,
+            EndCityGameTests.class);
 
     public ModGameTests() {
     }
