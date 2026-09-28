@@ -31,6 +31,7 @@
     "PotionBrewingMixin",
     "ReloadableResourceManagerMixin",
     "ServerGamePacketListenerImplMixin",
+    "ServerPlayerMixin",
     "TheEndBiomeSourceMixin",
     "TheEndGatewayBlockEntityInvoker",
     "UniqueSlotHandlingMixin",

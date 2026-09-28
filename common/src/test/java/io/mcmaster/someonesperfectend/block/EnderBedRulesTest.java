@@ -12,7 +12,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 
 class EnderBedRulesTest {
@@ -27,6 +29,16 @@ class EnderBedRulesTest {
         assertTrue(EnderBedRules.explodesIn(ResourceLocation.withDefaultNamespace("the_nether")));
         assertTrue(EnderBedRules.explodesIn(ResourceLocation.fromNamespaceAndPath("somemod", "overworld")));
         assertTrue(EnderBedRules.explodesIn(ResourceLocation.fromNamespaceAndPath("somemod", "the_end")));
+    }
+
+    @Test
+    void dropPointIsBelowTheHeadWithRoomForAPlayer() {
+        BlockPos head = new BlockPos(10, 64, -3);
+        assertEquals(new BlockPos(10, 63, -3), EnderBedRules.dropPoint(head));
+        assertEquals(List.of(new BlockPos(10, 63, -3), new BlockPos(10, 62, -3)),
+                List.of(EnderBedRules.arrivalSpace(head)));
+        // Feet at the bottom of the lower block: a 1.8-block player ends 0.2 below the bed's head half.
+        assertEquals(new Vec3(10.5, 62.0, -2.5), EnderBedRules.arrivalPos(head));
     }
 
     private static JsonObject read(String path) throws IOException {

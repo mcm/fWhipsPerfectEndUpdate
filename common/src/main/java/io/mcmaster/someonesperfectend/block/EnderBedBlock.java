@@ -2,8 +2,10 @@ package io.mcmaster.someonesperfectend.block;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -29,7 +31,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A vanilla-style two-block bed that only hangs: both halves need a block with a sturdy bottom face directly
  * above them. It renders upside down through a plain block model (no block entity), so both loaders draw it the
- * same way. Explodes like a vanilla bed in the Nether when used outside the Overworld and the End (US-025).
+ * same way. Explodes like a vanilla bed in the Nether when used outside the Overworld and the End (US-025); in
+ * those two, using it stores it as the player's End or Overworld Ender Bed (US-037).
  */
 public class EnderBedBlock extends BedBlock {
     public static final MapCodec<EnderBedBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -95,12 +98,9 @@ public class EnderBedBlock extends BedBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
             BlockHitResult hit) {
-        if (!EnderBedRules.explodesIn(level.dimension().location())) {
-            // Stored locations, End respawn, and travel are added by US-037/US-038.
-            return InteractionResult.PASS;
-        }
         if (level.isClientSide) {
-            return InteractionResult.CONSUME;
+            return EnderBedRules.explodesIn(level.dimension().location())
+                    ? InteractionResult.CONSUME : InteractionResult.SUCCESS;
         }
         if (state.getValue(PART) != BedPart.HEAD) {
             pos = pos.relative(state.getValue(FACING));
@@ -109,8 +109,26 @@ public class EnderBedBlock extends BedBlock {
                 return InteractionResult.CONSUME;
             }
         }
-        explode(level, pos, state);
+        if (EnderBedRules.explodesIn(level.dimension().location())) {
+            explode(level, pos, state);
+            return InteractionResult.SUCCESS;
+        }
+        if (state.getValue(OCCUPIED)) {
+            player.displayClientMessage(Component.translatable("block.minecraft.bed.occupied"), true);
+            return InteractionResult.SUCCESS;
+        }
+        storeLocation(level, pos, player);
         return InteractionResult.SUCCESS;
+    }
+
+    /**
+     * Stores the bed (its head half) as the player's End or Overworld Ender Bed (US-037). Never touches the vanilla
+     * respawn point, and doesn't sleep, so it can't skip the night or count toward the sleeping percentage.
+     */
+    private static void storeLocation(Level level, BlockPos head, Player player) {
+        EnderBedLocations.of(player).set(level.dimension(), head);
+        String key = level.dimension() == Level.END ? "ender_bed_end_set" : "ender_bed_overworld_set";
+        player.displayClientMessage(Component.translatable("message." + SomeonesPerfectEnd.MOD_ID + "." + key), true);
     }
 
     /** Vanilla's Nether bed explosion: removes both halves and explodes at the head (power 5, with fire). */

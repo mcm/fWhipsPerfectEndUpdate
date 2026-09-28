@@ -40,8 +40,8 @@ import net.minecraft.world.phys.Vec3;
 /** US-025: hanging Ender Beds (placement, support, drops, explosions) and their Endling barters. */
 public final class EnderBedGameTests {
     /** Where the foot of a test bed goes; mock players face south, so the head is at {@code FOOT.south()}. */
-    private static final BlockPos FOOT = new BlockPos(3, 3, 3);
-    private static final BlockPos HEAD = FOOT.south();
+    static final BlockPos FOOT = new BlockPos(3, 3, 3);
+    static final BlockPos HEAD = FOOT.south();
 
     private EnderBedGameTests() {
     }
@@ -66,7 +66,7 @@ public final class EnderBedGameTests {
     }
 
     /** Stone above both halves plus a placed red bed (foot at {@link #FOOT}, facing south). */
-    private static void hangBed(GameTestHelper helper) {
+    static void hangBed(GameTestHelper helper) {
         helper.setBlock(FOOT.above(), Blocks.STONE);
         helper.setBlock(HEAD.above(), Blocks.STONE);
         useBed(helper, FOOT.above(), Direction.DOWN);
@@ -198,7 +198,7 @@ public final class EnderBedGameTests {
         helper.succeed();
     }
 
-    private static InteractionResult use(ServerLevel level, BlockPos pos, Player player) {
+    static InteractionResult use(ServerLevel level, BlockPos pos, Player player) {
         return level.getBlockState(pos).useWithoutItem(level, player,
                 new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
     }
@@ -216,7 +216,7 @@ public final class EnderBedGameTests {
     }
 
     /** Builds a hanging bed in {@code level} at {@code foot} (facing south) inside an air pocket. */
-    private static void hangBedIn(ServerLevel level, BlockPos foot) {
+    static void hangBedIn(ServerLevel level, BlockPos foot) {
         for (BlockPos pos : BlockPos.betweenClosed(foot.offset(-3, -3, -3), foot.offset(3, 3, 4))) {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
         }
