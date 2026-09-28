@@ -59,7 +59,7 @@ public final class SomeonesPerfectEndClient {
      * types are registered; add any that are missing.
      */
     private static void registerSignMaterials() {
-        for (WoodType type : List.of(ModWoodTypes.ASTRAL)) {
+        for (WoodType type : List.of(ModWoodTypes.ASTRAL, ModWoodTypes.VOIDVINE)) {
             ResourceLocation id = ResourceLocation.parse(type.name());
             Sheets.SIGN_MATERIALS.putIfAbsent(type, new Material(Sheets.SIGN_SHEET, id.withPrefix("entity/signs/")));
             Sheets.HANGING_SIGN_MATERIALS.putIfAbsent(type,
@@ -73,6 +73,7 @@ public final class SomeonesPerfectEndClient {
         RenderTypeRegistry.register(RenderType.cutout(), ModBlocks.SHORT_VOID_GRASS.get(), ModBlocks.VOID_PETALS.get(),
                 ModBlocks.GLOWCAP.get(), ModBlocks.POTTED_GLOWCAP.get(), ModBlocks.INFUSER.get(),
                 ModBlocks.ASTRAL_DOOR.get(), ModBlocks.ASTRAL_TRAPDOOR.get(),
+                ModBlocks.VOIDVINE_DOOR.get(), ModBlocks.VOIDVINE_TRAPDOOR.get(),
                 ModBlocks.ASTRAL_SAPLING.get(), ModBlocks.POTTED_ASTRAL_SAPLING.get());
         RenderTypeRegistry.register(RenderType.translucent(), ModFluids.OASIS_WATER.get(),
                 ModFluids.FLOWING_OASIS_WATER.get());

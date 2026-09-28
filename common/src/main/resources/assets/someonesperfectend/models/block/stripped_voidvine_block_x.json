@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_uv_locked_x",
+  "textures": {
+    "end": "someonesperfectend:block/stripped_voidvine_block_top",
+    "side": "someonesperfectend:block/stripped_voidvine_block"
+  }
+}

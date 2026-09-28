@@ -138,20 +138,20 @@ public final class AstralWoodGameTests {
         helper.succeed();
     }
 
-    private static void useOnTop(GameTestHelper helper, Player player, BlockPos pos) {
+    static void useOnTop(GameTestHelper helper, Player player, BlockPos pos) {
         BlockPos abs = helper.absolutePos(pos);
         player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
                 new BlockHitResult(Vec3.atCenterOf(abs).add(0, 0.5, 0), Direction.UP, abs, false)));
     }
 
-    private static ItemStack craft(GameTestHelper helper, CraftingInput input) {
+    static ItemStack craft(GameTestHelper helper, CraftingInput input) {
         Optional<RecipeHolder<CraftingRecipe>> recipe = helper.getLevel().getRecipeManager()
                 .getRecipeFor(RecipeType.CRAFTING, input, helper.getLevel());
         return recipe.map(holder -> holder.value().assemble(input, helper.getLevel().registryAccess()))
                 .orElse(ItemStack.EMPTY);
     }
 
-    private static void assertFireOdds(GameTestHelper helper, FireBlockInvoker fire, Block block, int ignite, int burn) {
+    static void assertFireOdds(GameTestHelper helper, FireBlockInvoker fire, Block block, int ignite, int burn) {
         BlockState state = block.defaultBlockState();
         helper.assertTrue(fire.someonesperfectend$getIgniteOdds(state) == ignite
                         && fire.someonesperfectend$getBurnOdds(state) == burn,
@@ -159,7 +159,7 @@ public final class AstralWoodGameTests {
                         + fire.someonesperfectend$getBurnOdds(state));
     }
 
-    private static <T extends SignBlockEntity> T assertSign(GameTestHelper helper, BlockPos pos, Class<T> type) {
+    static <T extends SignBlockEntity> T assertSign(GameTestHelper helper, BlockPos pos, Class<T> type) {
         BlockEntity blockEntity = helper.getBlockEntity(pos);
         helper.assertTrue(type.isInstance(blockEntity), "no sign block entity at " + pos + ": " + blockEntity);
         helper.assertTrue(blockEntity.getType().isValid(helper.getBlockState(pos)),
@@ -168,7 +168,7 @@ public final class AstralWoodGameTests {
     }
 
     /** Placing a sign opens the editor for the placer (vanilla), so the placer may then submit text. */
-    private static void editAndCheck(GameTestHelper helper, Player player, SignBlockEntity sign, String text) {
+    static void editAndCheck(GameTestHelper helper, Player player, SignBlockEntity sign, String text) {
         helper.assertTrue(player.getUUID().equals(sign.getPlayerWhoMayEdit()), "placer may not edit the sign");
         sign.updateSignText(player, true, List.of(FilteredText.passThrough(text), FilteredText.passThrough(""),
                 FilteredText.passThrough(""), FilteredText.passThrough("")));

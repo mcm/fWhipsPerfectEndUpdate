@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "someonesperfectend:block/voidvine_mosaic_slab"
+    },
+    "type=double": {
+      "model": "someonesperfectend:block/voidvine_mosaic"
+    },
+    "type=top": {
+      "model": "someonesperfectend:block/voidvine_mosaic_slab_top"
+    }
+  }
+}
