@@ -28,6 +28,9 @@ public final class ModFeatures {
     public static final ResourceKey<ConfiguredFeature<?, ?>> HUGE_GLOWCAP_CONFIGURED = configured("huge_glowcap");
     /** {@code data/someonesperfectend/worldgen/configured_feature/astral_tree.json}. */
     public static final ResourceKey<ConfiguredFeature<?, ?>> ASTRAL_TREE_CONFIGURED = configured("astral_tree");
+    /** {@code astral_tree} with a 3-block island-edge overhang limit, used by {@code end_forest} (US-015). */
+    public static final ResourceKey<ConfiguredFeature<?, ?>> END_FOREST_ASTRAL_TREE_CONFIGURED =
+            configured("end_forest_astral_tree");
 
     /** {@code data/someonesperfectend/worldgen/configured_feature/bounce_cap_cluster.json}. */
     public static final ResourceKey<ConfiguredFeature<?, ?>> BOUNCE_CAP_CLUSTER_CONFIGURED =

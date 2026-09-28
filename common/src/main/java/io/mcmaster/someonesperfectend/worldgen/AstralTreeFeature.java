@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -29,11 +30,14 @@ import net.minecraft.world.level.material.Fluids;
  * A scaled-up chorus plant: a straight vertical stem with side branches in distinct directions that reach out two
  * or three blocks and then turn upward (the elbowed segments of a chorus plant), and a leaf cluster at the tip of the
  * stem and of every branch. The trunk starts at the origin, which must sit on {@link ModBlockTags#END_PLANT_SOIL}.
- * Nothing is placed if any log position is blocked.
+ * Nothing is placed if any log position is blocked, or, with {@link AstralTreeConfiguration#maxOverhang()}, if any
+ * log or leaf would stick out further than that past the island edge.
  */
 public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
     /** Leaves are placed within this distance of a branch tip. */
     public static final int CLUSTER_RADIUS = 2;
+    /** A column counts as island ground if it has a solid block at most this far below the tree's base. */
+    public static final int GROUND_DEPTH = 8;
 
     public AstralTreeFeature(Codec<AstralTreeConfiguration> codec) {
         super(codec);
@@ -110,6 +114,12 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
             }
         }
 
+        Map<BlockPos, Integer> distances = leafDistances(logs.keySet(), leaves);
+        if (config.maxOverhang().isPresent()
+                && overhangs(level, origin, topY, logs.keySet(), distances.keySet(), config.maxOverhang().get())) {
+            return false;
+        }
+
         for (Map.Entry<BlockPos, Direction.Axis> log : logs.entrySet()) {
             BlockState state = config.trunkProvider().getState(random, log.getKey());
             if (state.hasProperty(BlockStateProperties.AXIS)) {
@@ -117,7 +127,6 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
             }
             level.setBlock(log.getKey(), state, Block.UPDATE_ALL | Block.UPDATE_KNOWN_SHAPE);
         }
-        Map<BlockPos, Integer> distances = leafDistances(logs.keySet(), leaves);
         for (Map.Entry<BlockPos, Integer> leaf : distances.entrySet()) {
             BlockPos pos = leaf.getKey();
             BlockState state = config.foliageProvider().getState(random, pos);
@@ -135,6 +144,48 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
 
     private static boolean isFree(WorldGenLevel level, BlockPos pos) {
         return level.isStateAtPosition(pos, state -> state.isAir() || state.is(BlockTags.REPLACEABLE_BY_TREES));
+    }
+
+    /**
+     * Whether any tree column is more than {@code maxOverhang} blocks (horizontally, in both axes) away from every
+     * ground column, i.e. whether the tree would stick out past the island edge by more than that.
+     */
+    private static boolean overhangs(WorldGenLevel level, BlockPos origin, int topY, Set<BlockPos> logs,
+            Set<BlockPos> leaves, int maxOverhang) {
+        Set<Long> columns = new LinkedHashSet<>();
+        logs.forEach(pos -> columns.add(ChunkPos.asLong(pos.getX(), pos.getZ())));
+        leaves.forEach(pos -> columns.add(ChunkPos.asLong(pos.getX(), pos.getZ())));
+        Map<Long, Boolean> ground = new HashMap<>();
+        for (long column : columns) {
+            int x = ChunkPos.getX(column);
+            int z = ChunkPos.getZ(column);
+            boolean supported = false;
+            for (int dx = -maxOverhang; dx <= maxOverhang && !supported; dx++) {
+                for (int dz = -maxOverhang; dz <= maxOverhang && !supported; dz++) {
+                    int gx = x + dx;
+                    int gz = z + dz;
+                    supported = ground.computeIfAbsent(ChunkPos.asLong(gx, gz),
+                            key -> isGround(level, gx, gz, origin.getY() - GROUND_DEPTH, topY));
+                }
+            }
+            if (!supported) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Whether the column has an island block (not a plant, fluid, log, or leaf) between the two heights. */
+    private static boolean isGround(WorldGenLevel level, int x, int z, int minY, int maxY) {
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int y = Math.max(minY, level.getMinBuildHeight()); y <= maxY; y++) {
+            pos.set(x, y, z);
+            BlockState state = level.getBlockState(pos);
+            if (!state.canBeReplaced() && !state.is(BlockTags.LOGS) && !state.is(BlockTags.LEAVES)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Leaf distance to the nearest log (breadth-first through leaves); leaves farther than 6 are left out. */

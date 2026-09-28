@@ -50,7 +50,8 @@ public final class ModGameTests {
             VoidCleansingGameTests.class,
             ElevationBandGameTests.class,
             EndBiomeGameTests.class,
-            EndPlainsGameTests.class);
+            EndPlainsGameTests.class,
+            EndForestGameTests.class);
 
     public ModGameTests() {
     }

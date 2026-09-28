@@ -2,6 +2,7 @@ package io.mcmaster.someonesperfectend.gametest;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import io.mcmaster.someonesperfectend.block.ModBlockTags;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.worldgen.EndBiomeCategories;
 import io.mcmaster.someonesperfectend.worldgen.ModBiomes;
@@ -164,6 +165,9 @@ public final class EndBiomeGameTests {
                         if (y <= end.getMinBuildHeight()) {
                             continue;
                         }
+                        if (isTree(end.getBlockState(new BlockPos(bx, y, bz)))) {
+                            continue; // Astral tree canopies (US-015) hide the surface.
+                        }
                         // Look through decoration (US-014..017) to the surface block.
                         while (y > end.getMinBuildHeight() && isDecoration(end.getBlockState(new BlockPos(bx, y, bz)))) {
                             y--;
@@ -172,7 +176,8 @@ public final class EndBiomeGameTests {
                         ResourceKey<Biome> here = biomeKey(end.getBiome(top));
                         tops.computeIfAbsent(here, k -> new HashMap<>()).merge(end.getBlockState(top), 1,
                                 Integer::sum);
-                        if (here.equals(ModBiomes.END_PLAINS)) {
+                        // Chorus spreads up to 7 blocks from its stem, so it may grow in from a neighboring biome.
+                        if (here.equals(ModBiomes.END_PLAINS) && plainsAround(end, top)) {
                             helper.assertTrue(!end.getBlockState(top).is(Blocks.CHORUS_PLANT)
                                     && !end.getBlockState(top).is(Blocks.CHORUS_FLOWER), "Chorus in End Plains at "
                                     + top);
@@ -211,7 +216,24 @@ public final class EndBiomeGameTests {
 
     private static boolean isDecoration(BlockState state) {
         return state.is(ModBlocks.SHORT_VOID_GRASS.get()) || state.is(ModBlocks.VOID_PETALS.get())
-                || state.is(ModBlocks.BOUNCE_CAP.get());
+                || state.is(ModBlocks.BOUNCE_CAP.get()) || state.is(ModBlocks.GLOWCAP.get());
+    }
+
+    /** Whether every biome within 8 blocks (horizontally) of the position is {@code end_plains}. */
+    private static boolean plainsAround(ServerLevel level, BlockPos pos) {
+        for (int dx = -8; dx <= 8; dx += 4) {
+            for (int dz = -8; dz <= 8; dz += 4) {
+                if (!level.getBiome(pos.offset(dx, 0, dz)).is(ModBiomes.END_PLAINS)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean isTree(BlockState state) {
+        return state.is(ModBlockTags.ASTRAL_LOGS) || state.is(ModBlocks.ASTRAL_LEAVES.get())
+                || state.is(ModBlocks.FLOWERING_ASTRAL_LEAVES.get());
     }
 
     private static boolean enoughChunks(Map<ResourceKey<Biome>, Integer> chunks) {

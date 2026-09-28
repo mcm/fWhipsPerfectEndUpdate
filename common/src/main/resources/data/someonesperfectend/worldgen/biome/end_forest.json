@@ -31,7 +31,11 @@
     [],
     [],
     [],
-    []
+    [
+      "someonesperfectend:end_forest_astral_trees",
+      "someonesperfectend:patch_short_void_grass",
+      "someonesperfectend:end_forest_glowcaps"
+    ]
   ],
   "has_precipitation": false,
   "spawn_costs": {},
