@@ -13,10 +13,15 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -28,12 +33,17 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
-/** Oasis-logged blocks (MOD-45): the state property, fluid state, buckets, dispensers and the Nether. */
+/**
+ * Oasis-logged blocks (MOD-45): the state property, fluid state, buckets, dispensers and the Nether. Placing blocks
+ * into Oasis Water, flowing out after neighbor updates, lava and bottles (MOD-48).
+ */
 public final class OasisLoggingGameTests {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -255,6 +265,145 @@ public final class OasisLoggingGameTests {
         helper.assertTrue(
                 fluid.getType() == ModFluids.OASIS_WATER.get() && fluid.isSource(),
                 "expected an Oasis Water source, found " + fluid);
+        helper.succeed();
+    }
+
+    // Placing blocks into Oasis Water, and Oasis-logged blocks reacting to their neighbors (MOD-48).
+
+    private static BlockState oasisSource() {
+        return ModFluids.OASIS_WATER.get().defaultFluidState().createLegacyBlock();
+    }
+
+    /** A stone channel along x at y=1, z=1, x=1..length, open at the top. */
+    private static void channel(GameTestHelper helper, int length) {
+        for (BlockPos pos : BlockPos.betweenClosed(0, 0, 0, length + 1, 1, 2)) {
+            helper.setBlock(pos, Blocks.STONE);
+        }
+        for (BlockPos pos : BlockPos.betweenClosed(1, 1, 1, length, 1, 1)) {
+            helper.setBlock(pos, Blocks.AIR);
+        }
+    }
+
+    /** A survival player places the block item on top of the block below {@code pos}, like a right click. */
+    private static void placeBlockItem(GameTestHelper helper, BlockPos pos, Item item) {
+        Player player = playerLookingDown(helper, Vec3.atCenterOf(pos).add(0, 1.2, 0), new ItemStack(item));
+        BlockPos below = helper.absolutePos(pos.below());
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(below).add(0, 0.5, 0), Direction.UP, below, false);
+        InteractionResult result = ((BlockItem) item)
+                .place(new BlockPlaceContext(player, InteractionHand.MAIN_HAND, player.getMainHandItem(), hit));
+        helper.assertTrue(result.consumesAction(), "placing " + item + " failed: " + result);
+    }
+
+    @GameTest
+    public static void slabPlacedIntoOasisSourceIsOasisLogged(GameTestHelper helper) {
+        channel(helper, 1);
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, oasisSource());
+        placeBlockItem(helper, pos, Items.OAK_SLAB);
+        helper.assertTrue(
+                helper.getBlockState(pos).is(Blocks.OAK_SLAB), "no slab placed: " + helper.getBlockState(pos));
+        assertOasisLogged(helper, pos);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void lanternPlacedIntoOasisSourceIsOasisLogged(GameTestHelper helper) {
+        // Lanterns only waterlog in Fluids.WATER, like slabs; a different block class shows the hook is generic.
+        channel(helper, 1);
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, oasisSource());
+        placeBlockItem(helper, pos, Items.LANTERN);
+        helper.assertTrue(
+                helper.getBlockState(pos).is(Blocks.LANTERN), "no lantern placed: " + helper.getBlockState(pos));
+        assertOasisLogged(helper, pos);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void slabPlacedIntoFlowingOasisWaterIsDry(GameTestHelper helper) {
+        channel(helper, 1);
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(
+                pos,
+                ModFluids.FLOWING_OASIS_WATER
+                        .get()
+                        .defaultFluidState()
+                        .setValue(FlowingFluid.LEVEL, 7)
+                        .createLegacyBlock());
+        placeBlockItem(helper, pos, Items.OAK_SLAB);
+        BlockState state = helper.getBlockState(pos);
+        helper.assertTrue(
+                state.is(Blocks.OAK_SLAB)
+                        && !state.getValue(BlockStateProperties.WATERLOGGED)
+                        && !state.getValue(OasisLogging.OASIS_LOGGED),
+                "expected a dry slab, found " + state);
+        helper.assertTrue(state.getFluidState().isEmpty(), "the slab holds " + state.getFluidState());
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void oasisLoggedStairsFlowOutWhenNeighborRemoved(GameTestHelper helper) {
+        channel(helper, 2);
+        BlockPos stairs = new BlockPos(1, 1, 1);
+        BlockPos side = new BlockPos(2, 1, 1);
+        helper.setBlock(side, Blocks.STONE);
+        helper.setBlock(stairs, Blocks.OAK_STAIRS.defaultBlockState().setValue(OasisLogging.OASIS_LOGGED, true));
+        helper.setBlock(side, Blocks.AIR);
+        BlockPos abs = helper.absolutePos(stairs);
+        helper.assertTrue(
+                helper.getLevel().getFluidTicks().hasScheduledTick(abs, ModFluids.OASIS_WATER.get()),
+                "removing the neighbor did not schedule an Oasis Water tick");
+        helper.assertFalse(
+                helper.getLevel().getFluidTicks().hasScheduledTick(abs, Fluids.WATER),
+                "removing the neighbor scheduled a vanilla water tick");
+        helper.runAfterDelay(10, () -> {
+            FluidState fluid = helper.getLevel().getFluidState(helper.absolutePos(side));
+            helper.assertTrue(
+                    fluid.getType() == ModFluids.FLOWING_OASIS_WATER.get(),
+                    "expected flowing Oasis Water, found " + fluid);
+            helper.assertTrue(fluid.getType() != Fluids.FLOWING_WATER, "vanilla water flowed out");
+            assertOasisLogged(helper, stairs);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(timeoutTicks = 200)
+    public static void oasisFlowFromOasisLoggedBlockTurnsLavaIntoEndStone(GameTestHelper helper) {
+        // Stairs at x=1, stone at x=2, flowing lava at x=3 from a source at x=4. Removing the stone lets the
+        // Oasis Water reach the flowing lava.
+        channel(helper, 4);
+        helper.setBlock(
+                new BlockPos(1, 1, 1), Blocks.OAK_STAIRS.defaultBlockState().setValue(OasisLogging.OASIS_LOGGED, true));
+        helper.setBlock(new BlockPos(2, 1, 1), Blocks.STONE);
+        helper.setBlock(new BlockPos(4, 1, 1), Blocks.LAVA);
+        BlockPos lavaFlow = new BlockPos(3, 1, 1);
+        helper.startSequence()
+                .thenWaitUntil(() -> helper.assertTrue(
+                        helper.getLevel()
+                                .getFluidState(helper.absolutePos(lavaFlow))
+                                .is(FluidTags.LAVA),
+                        "lava has not flowed yet"))
+                .thenExecute(() -> helper.setBlock(new BlockPos(2, 1, 1), Blocks.AIR))
+                .thenWaitUntil(() -> helper.assertBlockPresent(Blocks.END_STONE, lavaFlow))
+                .thenExecute(() -> {
+                    helper.assertBlockNotPresent(Blocks.COBBLESTONE, new BlockPos(2, 1, 1));
+                    helper.assertBlockNotPresent(Blocks.STONE, lavaFlow);
+                })
+                .thenSucceed();
+    }
+
+    @GameTest
+    public static void glassBottleOnOasisLoggedBlockGivesOasisBottle(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos.below(), Blocks.STONE);
+        helper.setBlock(pos, Blocks.OAK_SLAB.defaultBlockState().setValue(OasisLogging.OASIS_LOGGED, true));
+        ItemStack result = use(
+                helper,
+                helper.getLevel(),
+                playerLookingDown(helper, new Vec3(1.5, 2.2, 1.5), new ItemStack(Items.GLASS_BOTTLE)));
+        helper.assertTrue(
+                result.is(ModFluids.OASIS_WATER_BOTTLE.get()), "expected an Oasis Water bottle, got " + result);
+        assertOasisLogged(helper, pos);
         helper.succeed();
     }
 
