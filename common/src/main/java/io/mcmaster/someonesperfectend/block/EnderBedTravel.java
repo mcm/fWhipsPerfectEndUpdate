@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -67,7 +68,8 @@ public final class EnderBedTravel {
 
     /**
      * Runs at the end of every living entity tick on both sides. Keeps a player lying in a hanging bed from falling
-     * out of it (nothing holds them up), and on the server finishes the trip once they've slept long enough.
+     * out of it (nothing holds them up; see {@link #pin}), and on the server finishes the trip once they've slept
+     * long enough.
      */
     public static void tick(LivingEntity entity) {
         if (!(entity instanceof Player player)) {
@@ -77,12 +79,17 @@ public final class EnderBedTravel {
         if (bed.isEmpty()) {
             return;
         }
-        BlockPos pos = bed.get();
-        player.setDeltaMovement(Vec3.ZERO);
-        player.setPos(pos.getX() + 0.5, pos.getY() + 0.6875, pos.getZ() + 0.5);
+        pin(player, bed.get());
         if (player instanceof ServerPlayer serverPlayer && player.getSleepTimer() >= SLEEP_TICKS) {
             wakeAndTravel(serverPlayer);
         }
+    }
+
+    /** Holds the player still with the top of their sleeping hitbox against the underside of the bed at {@code head}. */
+    public static void pin(Player player, BlockPos head) {
+        player.setDeltaMovement(Vec3.ZERO);
+        player.setPos(head.getX() + 0.5,
+                EnderBedPose.sleepingY(head.getY(), player.getDimensions(Pose.SLEEPING).height()), head.getZ() + 0.5);
     }
 
     /**

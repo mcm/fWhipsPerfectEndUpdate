@@ -2,6 +2,7 @@ package io.mcmaster.someonesperfectend.gametest;
 
 import io.mcmaster.someonesperfectend.block.EnderBedBlock;
 import io.mcmaster.someonesperfectend.block.EnderBedLocations;
+import io.mcmaster.someonesperfectend.block.EnderBedPose;
 import io.mcmaster.someonesperfectend.block.EnderBedRules;
 import io.mcmaster.someonesperfectend.block.EnderBedTravel;
 import io.mcmaster.someonesperfectend.gametest.EnderBedRespawnGameTests.Detached;
@@ -16,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.SleepStatus;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
@@ -31,6 +33,11 @@ public final class EnderBedTravelGameTests {
     /** End beds for these tests, away from the US-037 ones. */
     private static BlockPos endFoot(int slot) {
         return new BlockPos(300 + 16 * slot, 100, -900);
+    }
+
+    /** Where {@link EnderBedTravel#tick} pins a player sleeping in the bed at {@code head}. */
+    private static double sleepingY(Player player, BlockPos head) {
+        return EnderBedPose.sleepingY(head.getY(), player.getDimensions(Pose.SLEEPING).height());
     }
 
     private static EnderBedLocations beds(ServerPlayer player) {
@@ -107,7 +114,7 @@ public final class EnderBedTravelGameTests {
         sleep(player, EnderBedTravel.SLEEP_TICKS - 1);
         helper.assertTrue(player.isSleeping() && player.level() == overworld,
                 "the player should still be asleep in the Overworld before 100 ticks");
-        helper.assertTrue(player.getY() == overworldHead.getY() + 0.6875,
+        helper.assertTrue(player.getY() == sleepingY(player, overworldHead),
                 "the sleeper should stay in the hanging bed, got y=" + player.getY());
         sleep(player, 1);
         try {
@@ -160,7 +167,7 @@ public final class EnderBedTravelGameTests {
             helper.assertTrue(overworld.isDay(), "the test expects daytime");
             helper.assertTrue(player.isSleeping(), "an Ender Bed sleeper should stay asleep during the day, tick "
                     + tick[0]);
-            helper.assertTrue(player.getY() == head.getY() + 0.6875 && player.getDeltaMovement().equals(Vec3.ZERO),
+            helper.assertTrue(player.getY() == sleepingY(player, head) && player.getDeltaMovement().equals(Vec3.ZERO),
                     "the sleeper should stay in the hanging bed, got y=" + player.getY());
             if (++tick[0] > 120) {
                 helper.assertTrue(player.isSleepingLongEnough(), "the player should be fully asleep");
