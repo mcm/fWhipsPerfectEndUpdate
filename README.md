@@ -242,8 +242,21 @@ into end stone instead of cobblestone (`OasisWaterInteractions`), and bottles fi
 - Shapes, light and face sturdiness of an `oasis_logged=true` state come from the same state with
   `oasis_logged=false` (`BlockStateBaseMixin`, `BlockStateCacheMixin`), because some blocks (vanilla walls) only
   precompute shapes for their vanilla states.
-- Placing a block into an Oasis Water source (e.g. a slab) does not Oasis-log it: like before, only vanilla water is
-  kept by placement.
+- **Placement (MOD-48).** Any waterloggable block placed from a block item into an Oasis Water source is
+  Oasis-logged, even if its `getStateForPlacement` only waterlogs in `Fluids.WATER` (slabs, lanterns, most blocks).
+  The hook wraps `BlockItem#place`'s placement state, so it works for every block class (`BlockItemMixin`,
+  `OasisLogging.placementState`). Like vanilla, a block placed into flowing Oasis Water stays dry (unless the block
+  itself waterlogs in falling water; it is then Oasis-logged). A block merged into the same block (a second slab,
+  another candle) keeps the block's own rule: a double slab drops the water.
+- **Neighbor updates (MOD-48).** Waterloggable blocks schedule a `Fluids.WATER` tick when a neighbor changes. Where
+  the fluid is Oasis Water, `LevelAccessorMixin` schedules an Oasis Water tick instead (`ServerLevelMixin` also runs
+  Oasis Water for older water ticks), so Oasis Water, never vanilla water, flows out when e.g. an adjacent block is
+  broken, and it meets lava with the Oasis results (end stone). A glass bottle on an Oasis-logged block fills with
+  Oasis Water.
+- **Known limitation.** Code that compares a fluid with `Fluids.WATER` directly (`getType() == Fluids.WATER`, as
+  opposed to `is(FluidTags.WATER)`) sees an Oasis-logged block as dry. The mod covers vanilla's placement, tick and
+  bucket paths, but other mods' blocks or items that hard-code `Fluids.WATER` may treat Oasis-logged blocks as not
+  waterlogged (e.g. not put out, not pick up the water).
 
 **Block state count.** Every waterloggable block has twice as many states. Measured by
 `OasisLoggingGameTests.everyWaterloggableBlockHasOasisLogged` in the GameTest environment (vanilla, this mod and
@@ -257,7 +270,9 @@ vanilla water. Oasis Water source and flowing blocks are unknown blocks and beco
 
 `OasisWaterGameTests` covers the fluid, lava and brewing. `OasisLoggingGameTests` covers Oasis-logging: the state
 property on every waterloggable block, the fluid state, buckets on an oak slab, stairs, fence, leaves and
-`voidvine_trapdoor`, a campfire, dispensers, flowing out, breaking, and the Nether.
+`voidvine_trapdoor`, a campfire, dispensers, flowing out, breaking, and the Nether; and (MOD-48) placing a slab and a
+lantern into an Oasis source, a slab into flowing Oasis Water, stairs flowing Oasis Water out when a neighbor is
+removed, lava next to that flow, and a glass bottle.
 
 ## Endling villages
 

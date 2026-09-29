@@ -1,6 +1,7 @@
 package io.mcmaster.someonesperfectend.fluid;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
@@ -9,6 +10,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Oasis-logging: a waterlogged block that holds Oasis Water instead of vanilla water (MOD-45).
@@ -69,6 +71,25 @@ public final class OasisLogging {
     /** Called by the Oasis Water source fluid once it is created. */
     static void setSource(FluidState state) {
         source = state;
+    }
+
+    /**
+     * The state a block item places at {@code pos}, Oasis-logged if it goes into Oasis Water (MOD-48): into a source
+     * always (most blocks only waterlog in {@code Fluids.WATER}), into flowing Oasis Water only if the block waterlogged
+     * itself (like vanilla, which waterlogs a few blocks in falling water). A block merged into the same block (a
+     * second slab, another candle) is left to the block, which already keeps or drops the fluid.
+     */
+    public static @Nullable BlockState placementState(BlockGetter level, BlockPos pos, @Nullable BlockState state) {
+        if (state == null || !canBeOasisLogged(state) || state.getValue(OASIS_LOGGED)
+                || level.getBlockState(pos).is(state.getBlock())) {
+            return state;
+        }
+        FluidState fluid = level.getFluidState(pos);
+        if (!OasisWaterFluid.isOasisWater(fluid)
+                || !(fluid.isSource() || state.getValue(BlockStateProperties.WATERLOGGED))) {
+            return state;
+        }
+        return state.setValue(OASIS_LOGGED, true);
     }
 
     /**
