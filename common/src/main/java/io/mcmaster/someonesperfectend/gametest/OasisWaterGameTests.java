@@ -3,6 +3,7 @@ package io.mcmaster.someonesperfectend.gametest;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.alchemy.OasisPotions;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
+import io.mcmaster.someonesperfectend.fluid.OasisLogging;
 import io.mcmaster.someonesperfectend.fluid.OasisWaterFluid;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +99,7 @@ public final class OasisWaterGameTests {
                 new ItemStack(ModFluids.OASIS_WATER_BUCKET.get()));
         player.getMainHandItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
         helper.assertBlockProperty(slab, BlockStateProperties.WATERLOGGED, true);
+        helper.assertBlockProperty(slab, OasisLogging.OASIS_LOGGED, true);
         helper.succeed();
     }
 

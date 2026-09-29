@@ -217,6 +217,48 @@ in its `config/terrablender.toml`.
   Cities keep their vanilla frequency.
 - Like vanilla biome changes, only newly generated chunks use the new biomes; existing chunks are untouched.
 
+## Oasis Water
+
+Oasis Water (`fluid/OasisWaterFluid`) is vanilla water with a teal color: it extends `WaterFluid` and is in
+`#minecraft:water`, so flow, swimming, drowning, farmland and evaporation in the Nether are vanilla. Lava turns it
+into end stone instead of cobblestone (`OasisWaterInteractions`), and bottles filled from it brew Oasis potions
+(`alchemy/OasisPotions`).
+
+**Oasis-logging (MOD-45).** Waterloggable blocks can hold Oasis Water instead of vanilla water:
+
+- Every block whose state definition has `waterlogged` (vanilla, this mod, other mods) also gets a boolean
+  `oasis_logged` state property, default `false` (`StateDefinitionBuilderMixin`, `BlockMixin`). A state with
+  `waterlogged=true, oasis_logged=true` holds an Oasis Water source (`BlockStateBaseMixin`); every other state is
+  unchanged. Setting `waterlogged=false` always clears `oasis_logged`, and `oasis_logged=true` implies `waterlogged`
+  (`StateHolderMixin`), so no reachable state is `waterlogged=false, oasis_logged=true`.
+- The Oasis Water bucket (player and dispenser) Oasis-logs a waterloggable block and schedules an Oasis Water tick.
+  An empty bucket (player or dispenser) takes an Oasis Water bucket back out and clears both properties. The
+  default `SimpleWaterloggedBlock` methods accept Oasis Water (`SimpleWaterloggedBlockMixin`). Blocks that override
+  `placeLiquid` for vanilla water only (campfires, candles) run their own logic with water, which then becomes Oasis
+  Water (`OasisLogging.placeOasisWater`).
+- In an `ultraWarm` dimension (the Nether) the Oasis Water bucket never waterlogs anything and never places a
+  source. It fizzes, smokes and returns an empty bucket in survival, like vanilla water.
+- An Oasis-logged block flows Oasis Water into free space next to it, and breaking it leaves an Oasis Water source.
+- Shapes, light and face sturdiness of an `oasis_logged=true` state come from the same state with
+  `oasis_logged=false` (`BlockStateBaseMixin`, `BlockStateCacheMixin`), because some blocks (vanilla walls) only
+  precompute shapes for their vanilla states.
+- Placing a block into an Oasis Water source (e.g. a slab) does not Oasis-log it: like before, only vanilla water is
+  kept by placement.
+
+**Block state count.** Every waterloggable block has twice as many states. Measured by
+`OasisLoggingGameTests.everyWaterloggableBlockHasOasisLogged` in the GameTest environment (vanilla, this mod and
+its dependencies): 357 of 1,128 blocks are waterloggable, and the block state registry grows from 28,159 to 47,253
+states (+19,094, about +68%). The added states cost memory once per game (the state objects and their lookup
+tables), not per chunk: chunks only store the states they use.
+
+**Removing the mod.** Saved chunks store block states by name and properties. Without the mod, `oasis_logged` is an
+unknown property and is ignored when the chunk is loaded, so Oasis-logged blocks become blocks waterlogged with
+vanilla water. Oasis Water source and flowing blocks are unknown blocks and become air, like any removed mod block.
+
+`OasisWaterGameTests` covers the fluid, lava and brewing. `OasisLoggingGameTests` covers Oasis-logging: the state
+property on every waterloggable block, the fluid state, buckets on an oak slab, stairs, fence, leaves and
+`voidvine_trapdoor`, a campfire, dispensers, flowing out, breaking, and the Nether.
+
 ## Endling villages
 
 `someonesperfectend:endling_village` is a custom structure type (`worldgen/EndlingVillageStructure`) whose
