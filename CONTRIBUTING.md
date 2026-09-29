@@ -144,7 +144,7 @@ from the vanilla client jar Loom downloaded (or `-PclientJar=<path>`), as a star
 `./gradlew build` runs `checkNoMojangTextures` in every module, which fails if any output jar or source tree
 contains `assets/minecraft/textures`.
 
-## Trinket slot
+## Trinket slot and totems
 
 The single trinket slot is built on [Accessories](https://github.com/wisp-forest/Accessories) (Wisp Forest,
 `io.wispforest:accessories-*`, which also pulls in owo-lib). Code is in `common/.../trinket/`.
@@ -312,7 +312,15 @@ tables), not per chunk: chunks only store the states they use.
 unknown property and is ignored when the chunk is loaded, so Oasis-logged blocks become blocks waterlogged with
 vanilla water. Oasis Water source and flowing blocks are unknown blocks and become air, like any removed mod block.
 
-`OasisWaterGameTests` covers the fluid, lava and brewing. `OasisLoggingGameTests` covers Oasis-logging: the state
+**Oasis Water Cauldron (MOD-44).** `oasis_water_cauldron` (`fluid/OasisWaterCauldronBlock`, a
+`LayeredCauldronBlock`, levels 1–3, no item: pick-block and drops give a cauldron) is filled by an Oasis Water
+bucket (empty or vanilla water cauldron → level 3) or bottle (+1 level), and drained by a bucket (level 3) or glass
+bottle (−1 level), in every dimension including the Nether. It keeps the water cauldron's washing and puts out
+burning entities. The content face is the untinted Oasis teal texture. It is registered with Fabric's
+`CauldronFluidContent` and NeoForge's `RegisterCauldronFluidContentEvent` (1 bottle per level) through
+`OasisWaterPlatform`.
+
+`OasisWaterGameTests` covers the fluid, lava, brewing and the cauldron. `OasisLoggingGameTests` covers Oasis-logging: the state
 property on every waterloggable block, the fluid state, buckets on an oak slab, stairs, fence, leaves and
 `voidvine_trapdoor`, a campfire, dispensers, flowing out, breaking, and the Nether; and (MOD-48) placing a slab and a
 lantern into an Oasis source, a slab into flowing Oasis Water, stairs flowing Oasis Water out when a neighbor is
@@ -391,9 +399,11 @@ change in the snapshot Loom and Architectury Gradle plugins.
 - `@GameTest(template = "...")` takes a **full** template id (`someonesperfectend:gametest/<name>`); leaving it
   empty uses `ModGameTests.EMPTY_TEMPLATE`, an 8×8×8 air structure. Templates are vanilla structure `.nbt` files
   under `common/src/main/resources/data/someonesperfectend/structure/gametest/`.
-- Each loader registers only `ModGameTests` (Fabric: the `fabric-gametest` entrypoint; NeoForge:
+- Each loader registers `ModGameTests` (Fabric: the `fabric-gametest` entrypoint; NeoForge:
   `RegisterGameTestsEvent`). Its `@GameTestGenerator` turns the annotated methods into test functions. This
-  is needed because Fabric and NeoForge build template ids from `@GameTest` differently.
+  is needed because Fabric and NeoForge build template ids from `@GameTest` differently. Fabric also registers
+  `FabricGameTests` (Fabric-only tests, e.g. the Transfer API check in `OasisCauldronTransferGameTests`) from the
+  same entrypoint.
 - `:fabric:runGameTestServer` and `:neoforge:runGameTestServer` each start a headless test server in
   `<loader>/build/gametest/` (the world is wiped first). A task fails if the server exits non-zero (vanilla
   exits with the number of failed required tests), if the log does not report at least one passing required
