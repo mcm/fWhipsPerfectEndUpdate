@@ -1,13 +1,17 @@
 package io.mcmaster.someonesperfectend.gametest;
 
+import com.mojang.authlib.GameProfile;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.alchemy.OasisPotions;
 import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.fluid.OasisLogging;
+import io.mcmaster.someonesperfectend.fluid.OasisWaterCauldronBlock;
 import io.mcmaster.someonesperfectend.fluid.OasisWaterFluid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,13 +19,16 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -29,14 +36,20 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
+import net.minecraft.world.level.block.entity.BannerPatterns;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class OasisWaterGameTests {
@@ -309,5 +322,239 @@ public final class OasisWaterGameTests {
         stand.setItem(3, new ItemStack(Items.NETHER_WART));
         stand.setItem(4, new ItemStack(Items.BLAZE_POWDER));
         helper.succeedWhen(() -> assertPotion(helper, stand.getItem(0), Items.POTION, oasis("awkward")));
+    }
+
+    // Oasis Water Cauldron.
+
+    private static BlockState oasisCauldron(int level) {
+        return ModFluids.OASIS_WATER_CAULDRON.get().defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, level);
+    }
+
+    /**
+     * Uses {@code held} on the cauldron at {@code pos} (absolute) in {@code level} like a player clicking its top
+     * face; returns what the player holds afterwards.
+     */
+    private static ItemStack useOnCauldron(Level level, BlockPos pos, Player player, ItemStack held) {
+        player.setItemInHand(InteractionHand.MAIN_HAND, held);
+        BlockHitResult hit =
+                new BlockHitResult(Vec3.atCenterOf(pos).relative(Direction.UP, 0.5), Direction.UP, pos, false);
+        level.getBlockState(pos).useItemOn(held, level, player, InteractionHand.MAIN_HAND, hit);
+        return player.getMainHandItem();
+    }
+
+    /** Places {@code cauldron} at (1, 1, 1) of the test and uses {@code held} on it as a survival player. */
+    private static ItemStack useOnCauldron(GameTestHelper helper, BlockState cauldron, ItemStack held) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, cauldron);
+        return useOnCauldron(
+                helper.getLevel(), helper.absolutePos(pos), helper.makeMockPlayer(GameType.SURVIVAL), held);
+    }
+
+    private static void assertCauldron(GameTestHelper helper, BlockState expected) {
+        helper.assertBlockState(new BlockPos(1, 1, 1), state -> state == expected, () -> "expected " + expected);
+    }
+
+    private static void assertHolding(GameTestHelper helper, ItemStack held, Item expected) {
+        helper.assertTrue(held.is(expected) && held.getCount() == 1, "expected one " + expected + ", got " + held);
+    }
+
+    @GameTest
+    public static void oasisCauldronHasNoItem(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, oasisCauldron(3));
+        BlockPos abs = helper.absolutePos(pos);
+        OasisWaterCauldronBlock block = ModFluids.OASIS_WATER_CAULDRON.get();
+        helper.assertFalse(
+                BuiltInRegistries.ITEM.containsKey(BuiltInRegistries.BLOCK.getKey(block)),
+                "the Oasis Water Cauldron should have no item");
+        ItemStack picked = block.getCloneItemStack(helper.getLevel(), abs, oasisCauldron(3));
+        helper.assertTrue(picked.is(Items.CAULDRON), "pick-block should give a cauldron, got " + picked);
+        List<ItemStack> drops =
+                Block.getDrops(oasisCauldron(2), helper.getLevel(), abs, null, null, new ItemStack(Items.IRON_PICKAXE));
+        helper.assertTrue(
+                drops.size() == 1
+                        && drops.get(0).is(Items.CAULDRON)
+                        && drops.get(0).getCount() == 1,
+                "it should drop a cauldron, dropped " + drops);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void oasisBucketFillsEmptyCauldron(GameTestHelper helper) {
+        ItemStack held = useOnCauldron(
+                helper, Blocks.CAULDRON.defaultBlockState(), new ItemStack(ModFluids.OASIS_WATER_BUCKET.get()));
+        assertCauldron(helper, oasisCauldron(3));
+        assertHolding(helper, held, Items.BUCKET);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void oasisBucketReplacesWaterCauldron(GameTestHelper helper) {
+        ItemStack held = useOnCauldron(
+                helper,
+                Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 1),
+                new ItemStack(ModFluids.OASIS_WATER_BUCKET.get()));
+        assertCauldron(helper, oasisCauldron(3));
+        assertHolding(helper, held, Items.BUCKET);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void bucketDrainsFullOasisCauldron(GameTestHelper helper) {
+        ItemStack held = useOnCauldron(helper, oasisCauldron(3), new ItemStack(Items.BUCKET));
+        assertCauldron(helper, Blocks.CAULDRON.defaultBlockState());
+        assertHolding(helper, held, ModFluids.OASIS_WATER_BUCKET.get());
+
+        // Like water, a bucket only takes a full cauldron.
+        held = useOnCauldron(helper, oasisCauldron(2), new ItemStack(Items.BUCKET));
+        assertCauldron(helper, oasisCauldron(2));
+        assertHolding(helper, held, Items.BUCKET);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void oasisBottleFillsCauldron(GameTestHelper helper) {
+        ItemStack held = useOnCauldron(
+                helper, Blocks.CAULDRON.defaultBlockState(), new ItemStack(ModFluids.OASIS_WATER_BOTTLE.get()));
+        assertCauldron(helper, oasisCauldron(1));
+        assertHolding(helper, held, Items.GLASS_BOTTLE);
+
+        held = useOnCauldron(helper, oasisCauldron(2), new ItemStack(ModFluids.OASIS_WATER_BOTTLE.get()));
+        assertCauldron(helper, oasisCauldron(3));
+        assertHolding(helper, held, Items.GLASS_BOTTLE);
+
+        held = useOnCauldron(helper, oasisCauldron(3), new ItemStack(ModFluids.OASIS_WATER_BOTTLE.get()));
+        assertCauldron(helper, oasisCauldron(3));
+        assertHolding(helper, held, ModFluids.OASIS_WATER_BOTTLE.get());
+
+        // A plain water bottle doesn't mix into Oasis Water.
+        held = useOnCauldron(helper, oasisCauldron(1), PotionContents.createItemStack(Items.POTION, Potions.WATER));
+        assertCauldron(helper, oasisCauldron(1));
+        assertHolding(helper, held, Items.POTION);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void glassBottleDrainsOasisCauldron(GameTestHelper helper) {
+        ItemStack held = useOnCauldron(helper, oasisCauldron(2), new ItemStack(Items.GLASS_BOTTLE));
+        assertCauldron(helper, oasisCauldron(1));
+        assertHolding(helper, held, ModFluids.OASIS_WATER_BOTTLE.get());
+
+        held = useOnCauldron(helper, oasisCauldron(1), new ItemStack(Items.GLASS_BOTTLE));
+        assertCauldron(helper, Blocks.CAULDRON.defaultBlockState());
+        assertHolding(helper, held, ModFluids.OASIS_WATER_BOTTLE.get());
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void oasisCauldronWashesLikeWater(GameTestHelper helper) {
+        ItemStack helmet = new ItemStack(Items.LEATHER_HELMET);
+        helmet.set(DataComponents.DYED_COLOR, new DyedItemColor(0xFF0000, true));
+        ItemStack held = useOnCauldron(helper, oasisCauldron(3), helmet);
+        helper.assertFalse(held.has(DataComponents.DYED_COLOR), "the helmet was not washed");
+        assertCauldron(helper, oasisCauldron(2));
+
+        ItemStack banner = new ItemStack(Items.WHITE_BANNER);
+        banner.set(
+                DataComponents.BANNER_PATTERNS,
+                new BannerPatternLayers.Builder()
+                        .add(
+                                helper.getLevel()
+                                        .registryAccess()
+                                        .registryOrThrow(Registries.BANNER_PATTERN)
+                                        .getHolderOrThrow(BannerPatterns.STRIPE_TOP),
+                                DyeColor.RED)
+                        .build());
+        held = useOnCauldron(helper, oasisCauldron(2), banner);
+        helper.assertTrue(
+                held.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY)
+                        .layers()
+                        .isEmpty(),
+                "the banner was not washed: " + held);
+        assertCauldron(helper, oasisCauldron(1));
+
+        held = useOnCauldron(helper, oasisCauldron(1), new ItemStack(Items.RED_SHULKER_BOX));
+        assertHolding(helper, held, Items.SHULKER_BOX);
+        assertCauldron(helper, Blocks.CAULDRON.defaultBlockState());
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void oasisCauldronPutsOutBurningEntities(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, oasisCauldron(3));
+        // With AI, so it moves: entities only touch the blocks they are in while moving.
+        Chicken chicken =
+                helper.spawn(EntityType.CHICKEN, Vec3.atBottomCenterOf(pos).add(0.0, 0.25, 0.0));
+        chicken.setRemainingFireTicks(200);
+        helper.succeedWhen(() -> {
+            helper.assertFalse(chicken.isOnFire(), "the chicken is still on fire");
+            assertCauldron(helper, oasisCauldron(2));
+        });
+    }
+
+    /** A survival mock player in {@code level} ({@code makeMockPlayer} always uses the test level). */
+    private static Player playerIn(Level level) {
+        return new Player(level, BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
+            @Override
+            public boolean isSpectator() {
+                return false;
+            }
+
+            @Override
+            public boolean isCreative() {
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Fills and drains a cauldron with Oasis Water buckets and bottles in another dimension, at {@code pos} (outside
+     * the test area, so it restores the block it replaced).
+     */
+    private static void cauldronRoundTrip(GameTestHelper helper, ResourceKey<Level> dimension, BlockPos pos) {
+        ServerLevel level = helper.getLevel().getServer().getLevel(dimension);
+        helper.assertTrue(level != null, "the test server should have " + dimension.location());
+        BlockState previous = level.getBlockState(pos);
+        try {
+            Player player = playerIn(level);
+            level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
+            ItemStack held = useOnCauldron(level, pos, player, new ItemStack(ModFluids.OASIS_WATER_BUCKET.get()));
+            helper.assertTrue(
+                    level.getBlockState(pos) == oasisCauldron(3) && held.is(Items.BUCKET),
+                    "bucket fill in " + dimension.location() + ": " + level.getBlockState(pos) + ", " + held);
+            held = useOnCauldron(level, pos, player, new ItemStack(Items.GLASS_BOTTLE));
+            helper.assertTrue(
+                    level.getBlockState(pos) == oasisCauldron(2) && held.is(ModFluids.OASIS_WATER_BOTTLE.get()),
+                    "bottle drain in " + dimension.location() + ": " + level.getBlockState(pos) + ", " + held);
+            held = useOnCauldron(level, pos, player, held);
+            helper.assertTrue(
+                    level.getBlockState(pos) == oasisCauldron(3) && held.is(Items.GLASS_BOTTLE),
+                    "bottle fill in " + dimension.location() + ": " + level.getBlockState(pos) + ", " + held);
+            held = useOnCauldron(level, pos, player, new ItemStack(Items.BUCKET));
+            helper.assertTrue(
+                    level.getBlockState(pos).is(Blocks.CAULDRON) && held.is(ModFluids.OASIS_WATER_BUCKET.get()),
+                    "bucket drain in " + dimension.location() + ": " + level.getBlockState(pos) + ", " + held);
+        } finally {
+            level.setBlockAndUpdate(pos, previous);
+        }
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void oasisCauldronWorksInTheNether(GameTestHelper helper) {
+        helper.assertTrue(
+                helper.getLevel()
+                        .getServer()
+                        .getLevel(Level.NETHER)
+                        .dimensionType()
+                        .ultraWarm(),
+                "the Nether should be ultraWarm");
+        cauldronRoundTrip(helper, Level.NETHER, new BlockPos(8, 64, -4000));
+    }
+
+    @GameTest
+    public static void oasisCauldronWorksInTheEnd(GameTestHelper helper) {
+        cauldronRoundTrip(helper, Level.END, new BlockPos(8, 64, -4000));
     }
 }
