@@ -20,7 +20,8 @@
       "io.mcmaster.someonesperfectend.fabric.SomeonesPerfectEndTerraBlender"
     ],
     "fabric-gametest": [
-      "io.mcmaster.someonesperfectend.gametest.ModGameTests"
+      "io.mcmaster.someonesperfectend.gametest.ModGameTests",
+      "io.mcmaster.someonesperfectend.fabric.gametest.FabricGameTests"
     ]
   },
   "mixins": [

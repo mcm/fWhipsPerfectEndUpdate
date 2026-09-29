@@ -71,8 +71,13 @@ public final class ModGameTests {
 
     @GameTestGenerator
     public Collection<TestFunction> generate() {
+        return functions(TEST_CLASSES);
+    }
+
+    /** The test functions of the {@link GameTest} methods of {@code testClasses} (also used by loader-only tests). */
+    public static List<TestFunction> functions(List<Class<?>> testClasses) {
         List<TestFunction> functions = new ArrayList<>();
-        for (Class<?> testClass : TEST_CLASSES) {
+        for (Class<?> testClass : testClasses) {
             String suite = testClass.getSimpleName().toLowerCase(Locale.ROOT);
             for (Method method : testClass.getDeclaredMethods()) {
                 GameTest test = method.getAnnotation(GameTest.class);
