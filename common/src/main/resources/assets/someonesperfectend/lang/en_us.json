@@ -30,6 +30,7 @@
   "container.someonesperfectend.void_cleansing.description": "Lowers the item's repair cost",
   "container.someonesperfectend.infuser.locked": "Infusion only works in the End",
   "container.someonesperfectend.infuser.infusion": "Infusion",
+  "container.someonesperfectend.infuser.confirm_all": "Shift-click to use as many as possible",
   "tooltip.someonesperfectend.infusion": "Infused: %s \u2014 %s remaining",
   "block.someonesperfectend.astral_log": "Astral Log",
   "block.someonesperfectend.flowering_astral_log": "Flowering Astral Log",

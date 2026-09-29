@@ -23,6 +23,9 @@ public final class Infusers {
     public static final String LOCKED_TOOLTIP_KEY = "container." + SomeonesPerfectEnd.MOD_ID + ".infuser.locked";
     /** The screen's label while an item is in the infusion slot. */
     public static final String INFUSION_LABEL_KEY = "container." + SomeonesPerfectEnd.MOD_ID + ".infuser.infusion";
+    /** The infusion confirm button's tooltip line for Shift + confirm. */
+    public static final String CONFIRM_ALL_TOOLTIP_KEY =
+            "container." + SomeonesPerfectEnd.MOD_ID + ".infuser.confirm_all";
 
     @SuppressWarnings("DataFlowIssue") // the data fixer type is nullable
     public static final RegistrySupplier<BlockEntityType<InfuserBlockEntity>> BLOCK_ENTITY =
