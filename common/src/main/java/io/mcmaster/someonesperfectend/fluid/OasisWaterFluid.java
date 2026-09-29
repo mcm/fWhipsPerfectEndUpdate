@@ -50,6 +50,10 @@ public abstract class OasisWaterFluid extends WaterFluid {
     }
 
     public static class Source extends OasisWaterFluid {
+        public Source() {
+            OasisLogging.setSource(defaultFluidState().setValue(FALLING, false));
+        }
+
         @Override
         public int getAmount(FluidState state) {
             return 8;

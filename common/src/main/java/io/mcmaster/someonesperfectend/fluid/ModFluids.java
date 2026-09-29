@@ -61,7 +61,7 @@ public final class ModFluids {
 
     /** Loads this class so its entries are added to the deferred registers. */
     public static void init() {
-        LifecycleEvent.SETUP.register(() -> DispenserBlock.registerBehavior(
-                OASIS_WATER_BUCKET.get(), DispenserBlock.DISPENSER_REGISTRY.get(Items.WATER_BUCKET)));
+        LifecycleEvent.SETUP.register(() ->
+                DispenserBlock.registerBehavior(OASIS_WATER_BUCKET.get(), OasisWaterBucketItem.dispenseBehavior()));
     }
 }

@@ -40,6 +40,7 @@ public final class ModGameTests {
             RecolorGameTests.class,
             EndGroundGameTests.class,
             OasisWaterGameTests.class,
+            OasisLoggingGameTests.class,
             EndFloraGameTests.class,
             TrinketGameTests.class,
             InfuserGameTests.class,
