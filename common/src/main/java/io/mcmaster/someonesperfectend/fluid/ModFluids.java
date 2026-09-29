@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -57,11 +58,17 @@ public final class ModFluids {
                     .stacksTo(1)
                     .component(DataComponents.POTION_CONTENTS, new PotionContents(Potions.WATER))));
 
+    /** Has no item: it picks and drops as a cauldron. Levels hold one bottle each. */
+    public static final RegistrySupplier<OasisWaterCauldronBlock> OASIS_WATER_CAULDRON = ModRegistries.blockOnly(
+            "oasis_water_cauldron",
+            () -> new OasisWaterCauldronBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.CAULDRON)));
+
     private ModFluids() {}
 
     /** Loads this class so its entries are added to the deferred registers. */
     public static void init() {
         LifecycleEvent.SETUP.register(() ->
                 DispenserBlock.registerBehavior(OASIS_WATER_BUCKET.get(), OasisWaterBucketItem.dispenseBehavior()));
+        OasisWaterPlatform.registerCauldron();
     }
 }
