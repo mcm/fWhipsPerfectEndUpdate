@@ -25,8 +25,8 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The beacon menu plus one infusion slot. Slot indices: 0 payment (the beacon's), 1-36 player inventory,
- * {@link #INFUSION_SLOT} infusion. The infusion slot takes items only in the End.
+ * The beacon menu plus one infusion slot. Slot indices: 0 payment (the beacon's, but holding a stack), 1-36 player
+ * inventory, {@link #INFUSION_SLOT} infusion. The infusion slot takes items only in the End.
  */
 public class InfuserMenu extends BeaconMenu {
     public static final int PAYMENT_SLOT = 0;
@@ -55,6 +55,9 @@ public class InfuserMenu extends BeaconMenu {
 
     public InfuserMenu(int containerId, Inventory inventory, ContainerData data, ContainerLevelAccess access) {
         super(containerId, inventory, data, access);
+        Slot payment = slots.get(PAYMENT_SLOT);
+        ((StackablePayment) payment).someonesperfectend$allowStacks();
+        ((StackablePayment) payment.container).someonesperfectend$allowStacks();
         this.access = access;
         // The client has no level access, but its player is always in the Infuser's level.
         Level level = access.evaluate((accessLevel, pos) -> accessLevel).orElse(inventory.player.level());
@@ -103,11 +106,27 @@ public class InfuserMenu extends BeaconMenu {
 
     /** What confirming would write to the infusion item, ignoring the payment; empty if it can't be charged. */
     public Optional<InfusionRules.Charge> previewInfusion(InfusionEffect effect) {
+        return previewInfusion(effect, 1);
+    }
+
+    private Optional<InfusionRules.Charge> previewInfusion(InfusionEffect effect, int payments) {
         ItemStack stack = infusionSlot.getItem();
         if (!infusionEnabled || stack.isEmpty()) {
             return Optional.empty();
         }
-        return InfusionRules.charge(Infusion.kindsOf(stack), Infusion.currentOf(stack), effect, getLevels());
+        return InfusionRules.charge(Infusion.kindsOf(stack), Infusion.currentOf(stack), effect, getLevels(),
+                payments);
+    }
+
+    /** How many payments confirm-all would use: as many as are in the slot, up to what still fits under the cap. */
+    public int paymentsForConfirmAll() {
+        ItemStack stack = infusionSlot.getItem();
+        if (!infusionEnabled || stack.isEmpty()) {
+            return 0;
+        }
+        InfusionRules.Current current = Infusion.currentOf(stack);
+        int fit = InfusionRules.paymentsThatFit(current == null ? 0 : current.remainingTicks(), getLevels());
+        return Math.min(slots.get(PAYMENT_SLOT).getItem().getCount(), fit);
     }
 
     /** Whether confirming with this effect would infuse: a payment item is present and the item can be charged. */
@@ -121,12 +140,26 @@ public class InfuserMenu extends BeaconMenu {
      * @return whether the item was infused
      */
     public boolean infuse(@Nullable InfusionEffect effect) {
+        return infuse(effect, false);
+    }
+
+    /**
+     * Like {@link #infuse(InfusionEffect)}, but with {@code all} it uses {@link #paymentsForConfirmAll()} payment
+     * items at once (none if that is 0).
+     *
+     * @return whether the item was infused
+     */
+    public boolean infuse(@Nullable InfusionEffect effect, boolean all) {
         if (!canInfuse(effect)) {
             return false;
         }
-        InfusionRules.Charge charge = previewInfusion(effect).orElseThrow();
-        infusionSlot.getItem().set(Infusers.INFUSION.get(), Infusion.of(charge));
-        slots.get(PAYMENT_SLOT).remove(1);
+        int payments = all ? paymentsForConfirmAll() : 1;
+        Optional<InfusionRules.Charge> charge = previewInfusion(effect, payments);
+        if (charge.isEmpty()) {
+            return false;
+        }
+        infusionSlot.getItem().set(Infusers.INFUSION.get(), Infusion.of(charge.get()));
+        slots.get(PAYMENT_SLOT).remove(payments);
         infusionSlot.setChanged();
         return true;
     }
@@ -181,21 +214,47 @@ public class InfuserMenu extends BeaconMenu {
         super.updateEffects(primary, secondary);
     }
 
+    /**
+     * Confirm-all (Shift + confirm): the screen sends the chosen infusion effect's ordinal as a menu button click.
+     * An effect totem still takes exactly one payment.
+     */
+    @Override
+    public boolean clickMenuButton(Player player, int id) {
+        InfusionEffect[] effects = InfusionEffect.values();
+        if (id < 0 || id >= effects.length) {
+            return false;
+        }
+        if (infusionTotem() != null) {
+            return activateTotem();
+        }
+        return hasInfusionItem() && infuse(effects[id], true);
+    }
+
     /** Enables the beacon's own confirm button, which only sets beacon powers; see {@link #updateEffects}. */
     @Override
     public boolean hasPayment() {
         return super.hasPayment() && !hasInfusionItem();
     }
 
+    /**
+     * Returns the payment stack and the infusion item to the player's inventory (dropping what doesn't fit). The
+     * beacon would drop the payment instead, which is easy to miss with a whole stack.
+     */
     @Override
     public void removed(Player player) {
+        if (!player.level().isClientSide) {
+            clearContainer(player, slots.get(PAYMENT_SLOT).container);
+        }
         super.removed(player);
         if (!player.level().isClientSide) {
             clearContainer(player, infusion);
         }
     }
 
-    /** The beacon's shift-click rules, plus moving infusable items into the infusion slot. */
+    /**
+     * The beacon's shift-click rules, plus moving infusable items into the infusion slot, and moving whole stacks
+     * (as much as fits) into the payment slot.
+     */
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);
@@ -214,8 +273,7 @@ public class InfuserMenu extends BeaconMenu {
             if (!moveItemStackTo(stack, INFUSION_SLOT, INFUSION_SLOT + 1, false)) {
                 return ItemStack.EMPTY;
             }
-        } else if (!slots.get(PAYMENT_SLOT).hasItem() && slots.get(PAYMENT_SLOT).mayPlace(stack)
-                && stack.getCount() == 1) {
+        } else if (slots.get(PAYMENT_SLOT).mayPlace(stack)) {
             if (!moveItemStackTo(stack, PAYMENT_SLOT, PAYMENT_SLOT + 1, false)) {
                 return ItemStack.EMPTY;
             }

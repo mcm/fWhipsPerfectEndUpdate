@@ -9,6 +9,7 @@ import io.mcmaster.someonesperfectend.totem.EffectTotemItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -29,13 +30,16 @@ import org.jetbrains.annotations.Nullable;
  * The beacon screen plus the infusion slot. With the slot empty it is the beacon screen (its confirm button follows
  * {@link InfuserMenu#hasPayment()}). With an item in the slot, the beacon's buttons are hidden and infusion buttons
  * take their place: one per effect the item may take, active only when the tier allows it, plus a confirm button
- * that sends the chosen effect as the beacon packet's primary effect and keeps the screen open for more charges.
+ * that sends the chosen effect as the beacon packet's primary effect and keeps the screen open for more charges
+ * (Shift + confirm uses as many payments as fit, sent as a menu button click; see {@link InfuserMenu#clickMenuButton}).
  * An effect totem shows only its own (fixed) effect, and confirm activates it.
  * Outside the End the slot is drawn dark and locked.
  */
 public class InfuserScreen extends BeaconScreen {
     private static final Component LOCKED_TOOLTIP = Component.translatable(Infusers.LOCKED_TOOLTIP_KEY);
     private static final Component INFUSION_LABEL = Component.translatable(Infusers.INFUSION_LABEL_KEY);
+    private static final Component CONFIRM_TOOLTIP = Component.empty().append(CommonComponents.GUI_DONE).append("\n")
+            .append(Component.translatable(Infusers.CONFIRM_ALL_TOOLTIP_KEY).withStyle(ChatFormatting.GRAY));
     private static final ResourceLocation BUTTON_DISABLED_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/button_disabled");
     private static final ResourceLocation BUTTON_SELECTED_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/button_selected");
     private static final ResourceLocation BUTTON_HIGHLIGHTED_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/button_highlighted");
@@ -76,7 +80,12 @@ public class InfuserScreen extends BeaconScreen {
         addInfusionWidget(new SpriteButton(leftPos + 164, topPos + 107, CONFIRM_SPRITE, CommonComponents.GUI_DONE) {
             @Override
             public void onPress() {
-                if (selected != null) {
+                if (selected == null) {
+                    return;
+                }
+                if (hasShiftDown()) {
+                    minecraft.gameMode.handleInventoryButtonClick(infuserMenu.containerId, selected.ordinal());
+                } else {
                     minecraft.getConnection().send(new ServerboundSetBeaconPacket(
                             Optional.of(selected.holder()), Optional.empty()));
                 }
@@ -87,7 +96,7 @@ public class InfuserScreen extends BeaconScreen {
                 active = infuserMenu.infusionTotem() != null ? infuserMenu.canActivateTotem()
                         : infuserMenu.canInfuse(selected);
             }
-        });
+        }.withTooltip(CONFIRM_TOOLTIP));
         addInfusionWidget(new SpriteButton(leftPos + 190, topPos + 107, CANCEL_SPRITE, CommonComponents.GUI_CANCEL) {
             @Override
             public void onPress() {
@@ -243,6 +252,11 @@ public class InfuserScreen extends BeaconScreen {
         }
 
         void update() {
+        }
+
+        SpriteButton withTooltip(Component tooltip) {
+            setTooltip(Tooltip.create(tooltip));
+            return this;
         }
     }
 

@@ -10,6 +10,8 @@ import io.mcmaster.someonesperfectend.infuser.Infusion;
 import io.mcmaster.someonesperfectend.infuser.InfusionEffect;
 import io.mcmaster.someonesperfectend.infuser.InfusionRules;
 import io.netty.buffer.Unpooled;
+import net.minecraft.world.inventory.Slot;
+import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -362,6 +364,94 @@ public final class InfuserGameTests {
         menu.updateEffects(Optional.of(MobEffects.DIG_SPEED), Optional.empty());
         helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
                 "confirm at the cap should keep the payment");
+        helper.succeed();
+    }
+
+    /** An End menu at tier 4 with the item in the infusion slot and {@code count} iron ingots as payment. */
+    private static InfuserMenu stackedPaymentMenu(GameTestHelper helper, Player player, ItemStack item, int count) {
+        InfuserMenu menu = menuAtTier(end(helper), player, 4);
+        menu.getInfusionSlot().set(item);
+        menu.getSlot(InfuserMenu.PAYMENT_SLOT).set(new ItemStack(Items.IRON_INGOT, count));
+        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().getCount() == count,
+                "the payment slot should hold " + count + " iron ingots");
+        return menu;
+    }
+
+    private static void assertPayment(GameTestHelper helper, InfuserMenu menu, int count, String message) {
+        int actual = menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().getCount();
+        helper.assertTrue(actual == count, message + ": expected " + count + " payment items left, was " + actual);
+    }
+
+    @GameTest
+    public static void paymentSlotHoldsAStack(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        InfuserMenu menu = menuAtTier(end(helper), player, 4);
+        Slot payment = menu.getSlot(InfuserMenu.PAYMENT_SLOT);
+        helper.assertTrue(payment.getMaxStackSize(new ItemStack(Items.IRON_INGOT)) == 64,
+                "the payment slot should take 64 iron ingots");
+        menu.getSlot(InfuserMenu.INV_SLOT_START).set(new ItemStack(Items.IRON_INGOT, 40));
+        menu.quickMoveStack(player, InfuserMenu.INV_SLOT_START);
+        assertPayment(helper, menu, 40, "shift-clicking a stack should move all of it");
+        menu.getSlot(InfuserMenu.INV_SLOT_START).set(new ItemStack(Items.IRON_INGOT, 40));
+        menu.quickMoveStack(player, InfuserMenu.INV_SLOT_START);
+        assertPayment(helper, menu, 64, "shift-clicking should fill the payment slot");
+        helper.assertTrue(menu.getSlot(InfuserMenu.INV_SLOT_START).getItem().getCount() == 16,
+                "what doesn't fit should stay in the inventory");
+
+        // A plain beacon's payment slot still holds one.
+        BeaconMenu beacon = new BeaconMenu(0, player.getInventory());
+        helper.assertTrue(beacon.getSlot(0).getMaxStackSize(new ItemStack(Items.IRON_INGOT)) == 1,
+                "a beacon's payment slot should still hold one item");
+
+        // Closing returns the whole stack.
+        ServerPlayer serverPlayer = detachedServerPlayer(helper);
+        InfuserMenu closing = menuIn(end(helper), serverPlayer);
+        closing.getSlot(InfuserMenu.PAYMENT_SLOT).set(new ItemStack(Items.IRON_INGOT, 10));
+        closing.removed(serverPlayer);
+        helper.assertTrue(closing.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().isEmpty(),
+                "closing should empty the payment slot");
+        helper.assertTrue(serverPlayer.getInventory().countItem(Items.IRON_INGOT) == 10,
+                "closing should return all 10 iron ingots");
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void confirmUsesOnePaymentFromAStack(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        InfuserMenu menu = stackedPaymentMenu(helper, player, new ItemStack(Items.DIAMOND_PICKAXE), 10);
+        menu.updateEffects(Optional.of(MobEffects.DIG_SPEED), Optional.empty());
+        assertPayment(helper, menu, 9, "a normal confirm should use one payment");
+        assertInfusion(helper, menu.getInfusionSlot().getItem(), InfusionEffect.HASTE, 1, 340);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void confirmAllUsesAsManyAsFit(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        int id = InfusionEffect.HASTE.ordinal();
+        InfuserMenu fresh = stackedPaymentMenu(helper, player, new ItemStack(Items.DIAMOND_PICKAXE), 10);
+        helper.assertTrue(fresh.clickMenuButton(player, id), "confirm-all should infuse a fresh item");
+        assertPayment(helper, fresh, 0, "confirm-all on a fresh item should use all 10");
+        assertInfusion(helper, fresh.getInfusionSlot().getItem(), InfusionEffect.HASTE, 1, 10 * 340);
+
+        ItemStack sixty = new ItemStack(Items.DIAMOND_PICKAXE);
+        sixty.set(Infusers.INFUSION.get(), new Infusion(MobEffects.DIG_SPEED, 1, 60 * InfusionRules.chargeTicks(4)));
+        InfuserMenu nearlyFull = stackedPaymentMenu(helper, player, sixty, 10);
+        helper.assertTrue(nearlyFull.clickMenuButton(player, id), "confirm-all should top up a nearly full item");
+        assertPayment(helper, nearlyFull, 6, "confirm-all on an item 60 payments full should use 4");
+        assertInfusion(helper, nearlyFull.getInfusionSlot().getItem(), InfusionEffect.HASTE, 1,
+                InfusionRules.capTicks(4));
+
+        helper.assertFalse(nearlyFull.clickMenuButton(player, id), "confirm-all on a full item should do nothing");
+        assertPayment(helper, nearlyFull, 6, "confirm-all on a full item should use nothing");
+
+        // An effect totem still takes exactly one payment.
+        InfuserMenu totem = menuAtTier(end(helper), player, 4);
+        totem.getInfusionSlot().set(new ItemStack(EffectTotems.TOTEM_OF_HASTE.get()));
+        totem.getSlot(InfuserMenu.PAYMENT_SLOT).set(new ItemStack(Items.NETHERITE_INGOT, 5));
+        helper.assertTrue(totem.clickMenuButton(player, id), "confirm-all should activate the totem");
+        helper.assertTrue(EffectTotems.isActive(totem.getInfusionSlot().getItem()), "the totem should be active");
+        assertPayment(helper, totem, 4, "activating a totem with confirm-all should use one payment");
         helper.succeed();
     }
 
