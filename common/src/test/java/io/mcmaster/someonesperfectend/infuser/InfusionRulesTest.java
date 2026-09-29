@@ -109,6 +109,36 @@ class InfusionRulesTest {
     }
 
     @Test
+    void paymentsThatFit() {
+        // Empty item: all 64.
+        assertEquals(InfusionRules.MAX_PAYMENTS, InfusionRules.paymentsThatFit(0, 4));
+        assertEquals(InfusionRules.MAX_PAYMENTS, InfusionRules.paymentsThatFit(0, 1));
+        // Partly charged: 60 payments' worth leaves room for 4; a partial payment's worth still takes one more.
+        assertEquals(4, InfusionRules.paymentsThatFit(60 * InfusionRules.chargeTicks(4), 4));
+        assertEquals(5, InfusionRules.paymentsThatFit(60 * InfusionRules.chargeTicks(4) - 10, 4));
+        assertEquals(1, InfusionRules.paymentsThatFit(InfusionRules.capTicks(1) - 10, 1));
+        // Full (or above this tier's cap): none.
+        assertEquals(0, InfusionRules.paymentsThatFit(InfusionRules.capTicks(4), 4));
+        assertEquals(0, InfusionRules.paymentsThatFit(InfusionRules.capTicks(4), 1));
+    }
+
+    @Test
+    void chargeWithSeveralPayments() {
+        assertEquals(
+                new Charge(HASTE, 1, 10 * 340),
+                InfusionRules.charge(PICKAXE, null, HASTE, 4, 10).orElseThrow());
+        Current sixty = new Current(HASTE, 1, 60 * 340);
+        assertEquals(
+                InfusionRules.capTicks(4),
+                InfusionRules.charge(PICKAXE, sixty, HASTE, 4, 4).orElseThrow().remainingTicks());
+        // Clamped to the cap.
+        assertEquals(
+                InfusionRules.capTicks(4),
+                InfusionRules.charge(PICKAXE, sixty, HASTE, 4, 64).orElseThrow().remainingTicks());
+        assertEquals(Optional.empty(), InfusionRules.charge(PICKAXE, sixty, HASTE, 4, 0));
+    }
+
+    @Test
     void reInfusionKeepsEffectAndLevel() {
         Current speedTwo = new Current(SPEED, 1, 500);
         assertFalse(InfusionRules.canSelect(BOOTS, speedTwo, JUMP_BOOST, 4));

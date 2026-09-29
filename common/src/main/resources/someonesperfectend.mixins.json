@@ -12,6 +12,7 @@
   "mixins": [
     "BeaconBlockEntityAccessor",
     "BeaconBlockEntityMixin",
+    "BeaconPaymentMixin",
     "BlockEntityAccessor",
     "BlockEntityTypeMixin",
     "BlockItemMixin",

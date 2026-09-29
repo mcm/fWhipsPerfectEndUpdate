@@ -90,13 +90,32 @@ public final class InfusionRules {
         return current == null || current.effect() == effect;
     }
 
+    /** The result of charging with one payment; see {@link #charge(Set, Current, InfusionEffect, int, int)}. */
+    public static Optional<Charge> charge(Set<Kind> kinds, @Nullable Current current, InfusionEffect effect, int tier) {
+        return charge(kinds, current, effect, tier, 1);
+    }
+
     /**
-     * The result of charging with one payment, or empty if the effect can't be selected or the stored time is
-     * already at the cap. A first infusion sets the level from the tier; a top-up keeps the existing level. The
+     * How many payments still fit under the cap for an item storing this much time: each adds a full
+     * {@link #chargeTicks} until the stored time reaches {@link #capTicks}, so the last one may be clamped.
+     */
+    public static int paymentsThatFit(int remainingTicks, int tier) {
+        int room = capTicks(tier) - Math.max(remainingTicks, 0);
+        if (room <= 0) {
+            return 0;
+        }
+        int perPayment = chargeTicks(tier);
+        return (room + perPayment - 1) / perPayment;
+    }
+
+    /**
+     * The result of charging with this many payments, or empty if there are none, the effect can't be selected, or
+     * the stored time is already at the cap. A first infusion sets the level from the tier; a top-up keeps the existing level. The
      * new time is clamped to the cap and is never less than the existing time.
      */
-    public static Optional<Charge> charge(Set<Kind> kinds, @Nullable Current current, InfusionEffect effect, int tier) {
-        if (!canSelect(kinds, current, effect, tier)) {
+    public static Optional<Charge> charge(
+            Set<Kind> kinds, @Nullable Current current, InfusionEffect effect, int tier, int payments) {
+        if (payments <= 0 || !canSelect(kinds, current, effect, tier)) {
             return Optional.empty();
         }
         int existing = current == null ? 0 : current.remainingTicks();
@@ -105,7 +124,8 @@ public final class InfusionRules {
             return Optional.empty();
         }
         int amplifier = current == null ? amplifierFor(effect, tier) : current.amplifier();
-        return Optional.of(new Charge(effect, amplifier, Math.min(existing + chargeTicks(tier), cap)));
+        return Optional.of(new Charge(
+                effect, amplifier, (int) Math.min(existing + (long) payments * chargeTicks(tier), cap)));
     }
 
     /**
