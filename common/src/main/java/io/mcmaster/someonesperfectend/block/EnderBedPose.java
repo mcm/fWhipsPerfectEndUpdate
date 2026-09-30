@@ -38,6 +38,15 @@ public final class EnderBedPose {
     }
 
     /**
+     * Where the first-person camera goes under an Ender Bed: vanilla's sleeping camera ({@code vanillaCameraY}, above
+     * a face-up sleeper at {@code entityY}) put through the same roll and lift as the model, so it ends up below the
+     * face-down sleeper's face instead of inside the bed's base.
+     */
+    public static double cameraY(double entityY, double vanillaCameraY, float scale, float hitboxHeight) {
+        return entityY + lift(scale, hitboxHeight) * scale - (vanillaCameraY - entityY);
+    }
+
+    /**
      * The whole transform, applied in the world-aligned entity frame on top of vanilla's sleeping rotations: the
      * {@link #roll}, then the {@link #lift}.
      */
