@@ -1,6 +1,7 @@
 package io.mcmaster.someonesperfectend.block;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.minecraft.core.Direction;
 import org.joml.Matrix4f;
@@ -44,6 +45,21 @@ class EnderBedPoseTest {
             assertVector(side.negate(new Vector3f()).add(0.0F, underside - EnderBedPose.BACK_DEPTH, 0.0F),
                     transform.transformPosition(new Vector3f(side)), facing + " sides swap");
         }
+    }
+
+    @Test
+    void cameraGoesThroughTheSameRollAndLiftAsTheModel() {
+        // Vanilla's sleeping camera: eye height plus 0.3 above the entity.
+        float vanillaOffset = HEIGHT + 0.3F;
+        double entityY = 64 + 7.0 / 16.0 - HEIGHT;
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            Vector3f moved = EnderBedPose.transform(facing, 1.0F, HEIGHT)
+                    .transformPosition(new Vector3f(0.0F, vanillaOffset, 0.0F));
+            assertEquals(entityY + moved.y, EnderBedPose.cameraY(entityY, entityY + vanillaOffset, 1.0F, HEIGHT),
+                    EPSILON, facing + " camera");
+        }
+        assertTrue(EnderBedPose.cameraY(entityY, entityY + vanillaOffset, 1.0F, HEIGHT) < 64 + 7.0 / 16.0,
+                "the camera is below the bed's underside");
     }
 
     @Test

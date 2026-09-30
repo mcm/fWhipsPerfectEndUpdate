@@ -5,6 +5,7 @@
   "minVersion": "0.8",
   "client": [
     "client.AccessoriesClientMixin",
+    "client.CameraMixin",
     "client.CreativeModeInventoryScreenMixin",
     "client.EnchantmentScreenMixin",
     "client.InventoryScreenMixin",
