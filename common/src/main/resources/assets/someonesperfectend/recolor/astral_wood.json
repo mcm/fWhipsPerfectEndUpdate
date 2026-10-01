@@ -13,8 +13,19 @@
       "target": "someonesperfectend:block/astral_planks"
     },
     {
-      "source": "minecraft:block/bamboo_block",
+      "source": "minecraft:block/chorus_plant",
       "target": "someonesperfectend:block/astral_log",
+      "palette": {
+        "gradient": [
+          "#1f1a45",
+          "#4a3f8f",
+          "#8a7fd0"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:block/chorus_flower",
+      "target": "someonesperfectend:block/flowering_astral_log",
       "palette": {
         "gradient": [
           "#1f1a45",

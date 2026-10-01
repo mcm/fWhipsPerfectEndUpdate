@@ -146,6 +146,11 @@ public final class ModBlocks {
     public static final RegistrySupplier<RotatedPillarBlock> ASTRAL_LOG = ModRegistries.block(
             "astral_log",
             () -> new RotatedPillarBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_BARK_COLOR, ModWoodTypes.ASTRAL)));
+    /** Chorus Flower-look Astral Log (MOD-50 US-002); drops a plain Astral Log unless mined with Silk Touch. */
+    public static final RegistrySupplier<RotatedPillarBlock> FLOWERING_ASTRAL_LOG = ModRegistries.block(
+            "flowering_astral_log",
+            () -> new RotatedPillarBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_BARK_COLOR, ModWoodTypes.ASTRAL)));
+
     public static final RegistrySupplier<RotatedPillarBlock> ASTRAL_WOOD = ModRegistries.block(
             "astral_wood",
             () -> new RotatedPillarBlock(logProperties(ASTRAL_BARK_COLOR, ASTRAL_BARK_COLOR, ModWoodTypes.ASTRAL)));
@@ -460,6 +465,7 @@ public final class ModBlocks {
             ComposterBlock.COMPOSTABLES.put(VOIDFRUIT.get(), 0.3F);
             registerFlammables();
             AxeItemHooks.addStrippable(ASTRAL_LOG.get(), STRIPPED_ASTRAL_LOG.get());
+            AxeItemHooks.addStrippable(FLOWERING_ASTRAL_LOG.get(), STRIPPED_ASTRAL_LOG.get());
             AxeItemHooks.addStrippable(ASTRAL_WOOD.get(), STRIPPED_ASTRAL_WOOD.get());
             AxeItemHooks.addStrippable(VOIDVINE_BLOCK.get(), STRIPPED_VOIDVINE_BLOCK.get());
             registerFuels();
@@ -489,6 +495,7 @@ public final class ModBlocks {
         }
         for (RegistrySupplier<? extends Block> block : List.of(
                 ASTRAL_LOG,
+                FLOWERING_ASTRAL_LOG,
                 ASTRAL_WOOD,
                 STRIPPED_ASTRAL_LOG,
                 STRIPPED_ASTRAL_WOOD,
