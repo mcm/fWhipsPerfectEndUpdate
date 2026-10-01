@@ -24,6 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -52,14 +53,33 @@ public final class VoidvineWoodGameTests {
     }
 
     @GameTest
-    public static void stalksCraftIntoBlockAndSticks(GameTestHelper helper) {
+    public static void stalksCraftIntoSticksOnly(GameTestHelper helper) {
         ItemStack stalk = new ItemStack(ModBlocks.VOIDVINE.get());
-        ItemStack block = craft(helper, CraftingInput.of(3, 3, Collections.nCopies(9, stalk)));
-        helper.assertTrue(
-                block.is(ModBlocks.VOIDVINE_BLOCK.get().asItem()) && block.getCount() == 1,
-                "9 stalks crafted into " + block);
         ItemStack sticks = craft(helper, CraftingInput.of(1, 2, List.of(stalk, stalk)));
         helper.assertTrue(sticks.is(Items.STICK) && sticks.getCount() == 1, "2 stalks crafted into " + sticks);
+        ItemStack nine = craft(helper, CraftingInput.of(3, 3, Collections.nCopies(9, stalk)));
+        helper.assertFalse(nine.is(ModBlocks.VOIDVINE_BLOCK.get().asItem()), "9 stalks crafted into " + nine);
+        helper.succeed();
+    }
+
+    /** US-006 (MOD-50): the Voidvine Block comes only from Endling bartering, so no recipe makes it. */
+    @GameTest
+    public static void noRecipeOutputsVoidvineBlock(GameTestHelper helper) {
+        Item block = ModBlocks.VOIDVINE_BLOCK.get().asItem();
+        for (RecipeHolder<?> recipe : helper.getLevel().getRecipeManager().getRecipes()) {
+            helper.assertFalse(
+                    recipe.value()
+                            .getResultItem(helper.getLevel().registryAccess())
+                            .is(block),
+                    "recipe " + recipe.id() + " outputs the Voidvine Block");
+        }
+        helper.assertTrue(
+                helper.getLevel()
+                                .getServer()
+                                .getAdvancements()
+                                .get(SomeonesPerfectEnd.id("recipes/building_blocks/voidvine_block"))
+                        == null,
+                "the Voidvine Block recipe advancement should be gone");
         helper.succeed();
     }
 
