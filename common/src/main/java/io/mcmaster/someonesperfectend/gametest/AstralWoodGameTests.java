@@ -1,6 +1,7 @@
 package io.mcmaster.someonesperfectend.gametest;
 
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
+import io.mcmaster.someonesperfectend.block.ModBlockTags;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.block.ModWoodTypes;
 import io.mcmaster.someonesperfectend.mixin.FireBlockInvoker;
@@ -8,9 +9,14 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.FilteredText;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -21,10 +27,12 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -58,9 +66,99 @@ public final class AstralWoodGameTests {
     }
 
     @GameTest
+    public static void axeStripsFloweringLogKeepingAxis(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+        int x = 1;
+        for (Direction.Axis axis : Direction.Axis.values()) {
+            BlockPos pos = new BlockPos(x, 1, 1);
+            x += 2;
+            helper.setBlock(
+                    pos,
+                    ModBlocks.FLOWERING_ASTRAL_LOG.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis));
+            useOnTop(helper, player, pos);
+            BlockState stripped = helper.getBlockState(pos);
+            helper.assertTrue(
+                    stripped.is(ModBlocks.STRIPPED_ASTRAL_LOG.get()), "flowering log was not stripped: " + stripped);
+            helper.assertTrue(stripped.getValue(RotatedPillarBlock.AXIS) == axis, "stripping lost the axis " + axis);
+        }
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void floweringLogDropsAstralLogWithoutSilkTouch(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, ModBlocks.FLOWERING_ASTRAL_LOG.get());
+        BlockState state = helper.getBlockState(pos);
+        BlockPos abs = helper.absolutePos(pos);
+        for (ItemStack tool : List.of(ItemStack.EMPTY, new ItemStack(Items.DIAMOND_AXE))) {
+            List<Item> drops = Block.getDrops(state, level, abs, null, null, tool).stream()
+                    .map(ItemStack::getItem)
+                    .toList();
+            helper.assertTrue(
+                    drops.equals(List.of(ModBlocks.ASTRAL_LOG.get().asItem())),
+                    "flowering log mined with " + tool + " dropped " + drops);
+        }
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void floweringLogDropsItselfWithSilkTouch(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, ModBlocks.FLOWERING_ASTRAL_LOG.get());
+        ItemStack silkAxe = new ItemStack(Items.DIAMOND_AXE);
+        silkAxe.enchant(
+                level.registryAccess()
+                        .registryOrThrow(Registries.ENCHANTMENT)
+                        .getHolderOrThrow(Enchantments.SILK_TOUCH),
+                1);
+        List<Item> drops =
+                Block.getDrops(helper.getBlockState(pos), level, helper.absolutePos(pos), null, null, silkAxe).stream()
+                        .map(ItemStack::getItem)
+                        .toList();
+        helper.assertTrue(
+                drops.equals(List.of(ModBlocks.FLOWERING_ASTRAL_LOG.get().asItem())),
+                "flowering log mined with Silk Touch dropped " + drops);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void floweringLogSharesAstralLogTagsAndBehavior(GameTestHelper helper) {
+        BlockState flowering = ModBlocks.FLOWERING_ASTRAL_LOG.get().defaultBlockState();
+        for (TagKey<Block> tag : List.of(
+                ModBlockTags.ASTRAL_LOGS, BlockTags.LOGS_THAT_BURN, BlockTags.LOGS, BlockTags.MINEABLE_WITH_AXE)) {
+            helper.assertTrue(flowering.is(tag), "flowering log is not in " + tag.location());
+        }
+        ItemStack stack = new ItemStack(ModBlocks.FLOWERING_ASTRAL_LOG.get());
+        for (TagKey<Item> tag : List.of(
+                TagKey.create(Registries.ITEM, SomeonesPerfectEnd.id("astral_logs")),
+                ItemTags.LOGS_THAT_BURN,
+                ItemTags.LOGS)) {
+            helper.assertTrue(stack.is(tag), "flowering log item is not in " + tag.location());
+        }
+        helper.assertTrue(AbstractFurnaceBlockEntity.isFuel(stack), "flowering log is not furnace fuel");
+        helper.assertTrue(
+                ComposterBlock.COMPOSTABLES.getFloat(stack.getItem())
+                        == ComposterBlock.COMPOSTABLES.getFloat(
+                                ModBlocks.ASTRAL_LOG.get().asItem()),
+                "flowering log compost value differs from the Astral Log");
+        assertFireOdds(helper, (FireBlockInvoker) Blocks.FIRE, ModBlocks.FLOWERING_ASTRAL_LOG.get(), 5, 5);
+        helper.assertTrue(
+                ModBlocks.FLOWERING_ASTRAL_LOG.get().defaultDestroyTime()
+                                == ModBlocks.ASTRAL_LOG.get().defaultDestroyTime()
+                        && ModBlocks.FLOWERING_ASTRAL_LOG.get().getExplosionResistance()
+                                == ModBlocks.ASTRAL_LOG.get().getExplosionResistance(),
+                "flowering log strength differs from the Astral Log");
+        helper.succeed();
+    }
+
+    @GameTest
     public static void logCraftsIntoPlanks(GameTestHelper helper) {
         for (ItemLike log : List.of(
                 ModBlocks.ASTRAL_LOG.get(),
+                ModBlocks.FLOWERING_ASTRAL_LOG.get(),
                 ModBlocks.ASTRAL_WOOD.get(),
                 ModBlocks.STRIPPED_ASTRAL_LOG.get(),
                 ModBlocks.STRIPPED_ASTRAL_WOOD.get())) {
