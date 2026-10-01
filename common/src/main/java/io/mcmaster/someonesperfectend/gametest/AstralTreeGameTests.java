@@ -1,8 +1,12 @@
 package io.mcmaster.someonesperfectend.gametest;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.block.AstralSaplingBlock;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
+import io.mcmaster.someonesperfectend.worldgen.AstralTreeConfiguration;
 import io.mcmaster.someonesperfectend.worldgen.ModFeatures;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -12,6 +16,7 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
@@ -23,6 +28,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 public final class AstralTreeGameTests {
@@ -64,7 +70,7 @@ public final class AstralTreeGameTests {
         for (int i = 0; i < 100 && level.getBlockState(abs).is(ModBlocks.ASTRAL_SAPLING.get()); i++) {
             BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), level, abs);
         }
-        helper.assertBlockPresent(ModBlocks.ASTRAL_LOG.get(), CENTER.above());
+        helper.assertTrue(isTreeLog(helper.getBlockState(CENTER.above())), "no astral log above the sapling");
         assertTreeShape(helper, CENTER);
         helper.succeed();
     }
@@ -80,7 +86,7 @@ public final class AstralTreeGameTests {
             for (int i = 0; i < 20 && level.getBlockState(abs).is(ModBlocks.ASTRAL_SAPLING.get()); i++) {
                 level.getBlockState(abs).randomTick(level, abs, level.random);
             }
-            helper.assertBlockPresent(ModBlocks.ASTRAL_LOG.get(), CENTER.above());
+            helper.assertTrue(isTreeLog(helper.getBlockState(CENTER.above())), "no astral log above the sapling");
         });
     }
 
@@ -140,9 +146,8 @@ public final class AstralTreeGameTests {
      * that aren't decaying; returns {leaves, flowering}.
      */
     private static int[] assertTreeShape(GameTestHelper helper, BlockPos origin) {
-        Block log = ModBlocks.ASTRAL_LOG.get();
         int height = 0;
-        while (helper.getBlockState(origin.above(height)).is(log)) {
+        while (isTreeLog(helper.getBlockState(origin.above(height)))) {
             height++;
         }
         helper.assertTrue(height >= 8 && height <= 16, "trunk height " + height + " is outside 8-16");
@@ -151,11 +156,11 @@ public final class AstralTreeGameTests {
         int flowering = 0;
         for (BlockPos pos : BlockPos.betweenClosed(0, origin.getY(), 0, 16, 23, 16)) {
             BlockState state = helper.getBlockState(pos);
-            if (state.is(log)) {
+            if (isTreeLog(state)) {
                 helper.assertTrue(pos.getY() < origin.getY() + height, "log above the trunk top at " + pos.immutable());
                 int neighbors = 0;
                 for (Direction direction : net.minecraft.core.Direction.values()) {
-                    if (helper.getBlockState(pos.relative(direction)).is(log)) {
+                    if (isTreeLog(helper.getBlockState(pos.relative(direction)))) {
                         neighbors++;
                     }
                 }
@@ -178,6 +183,132 @@ public final class AstralTreeGameTests {
         helper.assertTrue(branches >= 2 && branches <= 4, branches + " branches, expected 2-4");
         helper.assertTrue(leaves + flowering > 20, "only " + (leaves + flowering) + " leaves");
         return new int[] {leaves, flowering};
+    }
+
+    /** Whether the state is a log that Astral trees generate: an Astral Log or a Flowering Astral Log. */
+    private static boolean isTreeLog(BlockState state) {
+        return state.is(ModBlocks.ASTRAL_LOG.get()) || state.is(ModBlocks.FLOWERING_ASTRAL_LOG.get());
+    }
+
+    /**
+     * Grows 20 Astral saplings with fixed seeds: 5-15% of all their logs are Flowering Astral Logs, each pointing
+     * along the same axis an Astral Log would; with {@code flowering_log_chance} 0 the feature places none.
+     */
+    @GameTest(template = TALL, timeoutTicks = 200)
+    public static void floweringLogsInGrownTrees(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockState sapling = ModBlocks.ASTRAL_SAPLING.get().defaultBlockState();
+        int logs = 0;
+        int flowering = 0;
+        for (int seed = 0; seed < 20; seed++) {
+            helper.setBlock(CENTER.below(), ModBlocks.END_TURF.get());
+            helper.setBlock(CENTER, sapling);
+            helper.assertTrue(
+                    AstralSaplingBlock.TREE_GROWER.growTree(
+                            level,
+                            level.getChunkSource().getGenerator(),
+                            helper.absolutePos(CENTER),
+                            sapling,
+                            RandomSource.create(seed)),
+                    "sapling seed " + seed + " did not grow");
+            assertTreeShape(helper, CENTER);
+            int[] counts = countLogs(helper);
+            logs += counts[0];
+            flowering += counts[1];
+            clear(helper);
+        }
+        double share = (double) flowering / (logs + flowering);
+        helper.assertTrue(share >= 0.05 && share <= 0.15, "flowering log share " + share + " is not about 10%");
+
+        ConfiguredFeature<?, ?> tree = level.registryAccess()
+                .registryOrThrow(Registries.CONFIGURED_FEATURE)
+                .getOrThrow(ModFeatures.ASTRAL_TREE_CONFIGURED);
+        AstralTreeConfiguration none = ((AstralTreeConfiguration) tree.config()).withFloweringLogChance(0.0F);
+        int plainLogs = 0;
+        for (int seed = 0; seed < 20; seed++) {
+            helper.setBlock(CENTER.below(), ModBlocks.END_TURF.get());
+            helper.assertTrue(
+                    ModFeatures.ASTRAL_TREE
+                            .get()
+                            .place(
+                                    none,
+                                    level,
+                                    level.getChunkSource().getGenerator(),
+                                    RandomSource.create(seed),
+                                    helper.absolutePos(CENTER)),
+                    "tree seed " + seed + " failed to place");
+            int[] counts = countLogs(helper);
+            helper.assertTrue(counts[1] == 0, counts[1] + " flowering logs with flowering_log_chance 0");
+            plainLogs += counts[0];
+            clear(helper);
+        }
+        helper.assertTrue(plainLogs > 0, "no logs with flowering_log_chance 0");
+        helper.succeed();
+    }
+
+    /**
+     * Counts {astral logs, flowering astral logs} in the test area, and asserts every flowering log has the axis of
+     * its position in the tree: vertical where a log continues above or below it, horizontal otherwise.
+     */
+    private static int[] countLogs(GameTestHelper helper) {
+        int logs = 0;
+        int flowering = 0;
+        for (BlockPos pos : BlockPos.betweenClosed(0, 1, 0, 16, 23, 16)) {
+            BlockState state = helper.getBlockState(pos);
+            if (state.is(ModBlocks.ASTRAL_LOG.get())) {
+                logs++;
+            } else if (state.is(ModBlocks.FLOWERING_ASTRAL_LOG.get())) {
+                flowering++;
+                Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
+                if (axis != Direction.Axis.Y) {
+                    BlockPos inward = null;
+                    for (Direction direction : Direction.Plane.HORIZONTAL) {
+                        if (direction.getAxis() == axis && isTreeLog(helper.getBlockState(pos.relative(direction)))) {
+                            inward = pos.relative(direction);
+                        }
+                    }
+                    helper.assertTrue(
+                            inward != null,
+                            "horizontal flowering log without a log along its axis at " + pos.immutable());
+                }
+            }
+        }
+        return new int[] {logs, flowering};
+    }
+
+    @GameTest
+    public static void floweringLogChanceConfig(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        for (var key : List.of(ModFeatures.ASTRAL_TREE_CONFIGURED, ModFeatures.END_FOREST_ASTRAL_TREE_CONFIGURED)) {
+            AstralTreeConfiguration config = (AstralTreeConfiguration) level.registryAccess()
+                    .registryOrThrow(Registries.CONFIGURED_FEATURE)
+                    .getOrThrow(key)
+                    .config();
+            helper.assertTrue(
+                    config.floweringLogChance() == 0.1F,
+                    key.location() + " flowering_log_chance is " + config.floweringLogChance());
+        }
+        // A configuration without the field still loads, with the default chance.
+        JsonObject json = JsonParser.parseString("""
+                {
+                  "trunk_provider": {"type": "minecraft:simple_state_provider",
+                      "state": {"Name": "someonesperfectend:astral_log", "Properties": {"axis": "y"}}},
+                  "foliage_provider": {"type": "minecraft:simple_state_provider",
+                      "state": {"Name": "someonesperfectend:astral_leaves"}},
+                  "height": 10,
+                  "branch_count": 2
+                }""").getAsJsonObject();
+        AstralTreeConfiguration legacy =
+                AstralTreeConfiguration.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+        helper.assertTrue(
+                legacy.floweringLogChance() == AstralTreeConfiguration.DEFAULT_FLOWERING_LOG_CHANCE
+                        && legacy.floweringLogChance() == 0.1F,
+                "default flowering_log_chance " + legacy.floweringLogChance());
+        json.addProperty("flowering_log_chance", 1.5F);
+        helper.assertTrue(
+                AstralTreeConfiguration.CODEC.parse(JsonOps.INSTANCE, json).isError(),
+                "flowering_log_chance 1.5 should be rejected");
+        helper.succeed();
     }
 
     private static void clear(GameTestHelper helper) {

@@ -2,6 +2,7 @@ package io.mcmaster.someonesperfectend.worldgen;
 
 import com.mojang.serialization.Codec;
 import io.mcmaster.someonesperfectend.block.ModBlockTags;
+import io.mcmaster.someonesperfectend.block.ModBlocks;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -31,7 +32,8 @@ import net.minecraft.world.level.material.Fluids;
  * or three blocks and then turn upward (the elbowed segments of a chorus plant), and a leaf cluster at the tip of the
  * stem and of every branch. The trunk starts at the origin, which must sit on {@link ModBlockTags#END_PLANT_SOIL}.
  * Nothing is placed if any log position is blocked, or, with {@link AstralTreeConfiguration#maxOverhang()}, if any
- * log or leaf would stick out further than that past the island edge.
+ * log or leaf would stick out further than that past the island edge. Each log independently becomes a Flowering
+ * Astral Log (same axis) with {@link AstralTreeConfiguration#floweringLogChance()}.
  */
 public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
     /** Leaves are placed within this distance of a branch tip. */
@@ -132,7 +134,9 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
         }
 
         for (Map.Entry<BlockPos, Direction.Axis> log : logs.entrySet()) {
-            BlockState state = config.trunkProvider().getState(random, log.getKey());
+            BlockState state = random.nextFloat() < config.floweringLogChance()
+                    ? ModBlocks.FLOWERING_ASTRAL_LOG.get().defaultBlockState()
+                    : config.trunkProvider().getState(random, log.getKey());
             if (state.hasProperty(BlockStateProperties.AXIS)) {
                 state = state.setValue(BlockStateProperties.AXIS, log.getValue());
             }
