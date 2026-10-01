@@ -1,6 +1,7 @@
 package io.mcmaster.someonesperfectend.recolor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -80,5 +81,36 @@ class RecolorRecipeParserTest {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> RecolorRecipeParser.parse("{\"source\": \"Bad Id\", \"target\": \"b\", \"palette\": {}}"));
+    }
+
+    @Test
+    void parsesFlipAndKeepOnlyMapped() {
+        List<RecolorRecipe> recipes = RecolorRecipeParser.parse("""
+                {
+                  "palette": {"colors": {"#ff0000": "#00ff00"}},
+                  "recipes": [
+                    {"source": "a", "target": "b", "flip": "vertical", "keep_only_mapped": true},
+                    {"source": "a", "target": "c", "flip": "horizontal"},
+                    {"source": "a", "target": "d"}
+                  ]
+                }
+                """);
+        assertEquals(Optional.of(RecolorRecipe.Flip.VERTICAL), recipes.get(0).flip());
+        assertTrue(recipes.get(0).keepOnlyMapped());
+        assertEquals(Optional.of(RecolorRecipe.Flip.HORIZONTAL), recipes.get(1).flip());
+        assertFalse(recipes.get(1).keepOnlyMapped());
+        assertTrue(recipes.get(2).flip().isEmpty());
+        assertFalse(recipes.get(2).keepOnlyMapped());
+    }
+
+    @Test
+    void invalidFlipIsAnErrorNamingTheFile() {
+        JsonParseException error = assertThrows(
+                JsonParseException.class,
+                () -> RecolorRecipeParser.parse(
+                        "assets/someonesperfectend/recolor/vines.json",
+                        "{\"source\": \"a\", \"target\": \"b\", \"palette\": {}, \"flip\": \"diagonal\"}"));
+        assertTrue(error.getMessage().contains("assets/someonesperfectend/recolor/vines.json"), error.getMessage());
+        assertTrue(error.getMessage().contains("diagonal"), error.getMessage());
     }
 }

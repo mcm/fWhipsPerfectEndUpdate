@@ -40,7 +40,8 @@ public final class RecolorExport {
                 for (Path file : files.filter(f -> f.toString().endsWith(".json"))
                         .sorted()
                         .toList()) {
-                    recipes.addAll(RecolorRecipeParser.parse(Files.readString(file, StandardCharsets.UTF_8)));
+                    recipes.addAll(
+                            RecolorRecipeParser.parse(file.toString(), Files.readString(file, StandardCharsets.UTF_8)));
                 }
             }
         }

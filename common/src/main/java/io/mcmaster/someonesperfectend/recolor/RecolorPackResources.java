@@ -109,9 +109,10 @@ public final class RecolorPackResources implements PackResources {
         List<RecolorRecipe> recipes = new ArrayList<>();
         recipeFiles.forEach((id, supplier) -> {
             try (InputStream in = supplier.get()) {
-                recipes.addAll(RecolorRecipeParser.parse(new String(in.readAllBytes(), StandardCharsets.UTF_8)));
+                recipes.addAll(RecolorRecipeParser.parse(
+                        id.toString(), new String(in.readAllBytes(), StandardCharsets.UTF_8)));
             } catch (IOException | RuntimeException e) {
-                LOGGER.warn("Skipping invalid recolor recipe file {}: {}", id, e.toString());
+                LOGGER.warn("Skipping recolor recipe file {}: {}", id, e.toString());
             }
         });
         return recipes;
