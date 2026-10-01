@@ -2,6 +2,7 @@ package io.mcmaster.someonesperfectend.gametest;
 
 import com.mojang.authlib.GameProfile;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
+import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.entity.Endling;
 import io.mcmaster.someonesperfectend.entity.EndlingBarters;
 import io.mcmaster.someonesperfectend.entity.Endlings;
@@ -54,7 +55,7 @@ public final class EndlingBarterGameTests {
         for (String name : List.of(
                 "astral_sapling",
                 "astral_log",
-                "voidvine",
+                "voidvine_block",
                 "voidsoil",
                 "end_turf",
                 "void_petals",
@@ -462,6 +463,12 @@ public final class EndlingBarterGameTests {
                 seen.equals(expected),
                 "every End block should be bartered, missing "
                         + expected.stream().filter(item -> !seen.contains(item)).toList());
+        // US-006 (MOD-50): the Voidvine Block replaced the Voidvine plant in the table.
+        helper.assertTrue(
+                seen.contains(ModBlocks.VOIDVINE_BLOCK.get().asItem()), "the barter table should give Voidvine Blocks");
+        helper.assertFalse(
+                seen.contains(ModBlocks.VOIDVINE.get().asItem()),
+                "the barter table should never give the Voidvine plant");
         endling.discard();
         helper.succeed();
     }

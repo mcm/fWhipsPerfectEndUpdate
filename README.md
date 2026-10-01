@@ -220,6 +220,19 @@ structure starts and `/locate` finds nothing there. `EndlingVillageGameTests` th
 structure-start step (`ChunkGenerator#createStructures`) on a fresh proto chunk and places the start the way
 `/place structure` does.
 
+## Endling bartering and the Voidvine wood set
+
+Endlings in the End take one item from `#someonesperfectend:endling_barter_inputs` (dropped by, or handed over
+from, a player who has `minecraft:end/kill_dragon`), inspect it for 6 seconds and roll
+`loot_table/gameplay/endling_bartering.json` (special inputs such as beacons, totems and beds roll their own
+tables under `gameplay/endling_barter/`). The default table gives Astral saplings and logs, Voidvine Blocks
+(weight 12, 1–2), Voidsoil, End Turf, Void Petals, Glowcaps, Bounce Caps and Voidfruit.
+
+Voidvine itself (the hanging plant grown under Voidsoil) only crafts into sticks. The Voidvine Block has no
+recipe: it comes from Endling barters, or from breaking placed ones. Voidvine and Stripped Voidvine Blocks
+(`#someonesperfectend:voidvine_blocks`) craft into Voidvine Planks; stripped blocks also make hanging signs, and
+the planks make the rest of the set. `EndlingBarterGameTests` and `VoidvineWoodGameTests` check this.
+
 ## Quality gates
 
 ```

@@ -257,7 +257,7 @@ public final class ModBlocks {
     /** Every Voidvine segment above the head (block id {@code voidvine_plant}). */
     public static final RegistrySupplier<VoidvinePlantBlock> VOIDVINE_BODY =
             ModRegistries.blockOnly("voidvine_plant", () -> new VoidvinePlantBlock(voidvineProperties()));
-    /** The Voidvine stalk: dropped by every segment, used by the wood-set recipes below, planted under Voidsoil. */
+    /** The Voidvine stalk: dropped by every segment, crafts into sticks, planted under Voidsoil. */
     public static final RegistrySupplier<Item> VOIDVINE = ModRegistries.item(
             "voidvine", () -> new ItemNameBlockItem(VOIDVINE_HEAD.get(), ModRegistries.itemProperties()));
     /** Food grown on Voidvines. Unlike chorus fruit it never teleports. */
@@ -269,10 +269,12 @@ public final class ModBlocks {
                             .saturationModifier(0.6F)
                             .build())));
 
+    /** Not craftable: Endlings barter it (MOD-50 US-006); it crafts into planks and strips like a log. */
     public static final RegistrySupplier<RotatedPillarBlock> VOIDVINE_BLOCK = ModRegistries.block(
             "voidvine_block",
             () -> new RotatedPillarBlock(
                     logProperties(VOIDVINE_WOOD_COLOR, VOIDVINE_BARK_COLOR, ModWoodTypes.VOIDVINE)));
+
     public static final RegistrySupplier<RotatedPillarBlock> STRIPPED_VOIDVINE_BLOCK = ModRegistries.block(
             "stripped_voidvine_block",
             () -> new RotatedPillarBlock(
