@@ -14,24 +14,31 @@
   },
   "recipes": [
     {
-      "source": "minecraft:block/bamboo_stalk",
-      "target": "someonesperfectend:block/voidvine_stalk"
+      "source": "minecraft:block/twisting_vines",
+      "target": "someonesperfectend:block/voidvine",
+      "flip": "vertical"
     },
     {
-      "source": "minecraft:block/cave_vines",
-      "target": "someonesperfectend:block/voidvine"
+      "source": "minecraft:block/twisting_vines_plant",
+      "target": "someonesperfectend:block/voidvine_plant",
+      "flip": "vertical"
     },
     {
       "source": "minecraft:block/cave_vines_lit",
-      "target": "someonesperfectend:block/voidvine_lit"
-    },
-    {
-      "source": "minecraft:block/cave_vines_plant",
-      "target": "someonesperfectend:block/voidvine_plant"
+      "target": "someonesperfectend:block/voidvine_berries",
+      "keep_only_mapped": true,
+      "flip": "vertical"
     },
     {
       "source": "minecraft:block/cave_vines_plant_lit",
-      "target": "someonesperfectend:block/voidvine_plant_lit"
+      "target": "someonesperfectend:block/voidvine_plant_berries",
+      "keep_only_mapped": true,
+      "flip": "vertical"
+    },
+    {
+      "source": "minecraft:block/twisting_vines_plant",
+      "target": "someonesperfectend:item/voidvine",
+      "flip": "vertical"
     },
     {
       "source": "minecraft:item/glow_berries",

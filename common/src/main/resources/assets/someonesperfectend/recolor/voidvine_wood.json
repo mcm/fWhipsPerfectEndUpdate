@@ -68,10 +68,6 @@
       "target": "someonesperfectend:block/voidvine_fence_gate_particle"
     },
     {
-      "source": "minecraft:item/bamboo",
-      "target": "someonesperfectend:item/voidvine"
-    },
-    {
       "source": "minecraft:item/bamboo_door",
       "target": "someonesperfectend:item/voidvine_door"
     },
