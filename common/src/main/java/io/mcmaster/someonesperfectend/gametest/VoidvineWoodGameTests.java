@@ -102,17 +102,33 @@ public final class VoidvineWoodGameTests {
     }
 
     @GameTest
-    public static void slabsCraftIntoMosaic(GameTestHelper helper) {
+    public static void planksCraftIntoSlabsAndStairs(GameTestHelper helper) {
+        ItemStack planks = new ItemStack(ModBlocks.VOIDVINE_PLANKS.get());
+        ItemStack slabs = craft(helper, CraftingInput.of(3, 1, Collections.nCopies(3, planks)));
+        helper.assertTrue(
+                slabs.is(ModBlocks.VOIDVINE_SLAB.get().asItem()) && slabs.getCount() == 6,
+                "3 planks crafted into " + slabs);
+        ItemStack stairs = craft(
+                helper,
+                CraftingInput.of(
+                        3,
+                        3,
+                        List.of(
+                                planks,
+                                ItemStack.EMPTY,
+                                ItemStack.EMPTY,
+                                planks,
+                                planks,
+                                ItemStack.EMPTY,
+                                planks,
+                                planks,
+                                planks)));
+        helper.assertTrue(
+                stairs.is(ModBlocks.VOIDVINE_STAIRS.get().asItem()) && stairs.getCount() == 4,
+                "6 planks crafted into " + stairs);
         ItemStack slab = new ItemStack(ModBlocks.VOIDVINE_SLAB.get());
-        ItemStack mosaic = craft(helper, CraftingInput.of(1, 2, List.of(slab, slab)));
-        helper.assertTrue(
-                mosaic.is(ModBlocks.VOIDVINE_MOSAIC.get().asItem()) && mosaic.getCount() == 1,
-                "2 slabs crafted into " + mosaic);
-        ItemStack mosaicStack = new ItemStack(ModBlocks.VOIDVINE_MOSAIC.get());
-        ItemStack mosaicSlabs = craft(helper, CraftingInput.of(3, 1, Collections.nCopies(3, mosaicStack)));
-        helper.assertTrue(
-                mosaicSlabs.is(ModBlocks.VOIDVINE_MOSAIC_SLAB.get().asItem()) && mosaicSlabs.getCount() == 6,
-                "3 mosaic crafted into " + mosaicSlabs);
+        ItemStack twoSlabs = craft(helper, CraftingInput.of(1, 2, List.of(slab, slab)));
+        helper.assertTrue(twoSlabs.isEmpty(), "2 slabs crafted into " + twoSlabs);
         helper.succeed();
     }
 
@@ -121,11 +137,8 @@ public final class VoidvineWoodGameTests {
         FireBlockInvoker fire = (FireBlockInvoker) Blocks.FIRE;
         for (Block block : List.of(
                 ModBlocks.VOIDVINE_PLANKS.get(),
-                ModBlocks.VOIDVINE_MOSAIC.get(),
                 ModBlocks.VOIDVINE_STAIRS.get(),
                 ModBlocks.VOIDVINE_SLAB.get(),
-                ModBlocks.VOIDVINE_MOSAIC_STAIRS.get(),
-                ModBlocks.VOIDVINE_MOSAIC_SLAB.get(),
                 ModBlocks.VOIDVINE_FENCE.get(),
                 ModBlocks.VOIDVINE_FENCE_GATE.get())) {
             assertFireOdds(helper, fire, block, 5, 20);
@@ -139,11 +152,8 @@ public final class VoidvineWoodGameTests {
                 Map.entry(ModBlocks.VOIDVINE_BLOCK.get(), 300),
                 Map.entry(ModBlocks.STRIPPED_VOIDVINE_BLOCK.get(), 300),
                 Map.entry(ModBlocks.VOIDVINE_PLANKS.get(), 300),
-                Map.entry(ModBlocks.VOIDVINE_MOSAIC.get(), 300),
                 Map.entry(ModBlocks.VOIDVINE_STAIRS.get(), 300),
-                Map.entry(ModBlocks.VOIDVINE_MOSAIC_STAIRS.get(), 300),
                 Map.entry(ModBlocks.VOIDVINE_SLAB.get(), 150),
-                Map.entry(ModBlocks.VOIDVINE_MOSAIC_SLAB.get(), 150),
                 Map.entry(ModBlocks.VOIDVINE_FENCE.get(), 300),
                 Map.entry(ModBlocks.VOIDVINE_FENCE_GATE.get(), 300),
                 Map.entry(ModBlocks.VOIDVINE_TRAPDOOR.get(), 300),

@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab",
-  "textures": {
-    "bottom": "someonesperfectend:block/voidvine_mosaic",
-    "side": "someonesperfectend:block/voidvine_mosaic",
-    "top": "someonesperfectend:block/voidvine_mosaic"
-  }
-}

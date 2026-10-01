@@ -207,7 +207,7 @@ in its `config/terrablender.toml`.
 `someonesperfectend:endling_village` is a custom structure type (`worldgen/EndlingVillageStructure`) whose
 pieces are placed by code (`EndlingVillagePieces`); it uses no structure `.nbt` files. The plan
 (`EndlingVillageLayout`) has 1–3 `huge_glowcap`s near the center and a ring of 3–6 huts around them (Voidvine
-mosaic floor, Astral or Voidvine walls, glowcap-block roof, doorway facing the center). Each hut spawns one
+plank floor, Astral or Voidvine walls, glowcap-block roof, doorway facing the center). Each hut spawns one
 endling bound to the village center (`Endling#setVillage`). A start needs a column at least 1024 blocks (plus
 the village radius) from the origin, a biome in `#someonesperfectend:has_structure/endling_village`
 (`end_plains`, `end_forest`, `end_highlands`), and an island that reaches past the village radius all around,

@@ -281,10 +281,6 @@ public final class ModBlocks {
             "voidvine_planks",
             () -> new Block(
                     woodProperties(VOIDVINE_WOOD_COLOR, ModWoodTypes.VOIDVINE).strength(2.0F, 3.0F)));
-    public static final RegistrySupplier<Block> VOIDVINE_MOSAIC = ModRegistries.block(
-            "voidvine_mosaic",
-            () -> new Block(
-                    woodProperties(VOIDVINE_WOOD_COLOR, ModWoodTypes.VOIDVINE).strength(2.0F, 3.0F)));
     public static final RegistrySupplier<StairBlock> VOIDVINE_STAIRS = ModRegistries.block(
             "voidvine_stairs",
             () -> new StairBlock(
@@ -292,15 +288,6 @@ public final class ModBlocks {
                     BlockBehaviour.Properties.ofLegacyCopy(VOIDVINE_PLANKS.get())));
     public static final RegistrySupplier<SlabBlock> VOIDVINE_SLAB = ModRegistries.block(
             "voidvine_slab",
-            () -> new SlabBlock(
-                    woodProperties(VOIDVINE_WOOD_COLOR, ModWoodTypes.VOIDVINE).strength(2.0F, 3.0F)));
-    public static final RegistrySupplier<StairBlock> VOIDVINE_MOSAIC_STAIRS = ModRegistries.block(
-            "voidvine_mosaic_stairs",
-            () -> new StairBlock(
-                    VOIDVINE_MOSAIC.get().defaultBlockState(),
-                    BlockBehaviour.Properties.ofLegacyCopy(VOIDVINE_MOSAIC.get())));
-    public static final RegistrySupplier<SlabBlock> VOIDVINE_MOSAIC_SLAB = ModRegistries.block(
-            "voidvine_mosaic_slab",
             () -> new SlabBlock(
                     woodProperties(VOIDVINE_WOOD_COLOR, ModWoodTypes.VOIDVINE).strength(2.0F, 3.0F)));
     public static final RegistrySupplier<FenceBlock> VOIDVINE_FENCE = ModRegistries.block(
@@ -484,11 +471,8 @@ public final class ModBlocks {
                 ASTRAL_FENCE,
                 ASTRAL_FENCE_GATE,
                 VOIDVINE_PLANKS,
-                VOIDVINE_MOSAIC,
                 VOIDVINE_SLAB,
                 VOIDVINE_STAIRS,
-                VOIDVINE_MOSAIC_SLAB,
-                VOIDVINE_MOSAIC_STAIRS,
                 VOIDVINE_FENCE,
                 VOIDVINE_FENCE_GATE)) {
             fire.setFlammable(block.get(), 5, 20);
@@ -517,9 +501,6 @@ public final class ModBlocks {
         FuelRegistry.register(
                 300,
                 VOIDVINE_BLOCK.get().asItem(),
-                STRIPPED_VOIDVINE_BLOCK.get().asItem(),
-                VOIDVINE_MOSAIC.get().asItem(),
-                VOIDVINE_MOSAIC_STAIRS.get().asItem());
-        FuelRegistry.register(150, VOIDVINE_MOSAIC_SLAB.get().asItem());
+                STRIPPED_VOIDVINE_BLOCK.get().asItem());
     }
 }
