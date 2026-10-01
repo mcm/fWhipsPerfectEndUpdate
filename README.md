@@ -105,6 +105,28 @@ A recipe file holds one recipe or a list sharing a palette:
 and optionally `colors`, exact `"#rrggbb": "#rrggbb"` replacements applied before the gradient or shift.
 Alpha is always kept and fully transparent pixels are left alone.
 
+Each recipe can also set:
+
+- `"keep_only_mapped": true`: only pixels whose source RGB is a key of the (recipe's or shared) palette's
+  `colors` are kept and recolored; every other pixel becomes transparent. Handy for cutting an overlay (such as
+  berries) out of a vanilla texture.
+- `"flip": "vertical"` or `"flip": "horizontal"`: mirrors the image after recoloring. A vertical flip of an
+  animated texture (one with a `.png.mcmeta`) turns each square frame upside down and keeps the frame order.
+  Any other value is a load error naming the recipe file.
+
+```json
+{
+  "palette": {"gradient": ["#0f2616", "#3d7d45", "#76b371"],
+              "colors": {"#eb8931": "#3fd3dd", "#f7e26b": "#c6fbff"}},
+  "recipes": [
+    {"source": "minecraft:block/twisting_vines", "target": "someonesperfectend:block/hanging_vine",
+     "flip": "vertical"},
+    {"source": "minecraft:block/cave_vines_lit", "target": "someonesperfectend:block/hanging_vine_berries",
+     "flip": "vertical", "keep_only_mapped": true}
+  ]
+}
+```
+
 `./gradlew exportRecoloredTextures` writes every recipe's output to `build/recolored-textures/` (git-ignored)
 from the vanilla client jar Loom downloaded (or `-PclientJar=<path>`), as a starting point for artists.
 `./gradlew build` runs `checkNoMojangTextures` in every module, which fails if any output jar or source tree

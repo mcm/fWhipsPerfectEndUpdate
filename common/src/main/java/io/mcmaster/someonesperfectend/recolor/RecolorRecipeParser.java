@@ -46,9 +46,22 @@ import java.util.Optional;
  * </ul>
  * and optionally {@code "colors"}: explicit {@code {"#rrggbb": "#rrggbb"}} replacements, which win over the
  * gradient or shift. Alpha is always kept.
+ *
+ * <p>Each recipe may also set {@code "keep_only_mapped": true} (only pixels whose source RGB is a key of the
+ * palette's {@code colors} are kept, the rest become transparent) and {@code "flip": "vertical" | "horizontal"}
+ * (mirrors the image after recoloring).
  */
 public final class RecolorRecipeParser {
     private RecolorRecipeParser() {}
+
+    /** Parses a recipe file; any error is rethrown as a {@link JsonParseException} naming {@code fileName}. */
+    public static List<RecolorRecipe> parse(String fileName, String json) {
+        try {
+            return parse(json);
+        } catch (RuntimeException e) {
+            throw new JsonParseException("Invalid recolor recipe file " + fileName + ": " + e.getMessage(), e);
+        }
+    }
 
     public static List<RecolorRecipe> parse(String json) {
         JsonElement root = JsonParser.parseString(json);
@@ -76,7 +89,22 @@ public final class RecolorRecipeParser {
         Palette palette = object.has("palette")
                 ? parsePalette(object.getAsJsonObject("palette"))
                 : shared.orElseThrow(() -> new JsonParseException("Recipe for " + target + " has no palette"));
-        return new RecolorRecipe(source, target, palette);
+        Optional<RecolorRecipe.Flip> flip = object.has("flip")
+                ? Optional.of(parseFlip(object.get("flip").getAsString(), target))
+                : Optional.empty();
+        boolean keepOnlyMapped =
+                object.has("keep_only_mapped") && object.get("keep_only_mapped").getAsBoolean();
+        return new RecolorRecipe(source, target, palette, flip, keepOnlyMapped);
+    }
+
+    private static RecolorRecipe.Flip parseFlip(String flip, TextureId target) {
+        return switch (flip) {
+            case "vertical" -> RecolorRecipe.Flip.VERTICAL;
+            case "horizontal" -> RecolorRecipe.Flip.HORIZONTAL;
+            default ->
+                throw new JsonParseException("Recipe for " + target + " has invalid flip \"" + flip
+                        + "\" (expected \"vertical\" or \"horizontal\")");
+        };
     }
 
     public static Palette parsePalette(JsonObject object) {

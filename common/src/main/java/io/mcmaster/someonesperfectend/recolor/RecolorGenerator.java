@@ -56,7 +56,10 @@ public final class RecolorGenerator {
                 TextureId target = recipe.target();
                 files.put(
                         new GeneratedFile(target.namespace(), target.pngPath()),
-                        recolorPng(source.get().png(), recipe.palette()));
+                        recolorPng(
+                                source.get().png(),
+                                recipe,
+                                source.get().mcmeta().isPresent()));
                 source.get()
                         .mcmeta()
                         .ifPresent(mcmeta ->
@@ -73,6 +76,20 @@ public final class RecolorGenerator {
 
     /** Decodes a PNG, applies the palette to every frame (the whole image) and encodes it as ARGB PNG. */
     public static byte[] recolorPng(byte[] png, Palette palette) throws IOException {
+        return recolorPng(png, palette, Optional.empty(), false, false);
+    }
+
+    /**
+     * Like {@link #recolorPng(byte[], Palette)}, also honoring the recipe's {@code keep_only_mapped} and flip.
+     * {@code animated} (the source has a {@code .png.mcmeta}) makes a vertical flip work frame by frame.
+     */
+    public static byte[] recolorPng(byte[] png, RecolorRecipe recipe, boolean animated) throws IOException {
+        return recolorPng(png, recipe.palette(), recipe.flip(), recipe.keepOnlyMapped(), animated);
+    }
+
+    private static byte[] recolorPng(
+            byte[] png, Palette palette, Optional<RecolorRecipe.Flip> flip, boolean keepOnlyMapped, boolean animated)
+            throws IOException {
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(png));
         if (image == null) {
             throw new IOException("Not a readable PNG");
@@ -80,9 +97,47 @@ public final class RecolorGenerator {
         int width = image.getWidth();
         int height = image.getHeight();
         int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+        if (keepOnlyMapped) {
+            pixels = keepOnlyMapped(pixels, palette);
+        }
+        pixels = palette.apply(pixels);
+        if (flip.isPresent()) {
+            pixels = flip(pixels, width, height, animated ? width : height, flip.get());
+        }
         BufferedImage out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        out.setRGB(0, 0, width, height, palette.apply(pixels), 0, width);
+        out.setRGB(0, 0, width, height, pixels, 0, width);
         return encodePng(out);
+    }
+
+    /** Makes every pixel whose RGB is not a key of the palette's {@code colors} fully transparent. */
+    static int[] keepOnlyMapped(int[] argb, Palette palette) {
+        int[] out = new int[argb.length];
+        for (int i = 0; i < argb.length; i++) {
+            out[i] = palette.colors().containsKey(argb[i] & 0xFFFFFF) ? argb[i] : 0;
+        }
+        return out;
+    }
+
+    /**
+     * Mirrors row-major pixels. The image is a vertical strip of {@code frameHeight}-tall frames (one frame
+     * unless animated); a vertical flip turns each frame upside down in place, keeping the frame order.
+     */
+    static int[] flip(int[] argb, int width, int height, int frameHeight, RecolorRecipe.Flip flip) {
+        if (frameHeight <= 0 || height % frameHeight != 0) {
+            frameHeight = height;
+        }
+        int[] out = new int[argb.length];
+        for (int y = 0; y < height; y++) {
+            int frameTop = y - y % frameHeight;
+            for (int x = 0; x < width; x++) {
+                int from = switch (flip) {
+                    case VERTICAL -> (frameTop + frameHeight - 1 - (y - frameTop)) * width + x;
+                    case HORIZONTAL -> y * width + (width - 1 - x);
+                };
+                out[y * width + x] = argb[from];
+            }
+        }
+        return out;
     }
 
     public static byte[] encodePng(BufferedImage image) throws IOException {
