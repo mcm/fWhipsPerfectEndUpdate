@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -149,18 +148,25 @@ class RecolorGeneratorTest {
         assertArrayEquals(new int[] {0x00000000, 0xFF0000FF}, out);
     }
 
-    /** Output of the voidvine recipe captured before flip / keep_only_mapped existed; must never change. */
+    /**
+     * Output of the voidvine recipe captured before flip / keep_only_mapped existed; must never change. The recipe
+     * is inlined as it was then, because the real voidvine recipe now flips its source.
+     */
     @Test
     void existingRecipeWithoutNewFieldsIsUnchanged() throws IOException {
-        String json;
-        try (InputStream in =
-                getClass().getResourceAsStream("/assets/someonesperfectend/recolor/voidvine_plant.json")) {
-            json = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-        }
-        RecolorRecipe recipe = RecolorRecipeParser.parse("voidvine_plant.json", json).stream()
-                .filter(r -> r.target().equals(TextureId.parse("someonesperfectend:block/voidvine")))
-                .findFirst()
-                .orElseThrow();
+        String json = """
+                {
+                  "palette": {
+                    "gradient": ["#0f2616", "#24522e", "#3d7d45", "#76b371"],
+                    "colors": {"#a46422": "#157a86", "#eb8931": "#3fd3dd", "#f7e26b": "#c6fbff"}
+                  },
+                  "recipes": [
+                    {"source": "minecraft:block/cave_vines", "target": "someonesperfectend:block/voidvine"}
+                  ]
+                }
+                """;
+        RecolorRecipe recipe =
+                RecolorRecipeParser.parse("voidvine_plant.json", json).get(0);
         assertTrue(recipe.flip().isEmpty());
         assertFalse(recipe.keepOnlyMapped());
         byte[] source = png(4, 4, new int[] {

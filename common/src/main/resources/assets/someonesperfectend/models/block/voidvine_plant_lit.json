@@ -1,7 +1,7 @@
 {
-  "parent": "someonesperfectend:block/voidvine_template",
+  "parent": "someonesperfectend:block/voidvine_lit_template",
   "textures": {
-    "stalk": "someonesperfectend:block/voidvine_stalk",
-    "cross": "someonesperfectend:block/voidvine_plant_lit"
+    "cross": "someonesperfectend:block/voidvine_plant",
+    "berries": "someonesperfectend:block/voidvine_plant_berries"
   }
 }
