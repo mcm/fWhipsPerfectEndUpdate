@@ -236,7 +236,7 @@ public final class EndlingVillageGameTests {
         }
 
         int stems = count(end, box, ModBlocks.GLOWCAP_STEM.get());
-        int floors = count(end, box, ModBlocks.VOIDVINE_MOSAIC.get());
+        int floors = count(end, box, ModBlocks.VOIDVINE_PLANKS.get());
         int roofs = count(end, box, ModBlocks.GLOWCAP_BLOCK.get());
         LOGGER.info(
                 "Endling village at {}: {} huts, {} glowcaps, {} glowcap stems, {} floor blocks, {} glowcap blocks",

@@ -52,7 +52,7 @@ public final class EndlingVillagePieces {
     }
 
     /**
-     * A small 5×5 hut: an end stone foundation, a Voidvine mosaic floor, Astral or Voidvine walls with log
+     * A small 5×5 hut: an end stone foundation, a Voidvine plank floor, Astral or Voidvine walls with log
      * corners, fence windows, an open doorway facing the village center, and a glowcap-block roof. One
      * endling, bound to the village center, is spawned inside when the hut generates.
      */
@@ -111,7 +111,7 @@ public final class EndlingVillagePieces {
                 BlockPos pivot) {
             int size = EndlingVillageLayout.HUT_SIZE;
             int last = size - 1;
-            BlockState floor = ModBlocks.VOIDVINE_MOSAIC.get().defaultBlockState();
+            BlockState floor = ModBlocks.VOIDVINE_PLANKS.get().defaultBlockState();
             BlockState wall = (astral ? ModBlocks.ASTRAL_PLANKS : ModBlocks.VOIDVINE_PLANKS)
                     .get()
                     .defaultBlockState();

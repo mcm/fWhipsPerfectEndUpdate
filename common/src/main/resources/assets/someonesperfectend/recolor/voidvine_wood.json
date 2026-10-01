@@ -9,12 +9,8 @@
   },
   "recipes": [
     {
-      "source": "minecraft:block/bamboo_planks",
-      "target": "someonesperfectend:block/voidvine_planks"
-    },
-    {
       "source": "minecraft:block/bamboo_mosaic",
-      "target": "someonesperfectend:block/voidvine_mosaic"
+      "target": "someonesperfectend:block/voidvine_planks"
     },
     {
       "source": "minecraft:block/bamboo_block",

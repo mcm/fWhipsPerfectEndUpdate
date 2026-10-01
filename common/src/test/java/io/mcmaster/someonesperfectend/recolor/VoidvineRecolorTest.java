@@ -93,6 +93,32 @@ class VoidvineRecolorTest {
     }
 
     @Test
+    void planksStairsAndSlabsUseBambooTileArt() throws IOException {
+        Map<String, RecolorRecipe> wood =
+                byTarget(RecolorRecipeParser.parse("voidvine_wood.json", read("recolor/voidvine_wood.json")));
+        TextureId tileArt = TextureId.parse("minecraft:block/bamboo_mosaic");
+        assertEquals(tileArt, wood.get("block/voidvine_planks").source());
+        assertEquals(
+                1,
+                wood.values().stream().filter(r -> r.source().equals(tileArt)).count(),
+                "only the planks recolor the bamboo tile art");
+        assertTrue(
+                wood.values().stream().noneMatch(r -> r.source().path().equals("block/bamboo_planks")),
+                "bamboo planks are still recolored");
+        for (String model : List.of(
+                "block/voidvine_planks",
+                "block/voidvine_stairs",
+                "block/voidvine_stairs_inner",
+                "block/voidvine_stairs_outer",
+                "block/voidvine_slab",
+                "block/voidvine_slab_top")) {
+            for (String texture : textures(model).values()) {
+                assertEquals("someonesperfectend:block/voidvine_planks", texture, model);
+            }
+        }
+    }
+
+    @Test
     void everyVoidvineModelTextureResolvesToARecipe() throws IOException, URISyntaxException {
         Set<String> targets = new TreeSet<>();
         Map<String, Integer> targetCounts = new HashMap<>();
