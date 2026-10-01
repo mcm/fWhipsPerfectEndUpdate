@@ -46,6 +46,7 @@
       "type": "minecraft:uniform",
       "min_inclusive": 2,
       "max_inclusive": 4
-    }
+    },
+    "flowering_log_chance": 0.1
   }
 }
