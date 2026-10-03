@@ -1,0 +1,5 @@
+# Bulk reformatting commits, skipped by `git blame` (GitHub does this automatically;
+# locally run `git config blame.ignoreRevsFile .git-blame-ignore-revs`).
+
+# style: apply spotlessApply
+f80b712323a2b61ca07b04d0834a51ba7d7a9129

@@ -203,7 +203,34 @@ structure-start step (`ChunkGenerator#createStructures`) on a fresh proto chunk 
 ```
 ./gradlew build          # compiles common, fabric and neoforge; runs JUnit tests in common
 ./gradlew gameTestAll    # runs the headless GameTest server for Fabric, then for NeoForge
+./gradlew spotlessApply  # formats the code (spotlessCheck only checks)
 ```
+
+### Formatting
+
+Java is formatted with [palantir-java-format](https://github.com/palantir/palantir-java-format) through Spotless;
+Gradle, properties, Markdown and workflow files only get whitespace cleanup. The Spotless config lives in a
+standalone build under `gradle/spotless/` so checking formatting never configures Loom; the root `spotlessApply`
+and `spotlessCheck` tasks delegate to it. To check without configuring the main build, run
+`cd gradle/spotless && ../../gradlew spotlessCheck` (`-p gradle/spotless` does not work).
+
+Bulk reformatting commits are listed in `.git-blame-ignore-revs`. GitHub skips them in blame views; locally run
+`git config blame.ignoreRevsFile .git-blame-ignore-revs`.
+
+### CI
+
+Every branch is treated the same. Protected branches only change through pull requests, so nothing runs a second
+time after a merge.
+
+| Workflow | Runs on | Jobs | Required check |
+| -- | -- | -- | -- |
+| `checks.yml` | every push to any branch | Spotless, Semgrep, TruffleHog | `Checks ✅` |
+| `pull-request.yml` | pull requests, weekly on the default branch | build + unit tests + jar checks, `gameTestAll`, changelog warning | `PR ✅` |
+| `publish-curseforge.yml` | `v<mod_version>-mc<minecraft_version>` tags | build + `gameTestAll`, then upload of both jars to CurseForge | — |
+
+Branch protection should require `Checks ✅` and `PR ✅` and have "Require branches to be up to date before
+merging" turned on, so the merged result is what CI tested. The weekly run catches upstream breakage, such as a
+change in the snapshot Loom and Architectury Gradle plugins.
 
 ### GameTests
 
