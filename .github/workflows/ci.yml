@@ -1,0 +1,244 @@
+# =============================================================================
+# CI Pipeline — Minecraft Architectury mod, Fabric + NeoForge (Gradle)
+# =============================================================================
+# What this covers:
+#   • Gradle wrapper integrity (validated automatically by setup-gradle)
+#   • Build (compile + Gradle `check`, which runs any unit tests)
+#   • Build output verification (per-loader jar names, expanded mod metadata)
+#   • Jar size report (job summary)
+#   • Release readiness (advisory — CHANGELOG entry for mod_version)
+#   • Semgrep SAST (community + Trail of Bits rules)
+#   • Secret scanning (TruffleHog)
+#   • Concurrency control (auto-cancel stale PR runs)
+#   • Final gate job (single required status check for branch protection)
+#
+# When this runs:
+#   • Pushes to main and pull requests targeting main (main is the newest
+#     Minecraft version), plus the same for per-Minecraft-version release
+#     branches named after the version (e.g. 1.20.1)
+#   • Weekly (default branch only), to catch upstream breakage (Maven repos, dependency changes)
+#   • Manually via workflow_dispatch
+#   Tag pushes do not run CI; they are handled by publish-curseforge.yml.
+#   Don't use [skip ci] on PR commits: it skips this workflow entirely, so the
+#   required "CI ✅" check never reports and the PR cannot be merged.
+#
+# Note: third-party actions are pinned to full commit SHAs (with a version
+# comment) to satisfy Semgrep's supply-chain rules and prevent mutable-tag
+# hijacking.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, "[0-9]*.[0-9]*"]
+  pull_request:
+    branches: [main, "[0-9]*.[0-9]*"]
+  schedule:
+    # Weekly full run (Sundays at 03:00 UTC)
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Cancel superseded PR runs, but let every branch build finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  JAVA_VERSION: "21"
+
+jobs:
+  # ===========================================================================
+  # 1. Build + Verification
+  # ===========================================================================
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      # Also validates the checksum of gradle/wrapper/gradle-wrapper.jar.
+      # The Gradle cache is only written from the default branch.
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      - name: Build
+        run: ./gradlew build --no-daemon
+
+      - name: Read gradle.properties
+        id: props
+        run: |
+          prop() { grep -E "^$1[[:space:]]*=" gradle.properties | cut -d'=' -f2- | tr -d '[:space:]'; }
+          {
+            echo "archives_name=$(prop archives_name)"
+            echo "mod_id=$(prop mod_id)"
+            echo "mod_version=$(prop mod_version)"
+            echo "minecraft_version=$(prop minecraft_version)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Verify build output
+        env:
+          ARCHIVES_NAME: ${{ steps.props.outputs.archives_name }}
+          MOD_VERSION: ${{ steps.props.outputs.mod_version }}
+        run: |
+          FAILED=0
+          for LOADER in fabric neoforge; do
+            JAR="${LOADER}/build/libs/${ARCHIVES_NAME}-${LOADER}-${MOD_VERSION}.jar"
+            if [ ! -f "$JAR" ]; then
+              echo "::error::Expected jar not found: $JAR"
+              ls -la "${LOADER}/build/libs/"
+              FAILED=1
+              continue
+            fi
+            echo "✅ Found $JAR"
+
+            if [ "$LOADER" = fabric ]; then
+              META_PATH=fabric.mod.json
+              VERSION_PATTERN="\"version\": *\"${MOD_VERSION}\""
+            else
+              META_PATH=META-INF/neoforge.mods.toml
+              VERSION_PATTERN="^version *= *\"${MOD_VERSION}\""
+            fi
+            META=$(unzip -p "$JAR" "$META_PATH")
+            if grep -q '\${' <<< "$META"; then
+              echo "::error::${META_PATH} in ${LOADER} jar contains unexpanded properties"
+              grep -n '\${' <<< "$META"
+              FAILED=1
+            elif ! grep -q "$VERSION_PATTERN" <<< "$META"; then
+              echo "::error::${META_PATH} in ${LOADER} jar does not have version ${MOD_VERSION}"
+              FAILED=1
+            else
+              echo "✅ ${META_PATH} expanded with version ${MOD_VERSION}"
+            fi
+          done
+          if [ "$FAILED" -ne 0 ]; then
+            exit 1
+          fi
+
+          {
+            echo "## 📦 Build Output"
+            echo ""
+            echo "| Jar | Size |"
+            echo "| --- | --- |"
+            for f in fabric/build/libs/*.jar neoforge/build/libs/*.jar; do
+              echo "| \`$(basename "$f")\` | $(du -h "$f" | cut -f1) |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload jars
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.props.outputs.mod_id }}-jars
+          path: |
+            fabric/build/libs/*.jar
+            neoforge/build/libs/*.jar
+            !**/*-dev-shadow.jar
+          retention-days: 14
+
+  # ===========================================================================
+  # 2. Release Readiness (advisory — warns, never fails)
+  # ===========================================================================
+  release-readiness:
+    name: Release Readiness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check CHANGELOG entry for mod_version
+        run: |
+          prop() { grep -E "^$1[[:space:]]*=" gradle.properties | cut -d'=' -f2- | tr -d '[:space:]'; }
+          MOD_VERSION=$(prop mod_version)
+          MINECRAFT_VERSION=$(prop minecraft_version)
+          if grep -qF "## [${MOD_VERSION}]" CHANGELOG.md; then
+            echo "✅ CHANGELOG.md has an entry for ${MOD_VERSION}"
+          else
+            echo "::warning file=CHANGELOG.md::No CHANGELOG.md entry for mod_version ${MOD_VERSION}. Add a '## [${MOD_VERSION}]' section before tagging v${MOD_VERSION}-mc${MINECRAFT_VERSION}, or the CurseForge release will use a fallback changelog."
+          fi
+
+  # ===========================================================================
+  # 3. Semgrep SAST
+  # ===========================================================================
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      # Pinned by digest; bump the tag and digest together when updating.
+      image: semgrep/semgrep:1.179.0@sha256:93963d9295a366f59e4850127b1550400ee7b388f04fe144e4a1f6325d96e01b
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run Semgrep
+        run: |
+          semgrep scan \
+            --config auto \
+            --config p/trailofbits \
+            --error \
+            --exclude='build' \
+            --exclude='.gradle' \
+            --exclude='run' \
+            --exclude='runs' \
+            --json \
+            --output=semgrep-results.json
+
+      - name: Upload Semgrep report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: semgrep-report
+          path: semgrep-results.json
+          retention-days: 30
+
+  # ===========================================================================
+  # 4. Secret Scanning (TruffleHog)
+  # ===========================================================================
+  secrets-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog scan
+        uses: trufflesecurity/trufflehog@4dd8831c5f12599465d4d45c3c447b4018a34c85 # v3.97.9
+        with:
+          extra_args: --only-verified
+
+  # ===========================================================================
+  # 5. Final Gate — all required checks must pass
+  # ===========================================================================
+  ci-ok:
+    name: CI ✅
+    if: always()
+    needs:
+      - build
+      - semgrep
+      - secrets-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate results
+        env:
+          BUILD: ${{ needs.build.result }}
+          SEMGREP: ${{ needs.semgrep.result }}
+          SECRETS: ${{ needs.secrets-scan.result }}
+        run: |
+          echo "Build:    ${BUILD}"
+          echo "Semgrep:  ${SEMGREP}"
+          echo "Secrets:  ${SECRETS}"
+
+          # Fail if any required job failed or was cancelled
+          for result in "$BUILD" "$SEMGREP" "$SECRETS"; do
+            if [[ "$result" == "failure" || "$result" == "cancelled" ]]; then
+              echo "::error::One or more required CI jobs failed"
+              exit 1
+            fi
+          done
+
+          echo "All required checks passed!"
