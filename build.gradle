@@ -9,6 +9,19 @@ architectury {
 }
 
 /*
+ * Code formatting (Spotless) lives in a standalone build under gradle/spotless so CI can check formatting without
+ * configuring Loom. These tasks delegate to it: `./gradlew spotlessApply` to format, `./gradlew spotlessCheck` to check.
+ */
+['spotlessCheck', 'spotlessApply'].each { taskName ->
+    tasks.register(taskName, GradleBuild) {
+        group = 'formatting'
+        description = "Runs ${taskName} in the standalone gradle/spotless build"
+        dir = file('gradle/spotless')
+        tasks = [taskName]
+    }
+}
+
+/*
  * GameTest harness. Each loader project defines a headless `runGameTestServer` run (see fabric/ and
  * neoforge/ build.gradle) and hands it to this helper, which
  *  - times out instead of hanging forever,

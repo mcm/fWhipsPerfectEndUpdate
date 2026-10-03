@@ -1,0 +1,30 @@
+plugins {
+    id 'com.diffplug.spotless' version '8.10.3'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Keep this build's outputs out of the main build's build/ directory.
+layout.buildDirectory = file('gradle/spotless/build')
+
+def generated = ['**/build/**', '**/.gradle/**', 'run/**', 'runs/**', '**/bin/**', '**/out/**', '.ralph-tui/**']
+
+spotless {
+    java {
+        target '*/src/**/*.java'
+        targetExclude generated
+        palantirJavaFormat('2.101.0')
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format 'misc', {
+        target '*.gradle', '*/*.gradle', 'gradle/spotless/*.gradle', '*.properties', '*/*.properties', '*.md',
+                'docs/**/*.md', '.github/**/*.yml', '.gitignore'
+        targetExclude generated
+        trimTrailingWhitespace()
+        leadingTabsToSpaces(4)
+        endWithNewline()
+    }
+}
