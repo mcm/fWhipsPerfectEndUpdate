@@ -31,16 +31,17 @@ public final class EndForestGameTests {
     private static final String TALL = "someonesperfectend:gametest/empty_tall";
     /** Trees reach at most 5 blocks from their trunk, so this margin keeps other biomes' trees out. */
     private static final int MARGIN = 8;
+
     private static final int CHUNKS = 8;
     private static final int MAX_OVERHANG = 3;
     /** How far below a tree block the test looks for the island it overhangs. */
     private static final int GROUND_SEARCH = 24;
+
     private static final int PLATFORM_Y = 8;
     /** Highest relative y a tree on the platform can reach (16-block trunk plus a leaf cluster). */
     private static final int TOP_Y = PLATFORM_Y + 20;
 
-    private EndForestGameTests() {
-    }
+    private EndForestGameTests() {}
 
     /**
      * Generates outer-End chunks of the (fixed-seed) GameTest world that lie entirely inside {@code end_forest},
@@ -57,9 +58,16 @@ public final class EndForestGameTests {
         for (int cx = 70; cx < 400 && found.size() < CHUNKS; cx += 3) {
             for (int cz = -200; cz <= 200 && found.size() < CHUNKS; cz += 3) {
                 ChunkPos chunk = new ChunkPos(cx, cz);
-                if (allForest(source, sampler, chunk) && end.getChunkSource().getGenerator().getBaseHeight(
-                        chunk.getMiddleBlockX(), chunk.getMiddleBlockZ(), Heightmap.Types.WORLD_SURFACE_WG, end,
-                        end.getChunkSource().randomState()) > end.getMinBuildHeight()) {
+                if (allForest(source, sampler, chunk)
+                        && end.getChunkSource()
+                                        .getGenerator()
+                                        .getBaseHeight(
+                                                chunk.getMiddleBlockX(),
+                                                chunk.getMiddleBlockZ(),
+                                                Heightmap.Types.WORLD_SURFACE_WG,
+                                                end,
+                                                end.getChunkSource().randomState())
+                                > end.getMinBuildHeight()) {
                     found.add(chunk);
                 }
             }
@@ -93,19 +101,28 @@ public final class EndForestGameTests {
                             grass++;
                         } else if (state.is(ModBlocks.GLOWCAP.get())) {
                             glowcaps++;
-                            helper.assertTrue(end.getBlockState(pos.below()).is(ModBlockTags.END_PLANT_SOIL),
+                            helper.assertTrue(
+                                    end.getBlockState(pos.below()).is(ModBlockTags.END_PLANT_SOIL),
                                     "Glowcap without soil at " + pos);
                         }
                         if (tree) {
-                            helper.assertTrue(overIsland(end, pos),
+                            helper.assertTrue(
+                                    overIsland(end, pos),
                                     "Astral tree block more than " + MAX_OVERHANG + " blocks past the edge at " + pos);
                         }
                     }
                 }
             }
         }
-        LOGGER.info("End Forest chunks {}: {} astral logs, {} astral leaves, {} flowering leaves, {} short void grass,"
-                + " {} glowcaps", found, logs, leaves, flowering, grass, glowcaps);
+        LOGGER.info(
+                "End Forest chunks {}: {} astral logs, {} astral leaves, {} flowering leaves, {} short void grass,"
+                        + " {} glowcaps",
+                found,
+                logs,
+                leaves,
+                flowering,
+                grass,
+                glowcaps);
         helper.assertTrue(logs > 0, "No astral logs in End Forest chunks " + found);
         helper.assertTrue(leaves > 0, "No astral leaves in End Forest chunks " + found);
         helper.assertTrue(grass > 0, "No short void grass in End Forest chunks " + found);
@@ -120,7 +137,8 @@ public final class EndForestGameTests {
     @GameTest(template = TALL, timeoutTicks = 200)
     public static void forestTreeRespectsOverhangLimit(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ConfiguredFeature<?, ?> feature = level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE)
+        ConfiguredFeature<?, ?> feature = level.registryAccess()
+                .registryOrThrow(Registries.CONFIGURED_FEATURE)
                 .getOrThrow(ModFeatures.END_FOREST_ASTRAL_TREE_CONFIGURED);
         BlockState turf = ModBlocks.END_TURF.get().defaultBlockState();
         // The test area is capped with barriers right above the template; tall trees reach past it.
@@ -138,7 +156,10 @@ public final class EndForestGameTests {
                     helper.setBlock(new BlockPos(x, PLATFORM_Y, z), turf);
                 }
             }
-            if (!feature.place(level, level.getChunkSource().getGenerator(), level.random,
+            if (!feature.place(
+                    level,
+                    level.getChunkSource().getGenerator(),
+                    level.random,
                     helper.absolutePos(new BlockPos(8, PLATFORM_Y + 1, 8)))) {
                 refused++;
                 continue;
@@ -147,10 +168,10 @@ public final class EndForestGameTests {
             for (BlockPos pos : BlockPos.betweenClosed(0, 0, 0, 16, TOP_Y, 16)) {
                 BlockState state = helper.getBlockState(pos);
                 if (state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES)) {
-                    int overhang = Math.max(Math.max(7 - pos.getX(), pos.getX() - 9),
-                            Math.max(7 - pos.getZ(), pos.getZ() - 9));
-                    helper.assertTrue(overhang <= MAX_OVERHANG, "Tree block " + overhang + " blocks past the edge at "
-                            + pos);
+                    int overhang = Math.max(
+                            Math.max(7 - pos.getX(), pos.getX() - 9), Math.max(7 - pos.getZ(), pos.getZ() - 9));
+                    helper.assertTrue(
+                            overhang <= MAX_OVERHANG, "Tree block " + overhang + " blocks past the edge at " + pos);
                 }
             }
         }
@@ -166,8 +187,13 @@ public final class EndForestGameTests {
             }
         }
         for (int attempt = 0; attempt < 5; attempt++) {
-            helper.assertTrue(feature.place(level, level.getChunkSource().getGenerator(), level.random,
-                    helper.absolutePos(new BlockPos(8, PLATFORM_Y + 1, 8))), "Tree refused on a 17x17 island");
+            helper.assertTrue(
+                    feature.place(
+                            level,
+                            level.getChunkSource().getGenerator(),
+                            level.random,
+                            helper.absolutePos(new BlockPos(8, PLATFORM_Y + 1, 8))),
+                    "Tree refused on a 17x17 island");
             clearAbove(helper, PLATFORM_Y + 1);
         }
         helper.succeed();
@@ -179,8 +205,11 @@ public final class EndForestGameTests {
 
     private static void clearAbove(GameTestHelper helper, int minY) {
         for (BlockPos pos : BlockPos.betweenClosed(0, minY, 0, 16, TOP_Y, 16)) {
-            helper.getLevel().setBlock(helper.absolutePos(pos), Blocks.AIR.defaultBlockState(),
-                    Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+            helper.getLevel()
+                    .setBlock(
+                            helper.absolutePos(pos),
+                            Blocks.AIR.defaultBlockState(),
+                            Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
         }
     }
 
@@ -204,8 +233,8 @@ public final class EndForestGameTests {
     private static boolean allForest(BiomeSource source, Climate.Sampler sampler, ChunkPos chunk) {
         for (int x = chunk.getMinBlockX() - MARGIN; x <= chunk.getMaxBlockX() + MARGIN + 3; x += 4) {
             for (int z = chunk.getMinBlockZ() - MARGIN; z <= chunk.getMaxBlockZ() + MARGIN + 3; z += 4) {
-                if (!source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z),
-                        sampler).is(ModBiomes.END_FOREST)) {
+                if (!source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z), sampler)
+                        .is(ModBiomes.END_FOREST)) {
                     return false;
                 }
             }

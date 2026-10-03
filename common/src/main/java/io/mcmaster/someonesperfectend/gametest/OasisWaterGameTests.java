@@ -39,8 +39,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
 public final class OasisWaterGameTests {
-    private OasisWaterGameTests() {
-    }
+    private OasisWaterGameTests() {}
 
     private static BlockState oasisSource() {
         return ModFluids.OASIS_WATER.get().defaultFluidState().createLegacyBlock();
@@ -64,7 +63,8 @@ public final class OasisWaterGameTests {
 
     private static void assertOasisSource(GameTestHelper helper, BlockPos pos) {
         FluidState fluid = helper.getLevel().getFluidState(helper.absolutePos(pos));
-        helper.assertTrue(OasisWaterFluid.isOasisWater(fluid) && fluid.isSource(),
+        helper.assertTrue(
+                OasisWaterFluid.isOasisWater(fluid) && fluid.isSource(),
                 "expected an Oasis Water source at " + pos + ", found " + fluid);
     }
 
@@ -80,9 +80,10 @@ public final class OasisWaterGameTests {
     @GameTest
     public static void bucketPlacesSource(GameTestHelper helper) {
         channel(helper, 1, 1);
-        Player player = playerLookingDown(helper, new Vec3(1.5, 1.0, 1.5),
-                new ItemStack(ModFluids.OASIS_WATER_BUCKET.get()));
-        ItemStack result = player.getMainHandItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND)
+        Player player =
+                playerLookingDown(helper, new Vec3(1.5, 1.0, 1.5), new ItemStack(ModFluids.OASIS_WATER_BUCKET.get()));
+        ItemStack result = player.getMainHandItem()
+                .use(helper.getLevel(), player, InteractionHand.MAIN_HAND)
                 .getObject();
         assertOasisSource(helper, new BlockPos(1, 1, 1));
         helper.assertTrue(result.is(Items.BUCKET), "bucket was not emptied: " + result);
@@ -94,8 +95,8 @@ public final class OasisWaterGameTests {
         channel(helper, 1, 1);
         BlockPos slab = new BlockPos(1, 1, 1);
         helper.setBlock(slab, Blocks.STONE_SLAB);
-        Player player = playerLookingDown(helper, new Vec3(1.5, 1.5, 1.5),
-                new ItemStack(ModFluids.OASIS_WATER_BUCKET.get()));
+        Player player =
+                playerLookingDown(helper, new Vec3(1.5, 1.5, 1.5), new ItemStack(ModFluids.OASIS_WATER_BUCKET.get()));
         player.getMainHandItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
         helper.assertBlockProperty(slab, BlockStateProperties.WATERLOGGED, true);
         helper.succeed();
@@ -116,7 +117,8 @@ public final class OasisWaterGameTests {
         helper.setBlock(new BlockPos(1, 1, 1), oasisSource());
         helper.succeedWhen(() -> {
             FluidState last = helper.getLevel().getFluidState(helper.absolutePos(new BlockPos(6, 1, 1)));
-            helper.assertTrue(OasisWaterFluid.isOasisWater(last) && last.getAmount() == 3,
+            helper.assertTrue(
+                    OasisWaterFluid.isOasisWater(last) && last.getAmount() == 3,
                     "expected level-3 Oasis Water 5 blocks from the source, found " + last);
         });
     }
@@ -155,9 +157,11 @@ public final class OasisWaterGameTests {
         channel(helper, 1, 1);
         helper.setBlock(new BlockPos(1, 1, 1), oasisSource());
         Player player = playerLookingDown(helper, new Vec3(1.5, 2.0, 1.5), new ItemStack(Items.GLASS_BOTTLE));
-        ItemStack result = player.getMainHandItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND)
+        ItemStack result = player.getMainHandItem()
+                .use(helper.getLevel(), player, InteractionHand.MAIN_HAND)
                 .getObject();
-        helper.assertTrue(result.is(ModFluids.OASIS_WATER_BOTTLE.get()), "expected an Oasis Water bottle, got " + result);
+        helper.assertTrue(
+                result.is(ModFluids.OASIS_WATER_BOTTLE.get()), "expected an Oasis Water bottle, got " + result);
         helper.succeed();
     }
 
@@ -188,7 +192,9 @@ public final class OasisWaterGameTests {
         helper.setBlock(new BlockPos(1, 1, 1), Blocks.LAVA);
         helper.startSequence()
                 .thenWaitUntil(() -> helper.assertTrue(
-                        helper.getLevel().getFluidState(helper.absolutePos(lavaFlow)).is(FluidTags.LAVA),
+                        helper.getLevel()
+                                .getFluidState(helper.absolutePos(lavaFlow))
+                                .is(FluidTags.LAVA),
                         "lava has not flowed yet"))
                 .thenExecute(() -> helper.setBlock(new BlockPos(3, 1, 1), water))
                 .thenWaitUntil(() -> helper.assertBlockPresent(expected, lavaFlow))
@@ -235,9 +241,9 @@ public final class OasisWaterGameTests {
         return stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
     }
 
-    private static void assertPotion(GameTestHelper helper, ItemStack stack, Item item,
-            Holder<Potion> potion) {
-        helper.assertTrue(stack.is(item) && contents(stack).is(potion),
+    private static void assertPotion(GameTestHelper helper, ItemStack stack, Item item, Holder<Potion> potion) {
+        helper.assertTrue(
+                stack.is(item) && contents(stack).is(potion),
                 "expected " + item + " of " + potion.getRegisteredName() + ", got " + stack + " " + contents(stack));
     }
 
@@ -260,17 +266,20 @@ public final class OasisWaterGameTests {
         ItemStack swiftness = brewing.mix(new ItemStack(Items.SUGAR), awkward);
         assertPotion(helper, swiftness, Items.POTION, oasis("swiftness"));
         MobEffectInstance speed = onlyEffect(helper, swiftness);
-        helper.assertTrue(speed.getEffect().is(MobEffects.MOVEMENT_SPEED) && speed.getDuration() == 3600 * 3 / 2,
+        helper.assertTrue(
+                speed.getEffect().is(MobEffects.MOVEMENT_SPEED) && speed.getDuration() == 3600 * 3 / 2,
                 "Oasis swiftness should last 5400 ticks: " + speed);
 
-        ItemStack vanillaSwiftness = brewing.mix(new ItemStack(Items.SUGAR),
-                PotionContents.createItemStack(Items.POTION, Potions.AWKWARD));
-        helper.assertTrue(onlyEffect(helper, vanillaSwiftness).getDuration() == 3600,
+        ItemStack vanillaSwiftness =
+                brewing.mix(new ItemStack(Items.SUGAR), PotionContents.createItemStack(Items.POTION, Potions.AWKWARD));
+        helper.assertTrue(
+                onlyEffect(helper, vanillaSwiftness).getDuration() == 3600,
                 "vanilla swiftness changed: " + vanillaSwiftness);
 
         ItemStack longSwiftness = brewing.mix(new ItemStack(Items.REDSTONE), swiftness);
         assertPotion(helper, longSwiftness, Items.POTION, oasis("long_swiftness"));
-        helper.assertTrue(onlyEffect(helper, longSwiftness).getDuration() == 9600 * 3 / 2,
+        helper.assertTrue(
+                onlyEffect(helper, longSwiftness).getDuration() == 9600 * 3 / 2,
                 "Oasis long swiftness should last 14400 ticks");
 
         ItemStack splash = brewing.mix(new ItemStack(Items.GUNPOWDER), swiftness);

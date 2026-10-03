@@ -36,7 +36,8 @@ public class ModBoatDispenseBehavior extends DefaultDispenseItemBehavior {
         double lift;
         if (level.getFluidState(front).is(FluidTags.WATER)) {
             lift = 1.0;
-        } else if (level.getBlockState(front).isAir() && level.getFluidState(front.below()).is(FluidTags.WATER)) {
+        } else if (level.getBlockState(front).isAir()
+                && level.getFluidState(front.below()).is(FluidTags.WATER)) {
             lift = 0.0;
         } else {
             return defaultBehavior.dispense(source, stack);

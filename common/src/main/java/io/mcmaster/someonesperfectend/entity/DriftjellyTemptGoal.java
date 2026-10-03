@@ -15,8 +15,8 @@ import net.minecraft.world.item.ItemStack;
 public class DriftjellyTemptGoal extends TemptGoal {
     private static final double STOP_DISTANCE_SQR = 2.5 * 2.5;
     private static final double RANGE = 10.0;
-    private static final TargetingConditions TEMPT_TARGETING = TargetingConditions.forNonCombat().range(RANGE)
-            .ignoreLineOfSight();
+    private static final TargetingConditions TEMPT_TARGETING =
+            TargetingConditions.forNonCombat().range(RANGE).ignoreLineOfSight();
 
     private final Driftjelly jelly;
     private final double speed;
@@ -37,10 +37,18 @@ public class DriftjellyTemptGoal extends TemptGoal {
         if (jelly.isDormant()) {
             return false;
         }
-        player = jelly.level().getNearestEntity(
-                jelly.level().getEntitiesOfClass(Player.class, jelly.getBoundingBox().inflate(RANGE),
-                        p -> isTemptItem(p.getMainHandItem()) || isTemptItem(p.getOffhandItem())),
-                TEMPT_TARGETING, jelly, jelly.getX(), jelly.getY(), jelly.getZ());
+        player = jelly.level()
+                .getNearestEntity(
+                        jelly.level()
+                                .getEntitiesOfClass(
+                                        Player.class,
+                                        jelly.getBoundingBox().inflate(RANGE),
+                                        p -> isTemptItem(p.getMainHandItem()) || isTemptItem(p.getOffhandItem())),
+                        TEMPT_TARGETING,
+                        jelly,
+                        jelly.getX(),
+                        jelly.getY(),
+                        jelly.getZ());
         return player != null;
     }
 

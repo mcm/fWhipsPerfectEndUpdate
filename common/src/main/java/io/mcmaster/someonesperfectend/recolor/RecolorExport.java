@@ -22,8 +22,7 @@ import java.util.zip.ZipFile;
  * <p>Arguments: {@code <client jar> <output dir> <resources dir>...}
  */
 public final class RecolorExport {
-    private RecolorExport() {
-    }
+    private RecolorExport() {}
 
     public static void main(String[] args) throws IOException {
         if (args.length < 3) {
@@ -38,7 +37,9 @@ public final class RecolorExport {
                 continue;
             }
             try (Stream<Path> files = Files.walk(recipeDir)) {
-                for (Path file : files.filter(f -> f.toString().endsWith(".json")).sorted().toList()) {
+                for (Path file : files.filter(f -> f.toString().endsWith(".json"))
+                        .sorted()
+                        .toList()) {
                     recipes.addAll(RecolorRecipeParser.parse(Files.readString(file, StandardCharsets.UTF_8)));
                 }
             }
@@ -48,8 +49,11 @@ public final class RecolorExport {
         try (ZipFile jar = new ZipFile(clientJar.toFile())) {
             result = RecolorGenerator.generate(recipes, id -> readFromJar(jar, id), id -> false);
         }
-        for (Map.Entry<RecolorGenerator.GeneratedFile, byte[]> file : result.files().entrySet()) {
-            Path target = output.resolve("assets").resolve(file.getKey().namespace()).resolve(file.getKey().path());
+        for (Map.Entry<RecolorGenerator.GeneratedFile, byte[]> file :
+                result.files().entrySet()) {
+            Path target = output.resolve("assets")
+                    .resolve(file.getKey().namespace())
+                    .resolve(file.getKey().path());
             Files.createDirectories(target.getParent());
             Files.write(target, file.getValue());
         }
@@ -66,8 +70,8 @@ public final class RecolorExport {
             return Optional.empty();
         }
         ZipEntry mcmeta = jar.getEntry(id.assetPath() + ".mcmeta");
-        return Optional.of(new RecolorGenerator.SourceTexture(read(jar, png),
-                mcmeta == null ? Optional.empty() : Optional.of(read(jar, mcmeta))));
+        return Optional.of(new RecolorGenerator.SourceTexture(
+                read(jar, png), mcmeta == null ? Optional.empty() : Optional.of(read(jar, mcmeta))));
     }
 
     private static byte[] read(ZipFile jar, ZipEntry entry) throws IOException {

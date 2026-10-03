@@ -32,9 +32,11 @@ public final class EndlingSpecialBarters extends SimpleJsonResourceReloadListene
 
     public record SpecialBarter(Item input, ResourceKey<LootTable> lootTable) {
         public static final Codec<SpecialBarter> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                BuiltInRegistries.ITEM.byNameCodec().fieldOf("input").forGetter(SpecialBarter::input),
-                ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("loot_table").forGetter(SpecialBarter::lootTable)
-        ).apply(instance, SpecialBarter::new));
+                        BuiltInRegistries.ITEM.byNameCodec().fieldOf("input").forGetter(SpecialBarter::input),
+                        ResourceKey.codec(Registries.LOOT_TABLE)
+                                .fieldOf("loot_table")
+                                .forGetter(SpecialBarter::lootTable))
+                .apply(instance, SpecialBarter::new));
     }
 
     /** Input item → loot table, replaced wholesale on every data reload. */
@@ -57,11 +59,14 @@ public final class EndlingSpecialBarters extends SimpleJsonResourceReloadListene
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Map<Item, ResourceKey<LootTable>> loaded = new HashMap<>();
-        files.forEach((id, json) -> SpecialBarter.CODEC.parse(JsonOps.INSTANCE, json)
+        files.forEach((id, json) -> SpecialBarter.CODEC
+                .parse(JsonOps.INSTANCE, json)
                 .resultOrPartial(error -> LOGGER.error("Invalid endling special barter {}: {}", id, error))
                 .ifPresent(barter -> {
                     if (loaded.put(barter.input(), barter.lootTable()) != null) {
-                        LOGGER.warn("Endling special barter {} replaces another barter for {}", id,
+                        LOGGER.warn(
+                                "Endling special barter {} replaces another barter for {}",
+                                id,
                                 BuiltInRegistries.ITEM.getKey(barter.input()));
                     }
                 }));

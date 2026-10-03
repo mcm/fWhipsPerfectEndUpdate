@@ -20,8 +20,7 @@ import org.jetbrains.annotations.Nullable;
  * point itself is never read or changed.
  */
 public final class EnderBedRespawn {
-    private EnderBedRespawn() {
-    }
+    private EnderBedRespawn() {}
 
     /** Whether {@code head} holds the head half of an Ender Bed whose drop point and the block below are open. */
     public static boolean isValidDestination(BlockGetter level, BlockPos head) {
@@ -45,8 +44,8 @@ public final class EnderBedRespawn {
      * then drop the player's vanilla respawn point.
      */
     @Nullable
-    public static DimensionTransition findRespawn(ServerPlayer player, boolean keepInventory,
-            DimensionTransition.PostDimensionTransition post) {
+    public static DimensionTransition findRespawn(
+            ServerPlayer player, boolean keepInventory, DimensionTransition.PostDimensionTransition post) {
         if (!player.isDeadOrDying() || player.level().dimension() != Level.END) {
             // Not a death in the End: the End-exit respawn and End portal exits stay vanilla.
             return null;
@@ -65,8 +64,8 @@ public final class EnderBedRespawn {
         // With `end` cleared, this re-enters the hook, which now returns null: the plain vanilla lookup.
         DimensionTransition vanilla = player.findRespawnPositionAndUseSpawnBlock(keepInventory, post);
         if (!vanilla.missingRespawnBlock() && player.connection != null) {
-            player.connection.send(new ClientboundGameEventPacket(
-                    ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
+            player.connection.send(
+                    new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
         }
         return vanilla;
     }

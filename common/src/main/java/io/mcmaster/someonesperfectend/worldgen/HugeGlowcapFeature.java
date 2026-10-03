@@ -29,7 +29,11 @@ public class HugeGlowcapFeature extends HugeRedMushroomFeature {
 
     /** Vanilla's check, with End soil as the only valid ground. */
     @Override
-    protected boolean isValidPosition(LevelAccessor level, BlockPos pos, int height, BlockPos.MutableBlockPos mutable,
+    protected boolean isValidPosition(
+            LevelAccessor level,
+            BlockPos pos,
+            int height,
+            BlockPos.MutableBlockPos mutable,
             HugeMushroomFeatureConfiguration config) {
         int y = pos.getY();
         if (y < level.getMinBuildHeight() + 1 || y + height + 1 >= level.getMaxBuildHeight()) {

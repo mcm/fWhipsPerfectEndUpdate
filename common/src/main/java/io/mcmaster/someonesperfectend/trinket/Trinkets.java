@@ -31,11 +31,11 @@ public final class Trinkets {
     /** Accessories slot predicate: only {@link #TRINKETS} items are valid. */
     public static final ResourceLocation TRINKETS_PREDICATE = SomeonesPerfectEnd.id("trinkets");
 
-    private Trinkets() {
-    }
+    private Trinkets() {}
 
     public static void init() {
-        AccessoriesAPI.registerPredicate(TRINKETS_PREDICATE,
+        AccessoriesAPI.registerPredicate(
+                TRINKETS_PREDICATE,
                 (level, slotType, slot, stack) -> stack.is(TRINKETS) ? TriState.TRUE : TriState.FALSE);
         UniqueSlotHandling.EVENT.register(factory -> factory.create(SLOT_ID, 1)
                 .slotPredicates(TRINKETS_PREDICATE)

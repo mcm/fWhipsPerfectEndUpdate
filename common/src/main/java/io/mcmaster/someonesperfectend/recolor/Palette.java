@@ -183,12 +183,36 @@ public record Palette(Map<Integer, Integer> colors, Optional<Gradient> gradient,
             float b;
             int sector = (int) (h / 60f) % 6;
             switch (sector) {
-                case 0 -> { r = c; g = x; b = 0; }
-                case 1 -> { r = x; g = c; b = 0; }
-                case 2 -> { r = 0; g = c; b = x; }
-                case 3 -> { r = 0; g = x; b = c; }
-                case 4 -> { r = x; g = 0; b = c; }
-                default -> { r = c; g = 0; b = x; }
+                case 0 -> {
+                    r = c;
+                    g = x;
+                    b = 0;
+                }
+                case 1 -> {
+                    r = x;
+                    g = c;
+                    b = 0;
+                }
+                case 2 -> {
+                    r = 0;
+                    g = c;
+                    b = x;
+                }
+                case 3 -> {
+                    r = 0;
+                    g = x;
+                    b = c;
+                }
+                case 4 -> {
+                    r = x;
+                    g = 0;
+                    b = c;
+                }
+                default -> {
+                    r = c;
+                    g = 0;
+                    b = x;
+                }
             }
             return (clampByte((r + m) * 255f) << 16) | (clampByte((g + m) * 255f) << 8) | clampByte((b + m) * 255f);
         }

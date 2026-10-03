@@ -22,6 +22,7 @@ public final class EnderBedLocations {
 
     @Nullable
     private BlockPos end;
+
     @Nullable
     private BlockPos overworld;
 

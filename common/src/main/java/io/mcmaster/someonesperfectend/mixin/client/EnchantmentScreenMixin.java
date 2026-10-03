@@ -37,29 +37,42 @@ public abstract class EnchantmentScreenMixin {
     }
 
     /** Only the Void Cleansing slot has a cost while it is offered, so every name drawn belongs to it. */
-    @WrapOperation(method = "renderBg", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/"
-            + "inventory/EnchantmentNames;getRandomName(Lnet/minecraft/client/gui/Font;I)"
-            + "Lnet/minecraft/network/chat/FormattedText;"))
-    private FormattedText someonesperfectend$voidCleansingName(EnchantmentNames names, Font font, int width,
-            Operation<FormattedText> original) {
+    @WrapOperation(
+            method = "renderBg",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/client/gui/screens/"
+                                    + "inventory/EnchantmentNames;getRandomName(Lnet/minecraft/client/gui/Font;I)"
+                                    + "Lnet/minecraft/network/chat/FormattedText;"))
+    private FormattedText someonesperfectend$voidCleansingName(
+            EnchantmentNames names, Font font, int width, Operation<FormattedText> original) {
         FormattedText name = original.call(names, font, width);
-        return someonesperfectend$voidCleansing() ? Component.translatable("container.someonesperfectend.void_cleansing")
+        return someonesperfectend$voidCleansing()
+                ? Component.translatable("container.someonesperfectend.void_cleansing")
                 : name;
     }
 
     /** The offer needs one dragon's breath, not one lapis per slot number. */
-    @WrapOperation(method = "renderBg", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/inventory/EnchantmentMenu;getGoldCount()I"))
+    @WrapOperation(
+            method = "renderBg",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/EnchantmentMenu;getGoldCount()I"))
     private int someonesperfectend$voidCleansingFuel(EnchantmentMenu menu, Operation<Integer> original) {
         int count = original.call(menu);
         return someonesperfectend$voidCleansing() && count >= VoidCleansingRules.BREATH_COST
-                ? VoidCleansingRules.OFFER_SLOT + 1 : count;
+                ? VoidCleansingRules.OFFER_SLOT + 1
+                : count;
     }
 
-    @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;"
-            + "renderComponentTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;II)V"))
-    private void someonesperfectend$voidCleansingTooltip(GuiGraphics graphics, Font font, List<Component> lines,
-            int mouseX, int mouseY, Operation<Void> original) {
+    @WrapOperation(
+            method = "render",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/client/gui/GuiGraphics;"
+                                    + "renderComponentTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;II)V"))
+    private void someonesperfectend$voidCleansingTooltip(
+            GuiGraphics graphics, Font font, List<Component> lines, int mouseX, int mouseY, Operation<Void> original) {
         Player player = Minecraft.getInstance().player;
         if (!someonesperfectend$voidCleansing() || player == null) {
             original.call(graphics, font, lines, mouseX, mouseY);
@@ -73,8 +86,9 @@ public abstract class EnchantmentScreenMixin {
         if (!player.getAbilities().instabuild) {
             tooltip.add(CommonComponents.EMPTY);
             if (player.experienceLevel < VoidCleansingRules.LEVEL_REQUIREMENT) {
-                tooltip.add(Component.translatable("container.enchant.level.requirement",
-                        VoidCleansingRules.LEVEL_REQUIREMENT).withStyle(ChatFormatting.RED));
+                tooltip.add(Component.translatable(
+                                "container.enchant.level.requirement", VoidCleansingRules.LEVEL_REQUIREMENT)
+                        .withStyle(ChatFormatting.RED));
             } else {
                 tooltip.add(Component.translatable("container.someonesperfectend.void_cleansing.breath")
                         .withStyle(ChatFormatting.GRAY));

@@ -67,8 +67,8 @@ public class VoidvinePlantBlock extends GrowingPlantBodyBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
-            BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         return Voidvines.harvest(player, state, level, pos);
     }
 }

@@ -33,8 +33,7 @@ public final class TotemStackingGameTests {
     private static final String BATCH = "totem_stacking";
     private static final int STORED = 2000;
 
-    private TotemStackingGameTests() {
-    }
+    private TotemStackingGameTests() {}
 
     private static Player player(GameTestHelper helper) {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
@@ -58,10 +57,10 @@ public final class TotemStackingGameTests {
     }
 
     /** Applies a beacon's powers once at the test origin, as its 80-tick update does. */
-    private static void beacon(GameTestHelper helper, int tier, Holder<MobEffect> primary,
-            Holder<MobEffect> secondary) {
-        BeaconBlockEntityAccessor.someonesperfectend$applyEffects(helper.getLevel(), helper.absolutePos(BlockPos.ZERO),
-                tier, primary, secondary);
+    private static void beacon(
+            GameTestHelper helper, int tier, Holder<MobEffect> primary, Holder<MobEffect> secondary) {
+        BeaconBlockEntityAccessor.someonesperfectend$applyEffects(
+                helper.getLevel(), helper.absolutePos(BlockPos.ZERO), tier, primary, secondary);
     }
 
     private static int amplifierOf(Player player, Holder<MobEffect> effect) {
@@ -86,7 +85,8 @@ public final class TotemStackingGameTests {
         beacon(helper, 4, MobEffects.DIG_SPEED, MobEffects.DIG_SPEED);
         equip(helper, player, activeHasteTotem());
         MobEffectInstance haste = player.getEffect(MobEffects.DIG_SPEED);
-        helper.assertTrue(haste != null && haste.getAmplifier() == 2,
+        helper.assertTrue(
+                haste != null && haste.getAmplifier() == 2,
                 "a Haste II beacon plus a Haste totem should give Haste III, was " + haste);
         helper.assertTrue(haste.isAmbient() && !haste.isVisible(), "the stacked effect should be ambient");
         player.discard();
@@ -98,7 +98,8 @@ public final class TotemStackingGameTests {
         Player player = player(helper);
         beacon(helper, 3, MobEffects.DAMAGE_BOOST, null);
         equip(helper, player, EffectTotems.activated(EffectTotems.TOTEM_OF_STRENGTH.get()));
-        helper.assertTrue(amplifierOf(player, MobEffects.DAMAGE_BOOST) == 1,
+        helper.assertTrue(
+                amplifierOf(player, MobEffects.DAMAGE_BOOST) == 1,
                 "a Strength I beacon plus a Strength totem should give Strength II");
         player.discard();
         helper.succeed();
@@ -109,7 +110,8 @@ public final class TotemStackingGameTests {
         Player player = player(helper);
         beacon(helper, 4, MobEffects.MOVEMENT_SPEED, MobEffects.MOVEMENT_SPEED);
         equip(helper, player, activeHasteTotem());
-        helper.assertTrue(amplifierOf(player, MobEffects.DIG_SPEED) == 0,
+        helper.assertTrue(
+                amplifierOf(player, MobEffects.DIG_SPEED) == 0,
                 "a Speed beacon should not raise a Haste totem above level I");
         helper.assertTrue(amplifierOf(player, MobEffects.MOVEMENT_SPEED) == 1, "the beacon's Speed II is unchanged");
         player.discard();
@@ -130,7 +132,8 @@ public final class TotemStackingGameTests {
         Player player = player(helper);
         player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 2000, 1));
         equip(helper, player, activeHasteTotem());
-        helper.assertTrue(amplifierOf(player, MobEffects.DIG_SPEED) == 1,
+        helper.assertTrue(
+                amplifierOf(player, MobEffects.DIG_SPEED) == 1,
                 "a Haste II potion plus a Haste totem should stay Haste II (no stacking)");
         player.discard();
         helper.succeed();
@@ -145,12 +148,15 @@ public final class TotemStackingGameTests {
         player.addEffect(new MobEffectInstance(beaconHaste));
         equip(helper, player, activeHasteTotem());
         MobEffectInstance stacked = player.getEffect(MobEffects.DIG_SPEED);
-        helper.assertTrue(stacked != null && stacked.getAmplifier() == 2 && stacked.getDuration() <= 40,
+        helper.assertTrue(
+                stacked != null && stacked.getAmplifier() == 2 && stacked.getDuration() <= 40,
                 "the stacked Haste III should last only as long as the beacon effect, was " + stacked);
         helper.runAfterDelay(60, () -> {
-            helper.assertTrue(BeaconEffectTracker.highestAmplifier(player, MobEffects.DIG_SPEED)
-                    == BeaconEffectTracker.NONE, "the beacon effect should have expired");
-            helper.assertTrue(amplifierOf(player, MobEffects.DIG_SPEED) == 0,
+            helper.assertTrue(
+                    BeaconEffectTracker.highestAmplifier(player, MobEffects.DIG_SPEED) == BeaconEffectTracker.NONE,
+                    "the beacon effect should have expired");
+            helper.assertTrue(
+                    amplifierOf(player, MobEffects.DIG_SPEED) == 0,
                     "after the beacon effect expires the totem should give Haste I");
             player.discard();
             helper.succeed();
@@ -163,12 +169,14 @@ public final class TotemStackingGameTests {
         equip(helper, player, activeHasteTotem());
         player.setItemSlot(EquipmentSlot.MAINHAND, hastePickaxe());
         helper.runAfterDelay(100, () -> {
-            helper.assertTrue(remaining(player.getMainHandItem()) == STORED,
+            helper.assertTrue(
+                    remaining(player.getMainHandItem()) == STORED,
                     "gear should not lose time while an active totem is worn");
             equip(helper, player, ItemStack.EMPTY);
         });
         helper.runAfterDelay(160, () -> {
-            helper.assertTrue(remaining(player.getMainHandItem()) < STORED,
+            helper.assertTrue(
+                    remaining(player.getMainHandItem()) < STORED,
                     "gear should resume losing time once the totem is removed");
             helper.assertTrue(player.hasEffect(MobEffects.DIG_SPEED), "the pickaxe should give Haste again");
             player.discard();
@@ -184,7 +192,8 @@ public final class TotemStackingGameTests {
         helper.runAfterDelay(61, () -> {
             helper.assertTrue(amplifierOf(player, MobEffects.DIG_SPEED) == 0, "the pickaxe should give Haste I");
             int used = STORED - remaining(player.getMainHandItem());
-            helper.assertTrue(used >= 40 && used <= 80, "the pickaxe should use about 20 ticks per second, used " + used);
+            helper.assertTrue(
+                    used >= 40 && used <= 80, "the pickaxe should use about 20 ticks per second, used " + used);
             player.discard();
             helper.succeed();
         });

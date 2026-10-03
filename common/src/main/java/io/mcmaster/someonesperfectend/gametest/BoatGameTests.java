@@ -30,8 +30,7 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.phys.AABB;
 
 public final class BoatGameTests {
-    private BoatGameTests() {
-    }
+    private BoatGameTests() {}
 
     @GameTest
     public static void boatItemsSpawnTheirEntityOnWater(GameTestHelper helper) {
@@ -48,12 +47,14 @@ public final class BoatGameTests {
                 player.getMainHandItem().use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
                 helper.assertTrue(player.getMainHandItem().isEmpty(), item + " was not used up");
 
-                EntityType<? extends Boat> entityType = ModBoats.entityType(type, chest).get();
-                List<? extends Boat> boats = helper.getLevel().getEntities(entityType, new AABB(abs).inflate(2),
-                        boat -> true);
+                EntityType<? extends Boat> entityType =
+                        ModBoats.entityType(type, chest).get();
+                List<? extends Boat> boats =
+                        helper.getLevel().getEntities(entityType, new AABB(abs).inflate(2), boat -> true);
                 helper.assertTrue(boats.size() == 1, item + " spawned " + boats.size() + " " + entityType);
                 Boat boat = boats.get(0);
-                helper.assertTrue(chest ? boat instanceof ModChestBoat : boat instanceof ModBoat,
+                helper.assertTrue(
+                        chest ? boat instanceof ModChestBoat : boat instanceof ModBoat,
                         "wrong boat class " + boat.getClass());
                 helper.assertTrue(boat.getVariant() == type.shape(), "boat shape is " + boat.getVariant());
                 helper.assertTrue(boat.getDropItem() == item, boat + " drops " + boat.getDropItem());
@@ -70,8 +71,8 @@ public final class BoatGameTests {
         for (ModBoatType type : ModBoatType.values()) {
             for (boolean chest : new boolean[] {false, true}) {
                 Item item = ModBoats.item(type, chest).get();
-                Boat boat = ModBoats.create(helper.getLevel(), type, chest, abs.getX() + 0.5, abs.getY(),
-                        abs.getZ() + 0.5);
+                Boat boat =
+                        ModBoats.create(helper.getLevel(), type, chest, abs.getX() + 0.5, abs.getY(), abs.getZ() + 0.5);
                 helper.getLevel().addFreshEntity(boat);
                 Player player = helper.makeMockPlayer(GameType.SURVIVAL);
                 helper.assertTrue(player.startRiding(boat) && player.getVehicle() == boat, item + " is not rideable");
@@ -79,16 +80,20 @@ public final class BoatGameTests {
 
                 boat.hurt(helper.getLevel().damageSources().playerAttack(player), 100.0F);
                 helper.assertTrue(boat.isRemoved(), item + " did not break");
-                List<ItemEntity> drops = helper.getLevel().getEntitiesOfClass(ItemEntity.class,
-                        new AABB(abs).inflate(3), drop -> true);
-                helper.assertTrue(drops.size() == 1 && drops.get(0).getItem().is(item) && drops.get(0).getItem()
-                        .getCount() == 1, "broken " + item + " dropped " + drops.stream().map(ItemEntity::getItem)
-                        .toList());
+                List<ItemEntity> drops =
+                        helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(abs).inflate(3), drop -> true);
+                helper.assertTrue(
+                        drops.size() == 1
+                                && drops.get(0).getItem().is(item)
+                                && drops.get(0).getItem().getCount() == 1,
+                        "broken " + item + " dropped "
+                                + drops.stream().map(ItemEntity::getItem).toList());
                 drops.forEach(ItemEntity::discard);
 
                 // A boat destroyed by a fall drops its shape's planks; ours must drop our planks instead.
                 ItemEntity planks = boat.spawnAtLocation(type.shape().getPlanks());
-                helper.assertTrue(planks != null && planks.getItem().is(type.planks().asItem()),
+                helper.assertTrue(
+                        planks != null && planks.getItem().is(type.planks().asItem()),
                         item + " fall drop is " + (planks == null ? null : planks.getItem()));
                 planks.discard();
             }
@@ -102,20 +107,26 @@ public final class BoatGameTests {
             Item boat = ModBoats.item(type, false).get();
             Item chestBoat = ModBoats.item(type, true).get();
             ItemStack planks = new ItemStack(type.planks());
-            ItemStack crafted = craft(helper, CraftingInput.of(3, 2,
-                    List.of(planks, ItemStack.EMPTY, planks, planks, planks, planks)));
+            ItemStack crafted = craft(
+                    helper, CraftingInput.of(3, 2, List.of(planks, ItemStack.EMPTY, planks, planks, planks, planks)));
             helper.assertTrue(crafted.is(boat) && crafted.getCount() == 1, type + " planks crafted into " + crafted);
-            ItemStack withChest = craft(helper, CraftingInput.of(2, 1,
-                    List.of(new ItemStack(Items.CHEST), new ItemStack(boat))));
+            ItemStack withChest =
+                    craft(helper, CraftingInput.of(2, 1, List.of(new ItemStack(Items.CHEST), new ItemStack(boat))));
             helper.assertTrue(withChest.is(chestBoat), boat + " and chest crafted into " + withChest);
 
             for (Item item : List.of(boat, chestBoat)) {
                 ItemStack stack = new ItemStack(item);
-                helper.assertTrue(stack.is(ItemTags.BOATS) && stack.getMaxStackSize() == 1,
+                helper.assertTrue(
+                        stack.is(ItemTags.BOATS) && stack.getMaxStackSize() == 1,
                         item + " is not a boat that stacks to 1");
                 helper.assertTrue(FuelRegistry.get(stack) == 1200, item + " burns for " + FuelRegistry.get(stack));
-                helper.assertTrue(helper.getLevel().getServer().getAdvancements()
-                        .get(SomeonesPerfectEnd.id("recipes/transportation/" + type.id(item == chestBoat))) != null,
+                helper.assertTrue(
+                        helper.getLevel()
+                                        .getServer()
+                                        .getAdvancements()
+                                        .get(SomeonesPerfectEnd.id(
+                                                "recipes/transportation/" + type.id(item == chestBoat)))
+                                != null,
                         "recipe advancement for " + item + " is missing");
             }
             helper.assertTrue(new ItemStack(chestBoat).is(ItemTags.CHEST_BOATS), chestBoat + " is not a chest boat");
@@ -131,14 +142,20 @@ public final class BoatGameTests {
         helper.setBlock(water.east().below(), Blocks.STONE);
         helper.setBlock(water, Blocks.WATER);
         helper.setBlock(water.east(), Blocks.WATER);
-        helper.setBlock(dispenser, Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, Direction.EAST));
+        helper.setBlock(
+                dispenser, Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, Direction.EAST));
         DispenserBlockEntity entity = (DispenserBlockEntity) helper.getBlockEntity(dispenser);
-        entity.setItem(0, new ItemStack(ModBoats.item(ModBoatType.VOIDVINE, false).get()));
+        entity.setItem(
+                0, new ItemStack(ModBoats.item(ModBoatType.VOIDVINE, false).get()));
         helper.setBlock(dispenser.west(), Blocks.REDSTONE_BLOCK);
-        EntityType<? extends Boat> raft = ModBoats.entityType(ModBoatType.VOIDVINE, false).get();
+        EntityType<? extends Boat> raft =
+                ModBoats.entityType(ModBoatType.VOIDVINE, false).get();
         helper.succeedWhen(() -> {
-            helper.assertTrue(!helper.getLevel().getEntities(raft, new AABB(helper.absolutePos(water)).inflate(2),
-                    boat -> true).isEmpty(), "no raft was dispensed");
+            helper.assertTrue(
+                    !helper.getLevel()
+                            .getEntities(raft, new AABB(helper.absolutePos(water)).inflate(2), boat -> true)
+                            .isEmpty(),
+                    "no raft was dispensed");
             helper.assertTrue(entity.isEmpty(), "dispenser still holds the raft");
         });
     }

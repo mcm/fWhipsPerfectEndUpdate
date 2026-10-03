@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public class TrinketSlot extends Slot {
     /** Position in the survival inventory screen: directly above the off-hand slot (77, 62). */
     public static final int X = 77;
+
     public static final int Y = 44;
     /** Empty-slot icon (a gem outline) in the block atlas. */
     public static final ResourceLocation EMPTY_ICON = SomeonesPerfectEnd.id("item/empty_trinket_slot");

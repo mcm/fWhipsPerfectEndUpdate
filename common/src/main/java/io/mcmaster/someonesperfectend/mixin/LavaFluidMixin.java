@@ -25,8 +25,13 @@ public abstract class LavaFluidMixin {
     }
 
     @Inject(method = "spreadTo", at = @At("HEAD"), cancellable = true)
-    private void someonesperfectend$oasisWaterBelow(LevelAccessor level, BlockPos pos, BlockState blockState,
-            Direction direction, FluidState fluidState, CallbackInfo ci) {
+    private void someonesperfectend$oasisWaterBelow(
+            LevelAccessor level,
+            BlockPos pos,
+            BlockState blockState,
+            Direction direction,
+            FluidState fluidState,
+            CallbackInfo ci) {
         if (direction != Direction.DOWN || !((LavaFluid) (Object) this).is(FluidTags.LAVA)) {
             return;
         }

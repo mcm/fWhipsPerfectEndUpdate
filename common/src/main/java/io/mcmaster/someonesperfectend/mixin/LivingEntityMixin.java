@@ -30,7 +30,8 @@ public abstract class LivingEntityMixin {
 
     @Inject(method = "stopSleeping", at = @At("HEAD"))
     private void someonesperfectend$beforeWaking(CallbackInfo ci) {
-        someonesperfectend$wakingEnderBed = EnderBedTravel.enderBed((LivingEntity) (Object) this).orElse(null);
+        someonesperfectend$wakingEnderBed =
+                EnderBedTravel.enderBed((LivingEntity) (Object) this).orElse(null);
     }
 
     /** Vanilla stands the sleeper up on top of the bed, which for a hanging bed is inside its support. */

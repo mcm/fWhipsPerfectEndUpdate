@@ -72,13 +72,15 @@ public class EffectTotemItem extends Item implements Accessory {
         int beacon = beaconAmplifier(entity);
         MobEffectInstance current = entity.getEffect(holder);
         // Only remove the totem's own effect (its current level, ambient, at most one application long).
-        if (current != null && current.getAmplifier() == TotemRules.amplifier(beacon) && current.isAmbient()
+        if (current != null
+                && current.getAmplifier() == TotemRules.amplifier(beacon)
+                && current.isAmbient()
                 && current.getDuration() <= TotemRules.EFFECT_DURATION) {
             entity.removeEffect(holder);
             if (beacon != TotemRules.NO_BEACON && entity instanceof Player player) {
                 // Removing the stacked level also drops the beacon's effect hidden under it; restore it.
-                entity.addEffect(new MobEffectInstance(holder,
-                        BeaconEffectTracker.remainingTicks(player, holder, beacon), beacon, true, true));
+                entity.addEffect(new MobEffectInstance(
+                        holder, BeaconEffectTracker.remainingTicks(player, holder, beacon), beacon, true, true));
             }
         }
     }
@@ -93,8 +95,8 @@ public class EffectTotemItem extends Item implements Accessory {
             return;
         }
         Holder<MobEffect> holder = effect.holder();
-        entity.addEffect(new MobEffectInstance(holder, TotemRules.EFFECT_DURATION, TotemRules.AMPLIFIER,
-                true, false, true));
+        entity.addEffect(
+                new MobEffectInstance(holder, TotemRules.EFFECT_DURATION, TotemRules.AMPLIFIER, true, false, true));
         int beacon = beaconAmplifier(entity);
         if (beacon != TotemRules.NO_BEACON && entity instanceof Player player) {
             int ticks = TotemRules.stackedDuration(BeaconEffectTracker.remainingTicks(player, holder, beacon));

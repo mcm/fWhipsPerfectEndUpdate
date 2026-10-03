@@ -3,16 +3,16 @@ package io.mcmaster.someonesperfectend.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LightEngine;
-import net.minecraft.tags.FluidTags;
 
 /**
  * End stone with light-blue grass on top. Behaves like grass on dirt, but with end stone: it spreads onto
@@ -33,13 +33,14 @@ public class EndTurfBlock extends Block implements BonemealableBlock {
         if (above.getFluidState().getAmount() == 8) {
             return false;
         }
-        int lightBlock = LightEngine.getLightBlockInto(level, state, pos, above, abovePos, Direction.UP,
-                above.getLightBlock(level, abovePos));
+        int lightBlock = LightEngine.getLightBlockInto(
+                level, state, pos, above, abovePos, Direction.UP, above.getLightBlock(level, abovePos));
         return lightBlock < level.getMaxLightLevel();
     }
 
     private static boolean canSpreadTo(BlockState state, LevelReader level, BlockPos pos) {
-        return canStayTurf(state, level, pos) && !level.getFluidState(pos.above()).is(FluidTags.WATER);
+        return canStayTurf(state, level, pos)
+                && !level.getFluidState(pos.above()).is(FluidTags.WATER);
     }
 
     @Override
@@ -79,8 +80,8 @@ public class EndTurfBlock extends Block implements BonemealableBlock {
         for (int i = 0; i < 128; i++) {
             BlockPos target = start;
             for (int step = 0; step < i / 16; step++) {
-                target = target.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2,
-                        random.nextInt(3) - 1);
+                target = target.offset(
+                        random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
                 if (!level.getBlockState(target.below()).is(this)
                         || level.getBlockState(target).isCollisionShapeFullBlock(level, target)) {
                     continue attempts;

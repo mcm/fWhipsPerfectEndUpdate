@@ -22,38 +22,58 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 public final class ModWoodTypes {
     /** Astral wood sounds like cherry, the other pastel wood. */
     public static final BlockSetType ASTRAL_SET = BlockSetTypeInvoker.someonesperfectend$register(new BlockSetType(
-            SomeonesPerfectEnd.id("astral").toString(), true, true, true, BlockSetType.PressurePlateSensitivity.EVERYTHING,
+            SomeonesPerfectEnd.id("astral").toString(),
+            true,
+            true,
+            true,
+            BlockSetType.PressurePlateSensitivity.EVERYTHING,
             SoundType.CHERRY_WOOD,
-            SoundEvents.CHERRY_WOOD_DOOR_CLOSE, SoundEvents.CHERRY_WOOD_DOOR_OPEN,
-            SoundEvents.CHERRY_WOOD_TRAPDOOR_CLOSE, SoundEvents.CHERRY_WOOD_TRAPDOOR_OPEN,
-            SoundEvents.CHERRY_WOOD_PRESSURE_PLATE_CLICK_OFF, SoundEvents.CHERRY_WOOD_PRESSURE_PLATE_CLICK_ON,
-            SoundEvents.CHERRY_WOOD_BUTTON_CLICK_OFF, SoundEvents.CHERRY_WOOD_BUTTON_CLICK_ON));
+            SoundEvents.CHERRY_WOOD_DOOR_CLOSE,
+            SoundEvents.CHERRY_WOOD_DOOR_OPEN,
+            SoundEvents.CHERRY_WOOD_TRAPDOOR_CLOSE,
+            SoundEvents.CHERRY_WOOD_TRAPDOOR_OPEN,
+            SoundEvents.CHERRY_WOOD_PRESSURE_PLATE_CLICK_OFF,
+            SoundEvents.CHERRY_WOOD_PRESSURE_PLATE_CLICK_ON,
+            SoundEvents.CHERRY_WOOD_BUTTON_CLICK_OFF,
+            SoundEvents.CHERRY_WOOD_BUTTON_CLICK_ON));
 
     public static final WoodType ASTRAL = WoodTypeInvoker.someonesperfectend$register(new WoodType(
-            SomeonesPerfectEnd.id("astral").toString(), ASTRAL_SET,
-            SoundType.CHERRY_WOOD, SoundType.CHERRY_WOOD_HANGING_SIGN,
-            SoundEvents.CHERRY_WOOD_FENCE_GATE_CLOSE, SoundEvents.CHERRY_WOOD_FENCE_GATE_OPEN));
+            SomeonesPerfectEnd.id("astral").toString(),
+            ASTRAL_SET,
+            SoundType.CHERRY_WOOD,
+            SoundType.CHERRY_WOOD_HANGING_SIGN,
+            SoundEvents.CHERRY_WOOD_FENCE_GATE_CLOSE,
+            SoundEvents.CHERRY_WOOD_FENCE_GATE_OPEN));
 
     /** Voidvine is modeled on bamboo, so it sounds like bamboo. */
     public static final BlockSetType VOIDVINE_SET = BlockSetTypeInvoker.someonesperfectend$register(new BlockSetType(
-            SomeonesPerfectEnd.id("voidvine").toString(), true, true, true,
-            BlockSetType.PressurePlateSensitivity.EVERYTHING, SoundType.BAMBOO_WOOD,
-            SoundEvents.BAMBOO_WOOD_DOOR_CLOSE, SoundEvents.BAMBOO_WOOD_DOOR_OPEN,
-            SoundEvents.BAMBOO_WOOD_TRAPDOOR_CLOSE, SoundEvents.BAMBOO_WOOD_TRAPDOOR_OPEN,
-            SoundEvents.BAMBOO_WOOD_PRESSURE_PLATE_CLICK_OFF, SoundEvents.BAMBOO_WOOD_PRESSURE_PLATE_CLICK_ON,
-            SoundEvents.BAMBOO_WOOD_BUTTON_CLICK_OFF, SoundEvents.BAMBOO_WOOD_BUTTON_CLICK_ON));
+            SomeonesPerfectEnd.id("voidvine").toString(),
+            true,
+            true,
+            true,
+            BlockSetType.PressurePlateSensitivity.EVERYTHING,
+            SoundType.BAMBOO_WOOD,
+            SoundEvents.BAMBOO_WOOD_DOOR_CLOSE,
+            SoundEvents.BAMBOO_WOOD_DOOR_OPEN,
+            SoundEvents.BAMBOO_WOOD_TRAPDOOR_CLOSE,
+            SoundEvents.BAMBOO_WOOD_TRAPDOOR_OPEN,
+            SoundEvents.BAMBOO_WOOD_PRESSURE_PLATE_CLICK_OFF,
+            SoundEvents.BAMBOO_WOOD_PRESSURE_PLATE_CLICK_ON,
+            SoundEvents.BAMBOO_WOOD_BUTTON_CLICK_OFF,
+            SoundEvents.BAMBOO_WOOD_BUTTON_CLICK_ON));
 
     public static final WoodType VOIDVINE = WoodTypeInvoker.someonesperfectend$register(new WoodType(
-            SomeonesPerfectEnd.id("voidvine").toString(), VOIDVINE_SET,
-            SoundType.BAMBOO_WOOD, SoundType.BAMBOO_WOOD_HANGING_SIGN,
-            SoundEvents.BAMBOO_WOOD_FENCE_GATE_CLOSE, SoundEvents.BAMBOO_WOOD_FENCE_GATE_OPEN));
+            SomeonesPerfectEnd.id("voidvine").toString(),
+            VOIDVINE_SET,
+            SoundType.BAMBOO_WOOD,
+            SoundType.BAMBOO_WOOD_HANGING_SIGN,
+            SoundEvents.BAMBOO_WOOD_FENCE_GATE_CLOSE,
+            SoundEvents.BAMBOO_WOOD_FENCE_GATE_OPEN));
 
-    private ModWoodTypes() {
-    }
+    private ModWoodTypes() {}
 
     /** Loads this class so the types are registered before any client code snapshots {@link WoodType#values()}. */
-    public static void init() {
-    }
+    public static void init() {}
 
     public static boolean isModWoodType(WoodType type) {
         return type.name().startsWith(SomeonesPerfectEnd.MOD_ID + ":");

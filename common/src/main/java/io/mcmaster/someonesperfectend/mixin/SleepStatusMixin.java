@@ -16,8 +16,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  */
 @Mixin(SleepStatus.class)
 public abstract class SleepStatusMixin {
-    @WrapOperation(method = "update", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerPlayer;isSleeping()Z"))
+    @WrapOperation(
+            method = "update",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSleeping()Z"))
     private boolean someonesperfectend$enderBedIsAwake(ServerPlayer player, Operation<Boolean> original) {
         return original.call(player) && !EnderBedTravel.isInEnderBed(player);
     }
@@ -27,6 +28,8 @@ public abstract class SleepStatusMixin {
         if (players.stream().noneMatch(EnderBedTravel::isInEnderBed)) {
             return players;
         }
-        return players.stream().filter(player -> !EnderBedTravel.isInEnderBed(player)).toList();
+        return players.stream()
+                .filter(player -> !EnderBedTravel.isInEnderBed(player))
+                .toList();
     }
 }

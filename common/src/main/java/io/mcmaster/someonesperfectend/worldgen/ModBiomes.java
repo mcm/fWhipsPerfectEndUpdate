@@ -21,15 +21,16 @@ public final class ModBiomes {
 
     /** Weights next to {@code minecraft:end_highlands} (10). Oasis is the rarest. */
     static final int PLAINS_HIGHLANDS_WEIGHT = 4;
+
     static final int FOREST_HIGHLANDS_WEIGHT = 4;
     static final int OASIS_HIGHLANDS_WEIGHT = 2;
     /** Weights next to {@code minecraft:end_midlands} (10). */
     static final int PLAINS_MIDLANDS_WEIGHT = 2;
+
     static final int FOREST_MIDLANDS_WEIGHT = 2;
     static final int OASIS_MIDLANDS_WEIGHT = 1;
 
-    private ModBiomes() {
-    }
+    private ModBiomes() {}
 
     private static ResourceKey<Biome> key(String name) {
         return ResourceKey.create(Registries.BIOME, SomeonesPerfectEnd.id(name));

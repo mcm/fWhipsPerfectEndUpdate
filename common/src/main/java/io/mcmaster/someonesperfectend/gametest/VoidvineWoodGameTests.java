@@ -34,14 +34,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
 
 public final class VoidvineWoodGameTests {
-    private VoidvineWoodGameTests() {
-    }
+    private VoidvineWoodGameTests() {}
 
     @GameTest
     public static void axeStripsVoidvineBlock(GameTestHelper helper) {
         BlockPos pos = new BlockPos(1, 1, 1);
-        helper.setBlock(pos, ModBlocks.VOIDVINE_BLOCK.get().defaultBlockState()
-                .setValue(RotatedPillarBlock.AXIS, Direction.Axis.Z));
+        helper.setBlock(
+                pos,
+                ModBlocks.VOIDVINE_BLOCK.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Z));
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
         useOnTop(helper, player, pos);
@@ -55,7 +55,8 @@ public final class VoidvineWoodGameTests {
     public static void stalksCraftIntoBlockAndSticks(GameTestHelper helper) {
         ItemStack stalk = new ItemStack(ModBlocks.VOIDVINE.get());
         ItemStack block = craft(helper, CraftingInput.of(3, 3, Collections.nCopies(9, stalk)));
-        helper.assertTrue(block.is(ModBlocks.VOIDVINE_BLOCK.get().asItem()) && block.getCount() == 1,
+        helper.assertTrue(
+                block.is(ModBlocks.VOIDVINE_BLOCK.get().asItem()) && block.getCount() == 1,
                 "9 stalks crafted into " + block);
         ItemStack sticks = craft(helper, CraftingInput.of(1, 2, List.of(stalk, stalk)));
         helper.assertTrue(sticks.is(Items.STICK) && sticks.getCount() == 1, "2 stalks crafted into " + sticks);
@@ -66,17 +67,36 @@ public final class VoidvineWoodGameTests {
     public static void blockCraftsIntoPlanks(GameTestHelper helper) {
         for (ItemLike block : List.of(ModBlocks.VOIDVINE_BLOCK.get(), ModBlocks.STRIPPED_VOIDVINE_BLOCK.get())) {
             ItemStack result = craft(helper, CraftingInput.of(1, 1, List.of(new ItemStack(block))));
-            helper.assertTrue(result.is(ModBlocks.VOIDVINE_PLANKS.get().asItem()) && result.getCount() == 2,
+            helper.assertTrue(
+                    result.is(ModBlocks.VOIDVINE_PLANKS.get().asItem()) && result.getCount() == 2,
                     block + " crafted into " + result);
         }
         ItemStack stripped = new ItemStack(ModBlocks.STRIPPED_VOIDVINE_BLOCK.get());
         ItemStack chain = new ItemStack(Items.CHAIN);
-        ItemStack hangingSigns = craft(helper, CraftingInput.of(3, 3, List.of(
-                chain, ItemStack.EMPTY, chain, stripped, stripped, stripped, stripped, stripped, stripped)));
-        helper.assertTrue(hangingSigns.is(ModBlocks.VOIDVINE_HANGING_SIGN_ITEM.get()) && hangingSigns.getCount() == 6,
+        ItemStack hangingSigns = craft(
+                helper,
+                CraftingInput.of(
+                        3,
+                        3,
+                        List.of(
+                                chain,
+                                ItemStack.EMPTY,
+                                chain,
+                                stripped,
+                                stripped,
+                                stripped,
+                                stripped,
+                                stripped,
+                                stripped)));
+        helper.assertTrue(
+                hangingSigns.is(ModBlocks.VOIDVINE_HANGING_SIGN_ITEM.get()) && hangingSigns.getCount() == 6,
                 "stripped blocks and chains crafted into " + hangingSigns);
-        helper.assertTrue(helper.getLevel().getServer().getAdvancements()
-                .get(SomeonesPerfectEnd.id("recipes/building_blocks/voidvine_planks")) != null,
+        helper.assertTrue(
+                helper.getLevel()
+                                .getServer()
+                                .getAdvancements()
+                                .get(SomeonesPerfectEnd.id("recipes/building_blocks/voidvine_planks"))
+                        != null,
                 "planks recipe advancement is missing");
         helper.succeed();
     }
@@ -85,11 +105,13 @@ public final class VoidvineWoodGameTests {
     public static void slabsCraftIntoMosaic(GameTestHelper helper) {
         ItemStack slab = new ItemStack(ModBlocks.VOIDVINE_SLAB.get());
         ItemStack mosaic = craft(helper, CraftingInput.of(1, 2, List.of(slab, slab)));
-        helper.assertTrue(mosaic.is(ModBlocks.VOIDVINE_MOSAIC.get().asItem()) && mosaic.getCount() == 1,
+        helper.assertTrue(
+                mosaic.is(ModBlocks.VOIDVINE_MOSAIC.get().asItem()) && mosaic.getCount() == 1,
                 "2 slabs crafted into " + mosaic);
         ItemStack mosaicStack = new ItemStack(ModBlocks.VOIDVINE_MOSAIC.get());
         ItemStack mosaicSlabs = craft(helper, CraftingInput.of(3, 1, Collections.nCopies(3, mosaicStack)));
-        helper.assertTrue(mosaicSlabs.is(ModBlocks.VOIDVINE_MOSAIC_SLAB.get().asItem()) && mosaicSlabs.getCount() == 6,
+        helper.assertTrue(
+                mosaicSlabs.is(ModBlocks.VOIDVINE_MOSAIC_SLAB.get().asItem()) && mosaicSlabs.getCount() == 6,
                 "3 mosaic crafted into " + mosaicSlabs);
         helper.succeed();
     }
@@ -97,9 +119,14 @@ public final class VoidvineWoodGameTests {
     @GameTest
     public static void voidvineBurnsAndFuelsFurnaces(GameTestHelper helper) {
         FireBlockInvoker fire = (FireBlockInvoker) Blocks.FIRE;
-        for (Block block : List.of(ModBlocks.VOIDVINE_PLANKS.get(), ModBlocks.VOIDVINE_MOSAIC.get(),
-                ModBlocks.VOIDVINE_STAIRS.get(), ModBlocks.VOIDVINE_SLAB.get(), ModBlocks.VOIDVINE_MOSAIC_STAIRS.get(),
-                ModBlocks.VOIDVINE_MOSAIC_SLAB.get(), ModBlocks.VOIDVINE_FENCE.get(),
+        for (Block block : List.of(
+                ModBlocks.VOIDVINE_PLANKS.get(),
+                ModBlocks.VOIDVINE_MOSAIC.get(),
+                ModBlocks.VOIDVINE_STAIRS.get(),
+                ModBlocks.VOIDVINE_SLAB.get(),
+                ModBlocks.VOIDVINE_MOSAIC_STAIRS.get(),
+                ModBlocks.VOIDVINE_MOSAIC_SLAB.get(),
+                ModBlocks.VOIDVINE_FENCE.get(),
                 ModBlocks.VOIDVINE_FENCE_GATE.get())) {
             assertFireOdds(helper, fire, block, 5, 20);
         }
@@ -147,12 +174,15 @@ public final class VoidvineWoodGameTests {
 
     @GameTest
     public static void voidvineWoodTypeIsRegistered(GameTestHelper helper) {
-        helper.assertTrue(WoodType.values().anyMatch(type -> type == ModWoodTypes.VOIDVINE), "voidvine WoodType missing");
-        helper.assertTrue(ModWoodTypes.VOIDVINE.name().equals("someonesperfectend:voidvine"),
+        helper.assertTrue(
+                WoodType.values().anyMatch(type -> type == ModWoodTypes.VOIDVINE), "voidvine WoodType missing");
+        helper.assertTrue(
+                ModWoodTypes.VOIDVINE.name().equals("someonesperfectend:voidvine"),
                 "unexpected name " + ModWoodTypes.VOIDVINE.name());
         helper.assertTrue(ModBlocks.VOIDVINE_DOOR.get().type() == ModWoodTypes.VOIDVINE_SET, "door uses another set");
         Item stalk = ModBlocks.VOIDVINE.get();
-        helper.assertTrue(stalk.builtInRegistryHolder().key().location().equals(SomeonesPerfectEnd.id("voidvine")),
+        helper.assertTrue(
+                stalk.builtInRegistryHolder().key().location().equals(SomeonesPerfectEnd.id("voidvine")),
                 "stalk item has the wrong id");
         helper.succeed();
     }

@@ -5,35 +5,35 @@ import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.infuser.InfuserBlockEntity;
 import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
-import io.mcmaster.someonesperfectend.mixin.BeaconBlockEntityAccessor;
 import io.mcmaster.someonesperfectend.infuser.Infusion;
 import io.mcmaster.someonesperfectend.infuser.InfusionEffect;
 import io.mcmaster.someonesperfectend.infuser.InfusionRules;
+import io.mcmaster.someonesperfectend.mixin.BeaconBlockEntityAccessor;
 import io.netty.buffer.Unpooled;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.inventory.BeaconMenu;
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
@@ -54,8 +54,7 @@ public final class InfuserGameTests {
      */
     private static final String NEGATIVE_BATCH = "infuser_negative";
 
-    private InfuserGameTests() {
-    }
+    private InfuserGameTests() {}
 
     /** Places an Infuser at {@link #INFUSER}, optionally on a 3x3 tier-1 pyramid of iron blocks. */
     private static InfuserBlockEntity placeInfuser(GameTestHelper helper, boolean pyramid) {
@@ -70,14 +69,19 @@ public final class InfuserGameTests {
 
     /** Opens a server-side menu on the Infuser, pays one iron ingot, and confirms Speed, like the beacon screen. */
     private static InfuserMenu confirmSpeed(GameTestHelper helper, InfuserBlockEntity infuser, Player player) {
-        InfuserMenu menu = new InfuserMenu(0, player.getInventory(),
+        InfuserMenu menu = new InfuserMenu(
+                0,
+                player.getInventory(),
                 ((BeaconBlockEntityAccessor) infuser).someonesperfectend$dataAccess(),
                 ContainerLevelAccess.create(helper.getLevel(), infuser.getBlockPos()));
         menu.getSlot(InfuserMenu.PAYMENT_SLOT).set(new ItemStack(Items.IRON_INGOT));
-        helper.assertTrue(menu.hasPayment(), "the confirm button should be enabled with a payment and no infusion item");
+        helper.assertTrue(
+                menu.hasPayment(), "the confirm button should be enabled with a payment and no infusion item");
         menu.updateEffects(Optional.of(MobEffects.MOVEMENT_SPEED), Optional.empty());
-        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().isEmpty(), "confirm should consume the payment");
-        helper.assertTrue(menu.getPrimaryEffect() != null && menu.getPrimaryEffect().is(MobEffects.MOVEMENT_SPEED),
+        helper.assertTrue(
+                menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().isEmpty(), "confirm should consume the payment");
+        helper.assertTrue(
+                menu.getPrimaryEffect() != null && menu.getPrimaryEffect().is(MobEffects.MOVEMENT_SPEED),
                 "confirm should set Speed as the primary power");
         return menu;
     }
@@ -101,10 +105,10 @@ public final class InfuserGameTests {
     /** A server player with a dummy connection that isn't in the level or player list. */
     private static ServerPlayer detachedServerPlayer(GameTestHelper helper) {
         MinecraftServer server = helper.getLevel().getServer();
-        CommonListenerCookie cookie = CommonListenerCookie.createInitial(
-                new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
-        ServerPlayer player = new ServerPlayer(server, helper.getLevel(), cookie.gameProfile(),
-                cookie.clientInformation());
+        CommonListenerCookie cookie =
+                CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
+        ServerPlayer player =
+                new ServerPlayer(server, helper.getLevel(), cookie.gameProfile(), cookie.clientInformation());
         Connection connection = new Connection(PacketFlow.SERVERBOUND);
         new EmbeddedChannel(connection);
         new ServerGamePacketListenerImpl(server, connection, player, cookie);
@@ -112,7 +116,10 @@ public final class InfuserGameTests {
     }
 
     private static InfuserMenu menuIn(Level level, Player player) {
-        return new InfuserMenu(0, player.getInventory(), new SimpleContainerData(3),
+        return new InfuserMenu(
+                0,
+                player.getInventory(),
+                new SimpleContainerData(3),
                 ContainerLevelAccess.create(level, BlockPos.ZERO));
     }
 
@@ -134,11 +141,13 @@ public final class InfuserGameTests {
         return menu.getInfusionSlot().getItem();
     }
 
-    private static void assertInfusion(GameTestHelper helper, ItemStack stack, InfusionEffect effect, int amplifier,
-            int ticks) {
+    private static void assertInfusion(
+            GameTestHelper helper, ItemStack stack, InfusionEffect effect, int amplifier, int ticks) {
         Infusion infusion = Infusion.get(stack);
         helper.assertTrue(infusion != null, stack + " should be infused");
-        helper.assertTrue(infusion.effect().is(effect.holder()) && infusion.amplifier() == amplifier
+        helper.assertTrue(
+                infusion.effect().is(effect.holder())
+                        && infusion.amplifier() == amplifier
                         && infusion.remainingTicks() == ticks,
                 "expected " + effect + " amplifier " + amplifier + " with " + ticks + " ticks, was " + infusion);
     }
@@ -153,15 +162,22 @@ public final class InfuserGameTests {
     public static void infuserBlockBasics(GameTestHelper helper) {
         InfuserBlockEntity infuser = placeInfuser(helper, false);
         BlockState state = helper.getBlockState(INFUSER);
-        helper.assertTrue(infuser.getType() == Infusers.BLOCK_ENTITY.get(), "the Infuser should use its own block entity type");
+        helper.assertTrue(
+                infuser.getType() == Infusers.BLOCK_ENTITY.get(), "the Infuser should use its own block entity type");
         helper.assertTrue(state.getLightEmission() == 15, "the Infuser should give light level 15");
         CompoundTag saved = infuser.saveWithId(helper.getLevel().registryAccess());
-        helper.assertTrue("someonesperfectend:infuser".equals(saved.getString("id")), "saved id was " + saved.getString("id"));
-        helper.assertTrue(Block.getDrops(state, helper.getLevel(), helper.absolutePos(INFUSER), infuser).stream()
-                .anyMatch(stack -> stack.is(ModBlocks.INFUSER.get().asItem())), "the Infuser should drop itself");
-        helper.assertTrue(helper.getLevel().getRecipeManager().getRecipes().stream()
-                .noneMatch(recipe -> recipe.value().getResultItem(helper.getLevel().registryAccess())
-                        .is(ModBlocks.INFUSER.get().asItem())), "the Infuser should not be craftable");
+        helper.assertTrue(
+                "someonesperfectend:infuser".equals(saved.getString("id")), "saved id was " + saved.getString("id"));
+        helper.assertTrue(
+                Block.getDrops(state, helper.getLevel(), helper.absolutePos(INFUSER), infuser).stream()
+                        .anyMatch(stack -> stack.is(ModBlocks.INFUSER.get().asItem())),
+                "the Infuser should drop itself");
+        helper.assertTrue(
+                helper.getLevel().getRecipeManager().getRecipes().stream()
+                        .noneMatch(recipe -> recipe.value()
+                                .getResultItem(helper.getLevel().registryAccess())
+                                .is(ModBlocks.INFUSER.get().asItem())),
+                "the Infuser should not be craftable");
         helper.succeed();
     }
 
@@ -174,7 +190,8 @@ public final class InfuserGameTests {
             helper.assertTrue(menu.getLevels() == 1, "the iron pyramid should be tier 1, was " + menu.getLevels());
             helper.assertTrue(player.hasEffect(MobEffects.MOVEMENT_SPEED), "a nearby player should get Speed");
             // Tier 1: (9 + 2 * 1) * 20 ticks.
-            helper.assertTrue(player.getEffect(MobEffects.MOVEMENT_SPEED).getDuration() <= 220, "Speed should last 220 ticks");
+            helper.assertTrue(
+                    player.getEffect(MobEffects.MOVEMENT_SPEED).getDuration() <= 220, "Speed should last 220 ticks");
             removePlayer(player);
             helper.setBlock(INFUSER, Blocks.AIR);
         });
@@ -188,7 +205,8 @@ public final class InfuserGameTests {
         helper.runAtTickTime(200, () -> {
             removePlayer(player);
             helper.assertTrue(menu.getLevels() == 0, "without a pyramid the tier should be 0");
-            helper.assertFalse(player.hasEffect(MobEffects.MOVEMENT_SPEED), "without a pyramid there should be no Speed");
+            helper.assertFalse(
+                    player.hasEffect(MobEffects.MOVEMENT_SPEED), "without a pyramid there should be no Speed");
             helper.succeed();
         });
     }
@@ -218,17 +236,28 @@ public final class InfuserGameTests {
         ItemStack pickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
         InfuserMenu overworldMenu = menuIn(helper.getLevel(), player);
         helper.assertFalse(overworldMenu.isInfusionEnabled(), "an Overworld menu should lock the infusion slot");
-        helper.assertFalse(overworldMenu.getInfusionSlot().mayPlace(pickaxe), "a locked infusion slot should refuse items");
+        helper.assertFalse(
+                overworldMenu.getInfusionSlot().mayPlace(pickaxe), "a locked infusion slot should refuse items");
 
         InfuserMenu endMenu = menuIn(end, player);
         helper.assertTrue(endMenu.isInfusionEnabled(), "an End menu should enable the infusion slot");
-        for (ItemStack ok : new ItemStack[] {pickaxe, new ItemStack(Items.IRON_BOOTS),
-                new ItemStack(Items.NETHERITE_CHESTPLATE), new ItemStack(Items.DIAMOND_SWORD),
-                new ItemStack(Items.IRON_AXE), new ItemStack(Items.STONE_SHOVEL)}) {
+        for (ItemStack ok : new ItemStack[] {
+            pickaxe,
+            new ItemStack(Items.IRON_BOOTS),
+            new ItemStack(Items.NETHERITE_CHESTPLATE),
+            new ItemStack(Items.DIAMOND_SWORD),
+            new ItemStack(Items.IRON_AXE),
+            new ItemStack(Items.STONE_SHOVEL)
+        }) {
             helper.assertTrue(endMenu.getInfusionSlot().mayPlace(ok), "the infusion slot should accept " + ok);
         }
-        for (ItemStack bad : new ItemStack[] {new ItemStack(Items.DIRT), new ItemStack(Items.IRON_HELMET),
-                new ItemStack(Items.IRON_LEGGINGS), new ItemStack(Items.IRON_INGOT), new ItemStack(Items.BOW)}) {
+        for (ItemStack bad : new ItemStack[] {
+            new ItemStack(Items.DIRT),
+            new ItemStack(Items.IRON_HELMET),
+            new ItemStack(Items.IRON_LEGGINGS),
+            new ItemStack(Items.IRON_INGOT),
+            new ItemStack(Items.BOW)
+        }) {
             helper.assertFalse(endMenu.getInfusionSlot().mayPlace(bad), "the infusion slot should refuse " + bad);
         }
         helper.succeed();
@@ -243,14 +272,17 @@ public final class InfuserGameTests {
         menu.getInfusionSlot().set(new ItemStack(Items.DIAMOND_PICKAXE));
         helper.assertFalse(menu.hasPayment(), "confirm should be disabled with an item in the infusion slot");
         menu.updateEffects(Optional.of(MobEffects.MOVEMENT_SPEED), Optional.empty());
-        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
+        helper.assertTrue(
+                menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
                 "confirm with an infusion item should not consume the payment");
-        helper.assertTrue(menu.getPrimaryEffect() == null, "confirm with an infusion item should not set beacon powers");
+        helper.assertTrue(
+                menu.getPrimaryEffect() == null, "confirm with an infusion item should not set beacon powers");
 
         menu.getSlot(InfuserMenu.PAYMENT_SLOT).set(ItemStack.EMPTY);
         menu.removed(player);
         helper.assertTrue(menu.getInfusionSlot().getItem().isEmpty(), "closing should empty the infusion slot");
-        helper.assertTrue(player.getInventory().contains(new ItemStack(Items.DIAMOND_PICKAXE)),
+        helper.assertTrue(
+                player.getInventory().contains(new ItemStack(Items.DIAMOND_PICKAXE)),
                 "closing should return the infusion item to the player");
         helper.succeed();
     }
@@ -262,21 +294,25 @@ public final class InfuserGameTests {
         int firstInvSlot = InfuserMenu.INV_SLOT_START;
         endMenu.getSlot(firstInvSlot).set(new ItemStack(Items.DIAMOND_PICKAXE));
         endMenu.quickMoveStack(player, firstInvSlot);
-        helper.assertTrue(endMenu.getInfusionSlot().getItem().is(Items.DIAMOND_PICKAXE),
+        helper.assertTrue(
+                endMenu.getInfusionSlot().getItem().is(Items.DIAMOND_PICKAXE),
                 "shift-clicking a tool in the End should move it into the infusion slot");
         endMenu.getSlot(firstInvSlot).set(new ItemStack(Items.IRON_INGOT));
         endMenu.quickMoveStack(player, firstInvSlot);
-        helper.assertTrue(endMenu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
+        helper.assertTrue(
+                endMenu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
                 "shift-clicking a payment item should move it into the payment slot");
         endMenu.quickMoveStack(player, InfuserMenu.INFUSION_SLOT);
-        helper.assertTrue(endMenu.getInfusionSlot().getItem().isEmpty(),
+        helper.assertTrue(
+                endMenu.getInfusionSlot().getItem().isEmpty(),
                 "shift-clicking the infusion slot should move the item back to the inventory");
 
         Player other = helper.makeMockPlayer(GameType.SURVIVAL);
         InfuserMenu overworldMenu = menuIn(helper.getLevel(), other);
         overworldMenu.getSlot(firstInvSlot).set(new ItemStack(Items.DIAMOND_PICKAXE));
         overworldMenu.quickMoveStack(other, firstInvSlot);
-        helper.assertTrue(overworldMenu.getInfusionSlot().getItem().isEmpty(),
+        helper.assertTrue(
+                overworldMenu.getInfusionSlot().getItem().isEmpty(),
                 "shift-clicking outside the End should not fill the locked infusion slot");
         helper.succeed();
     }
@@ -287,23 +323,29 @@ public final class InfuserGameTests {
         InfuserMenu menu = menuAtTier(end(helper), player, 1);
         menu.getInfusionSlot().set(new ItemStack(Items.DIAMOND_PICKAXE));
         menu.getSlot(InfuserMenu.PAYMENT_SLOT).set(new ItemStack(Items.IRON_INGOT));
-        helper.assertTrue(menu.infusionEffects().equals(java.util.List.of(InfusionEffect.HASTE)),
+        helper.assertTrue(
+                menu.infusionEffects().equals(java.util.List.of(InfusionEffect.HASTE)),
                 "a pickaxe should only offer Haste, offered " + menu.infusionEffects());
         helper.assertTrue(menu.canInfuse(InfusionEffect.HASTE), "confirm should be enabled for Haste");
         helper.assertFalse(menu.canInfuse(InfusionEffect.SPEED), "a pickaxe can't take Speed");
 
         // A wrong effect consumes nothing.
         menu.updateEffects(Optional.of(MobEffects.MOVEMENT_SPEED), Optional.empty());
-        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
+        helper.assertTrue(
+                menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
                 "confirming an effect the item can't take should keep the payment");
         helper.assertTrue(Infusion.get(menu.getInfusionSlot().getItem()) == null, "the pickaxe should not be infused");
 
         menu.updateEffects(Optional.of(MobEffects.DIG_SPEED), Optional.empty());
-        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().isEmpty(),
+        helper.assertTrue(
+                menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().isEmpty(),
                 "confirming should consume the one iron ingot");
         assertInfusion(helper, menu.getInfusionSlot().getItem(), InfusionEffect.HASTE, 0, 220);
-        helper.assertTrue(menu.getLevels() == 1 && menu.getPrimaryEffect() != null
-                        && menu.getPrimaryEffect().is(MobEffects.DIG_SPEED) && menu.getSecondaryEffect() == null,
+        helper.assertTrue(
+                menu.getLevels() == 1
+                        && menu.getPrimaryEffect() != null
+                        && menu.getPrimaryEffect().is(MobEffects.DIG_SPEED)
+                        && menu.getSecondaryEffect() == null,
                 "infusing should not change the beacon powers");
 
         // A second charge adds another (9 + 2 * 1) * 20 ticks.
@@ -316,11 +358,11 @@ public final class InfuserGameTests {
     public static void tierSetsTheLevelAtTheFirstInfusion(GameTestHelper helper) {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         ServerLevel end = end(helper);
-        ItemStack boots = confirmInfusion(menuAtTier(end, player, 4), new ItemStack(Items.IRON_BOOTS),
-                MobEffects.MOVEMENT_SPEED);
+        ItemStack boots =
+                confirmInfusion(menuAtTier(end, player, 4), new ItemStack(Items.IRON_BOOTS), MobEffects.MOVEMENT_SPEED);
         assertInfusion(helper, boots, InfusionEffect.SPEED, 1, 340);
-        ItemStack chestplate = confirmInfusion(menuAtTier(end, player, 4), new ItemStack(Items.DIAMOND_CHESTPLATE),
-                MobEffects.REGENERATION);
+        ItemStack chestplate = confirmInfusion(
+                menuAtTier(end, player, 4), new ItemStack(Items.DIAMOND_CHESTPLATE), MobEffects.REGENERATION);
         assertInfusion(helper, chestplate, InfusionEffect.REGENERATION, 0, 340);
 
         // Topping up at tier 1 keeps level II and adds a tier-1 charge; another effect is refused.
@@ -333,7 +375,8 @@ public final class InfuserGameTests {
         tierTwo.getInfusionSlot().set(tierOne.getInfusionSlot().getItem());
         confirmInfusion(tierTwo, ItemStack.EMPTY, MobEffects.JUMP);
         assertInfusion(helper, tierTwo.getInfusionSlot().getItem(), InfusionEffect.SPEED, 1, 560);
-        helper.assertTrue(tierTwo.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
+        helper.assertTrue(
+                tierTwo.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
                 "a refused re-infusion should keep the payment");
 
         // An axe takes Haste or Strength, one at a time; Strength needs tier 3.
@@ -343,8 +386,8 @@ public final class InfuserGameTests {
         InfuserMenu tierThree = menuAtTier(end, player, 3);
         ItemStack axe = confirmInfusion(tierThree, new ItemStack(Items.IRON_AXE), MobEffects.DAMAGE_BOOST);
         assertInfusion(helper, axe, InfusionEffect.STRENGTH, 0, 300);
-        helper.assertFalse(tierThree.canSelectInfusion(InfusionEffect.HASTE),
-                "an axe infused with Strength can't take Haste");
+        helper.assertFalse(
+                tierThree.canSelectInfusion(InfusionEffect.HASTE), "an axe infused with Strength can't take Haste");
         helper.succeed();
     }
 
@@ -360,7 +403,8 @@ public final class InfuserGameTests {
         menu.getSlot(InfuserMenu.PAYMENT_SLOT).set(new ItemStack(Items.IRON_INGOT));
         helper.assertFalse(menu.canInfuse(InfusionEffect.HASTE), "confirm should be disabled at the cap");
         menu.updateEffects(Optional.of(MobEffects.DIG_SPEED), Optional.empty());
-        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
+        helper.assertTrue(
+                menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
                 "confirm at the cap should keep the payment");
         helper.succeed();
     }
@@ -372,7 +416,8 @@ public final class InfuserGameTests {
         // Bypass the locked slot to check that confirm itself refuses outside the End.
         ItemStack pickaxe = confirmInfusion(menu, new ItemStack(Items.DIAMOND_PICKAXE), MobEffects.DIG_SPEED);
         helper.assertTrue(Infusion.get(pickaxe) == null, "infusing should not work outside the End");
-        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
+        helper.assertTrue(
+                menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.IRON_INGOT),
                 "confirm outside the End should keep the payment");
         helper.succeed();
     }
@@ -387,8 +432,10 @@ public final class InfuserGameTests {
         Tag saved = stack.save(registries);
         ItemStack loaded = ItemStack.parse(registries, saved).orElseThrow();
         helper.assertTrue(infusion.equals(Infusion.get(loaded)), "the infusion should survive save/load, was " + saved);
-        helper.assertTrue(saved.toString().contains("someonesperfectend:infusion")
-                && saved.toString().contains("remaining_ticks"), "saved NBT was " + saved);
+        helper.assertTrue(
+                saved.toString().contains("someonesperfectend:infusion")
+                        && saved.toString().contains("remaining_ticks"),
+                "saved NBT was " + saved);
 
         RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
         ItemStack.STREAM_CODEC.encode(buf, stack);
@@ -396,8 +443,10 @@ public final class InfuserGameTests {
         helper.assertTrue(infusion.equals(Infusion.get(synced)), "the infusion should sync to clients");
 
         Component tooltip = infusion.tooltip();
-        helper.assertTrue(tooltip.getContents() instanceof TranslatableContents contents
-                        && contents.getKey().equals(Infusion.TOOLTIP_KEY) && contents.getArgs().length == 2
+        helper.assertTrue(
+                tooltip.getContents() instanceof TranslatableContents contents
+                        && contents.getKey().equals(Infusion.TOOLTIP_KEY)
+                        && contents.getArgs().length == 2
                         && "10:17".equals(contents.getArgs()[1]),
                 "tooltip should be 'Infused: <effect level> — 10:17 remaining', was " + tooltip);
         helper.succeed();

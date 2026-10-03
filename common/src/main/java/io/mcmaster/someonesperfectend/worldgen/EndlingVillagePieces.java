@@ -28,10 +28,10 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 public final class EndlingVillagePieces {
     /** How far below the floor a hut's end stone foundation may reach to meet the ground. */
     public static final int FOUNDATION_DEPTH = 6;
+
     private static final int HUT_HEIGHT = 5;
 
-    private EndlingVillagePieces() {
-    }
+    private EndlingVillagePieces() {}
 
     private static void place(WorldGenLevel level, BoundingBox box, BlockPos pos, BlockState state) {
         if (box.isInside(pos)) {
@@ -51,9 +51,16 @@ public final class EndlingVillagePieces {
         private final BlockPos village;
 
         public Hut(BlockPos origin, int door, boolean astral, BlockPos village) {
-            super(EndlingVillages.HUT_PIECE.get(), 0, new BoundingBox(origin.getX() - 1,
-                    origin.getY() - FOUNDATION_DEPTH, origin.getZ() - 1, origin.getX() + EndlingVillageLayout.HUT_SIZE,
-                    origin.getY() + HUT_HEIGHT, origin.getZ() + EndlingVillageLayout.HUT_SIZE));
+            super(
+                    EndlingVillages.HUT_PIECE.get(),
+                    0,
+                    new BoundingBox(
+                            origin.getX() - 1,
+                            origin.getY() - FOUNDATION_DEPTH,
+                            origin.getZ() - 1,
+                            origin.getX() + EndlingVillageLayout.HUT_SIZE,
+                            origin.getY() + HUT_HEIGHT,
+                            origin.getZ() + EndlingVillageLayout.HUT_SIZE));
             this.origin = origin.immutable();
             this.door = door;
             this.astral = astral;
@@ -82,14 +89,25 @@ public final class EndlingVillagePieces {
         }
 
         @Override
-        public void postProcess(WorldGenLevel level, StructureManager structures, ChunkGenerator generator,
-                RandomSource random, BoundingBox box, ChunkPos chunk, BlockPos pivot) {
+        public void postProcess(
+                WorldGenLevel level,
+                StructureManager structures,
+                ChunkGenerator generator,
+                RandomSource random,
+                BoundingBox box,
+                ChunkPos chunk,
+                BlockPos pivot) {
             int size = EndlingVillageLayout.HUT_SIZE;
             int last = size - 1;
             BlockState floor = ModBlocks.VOIDVINE_MOSAIC.get().defaultBlockState();
-            BlockState wall = (astral ? ModBlocks.ASTRAL_PLANKS : ModBlocks.VOIDVINE_PLANKS).get().defaultBlockState();
-            BlockState post = (astral ? ModBlocks.ASTRAL_LOG.get() : ModBlocks.VOIDVINE_BLOCK.get()).defaultBlockState();
-            BlockState window = (astral ? ModBlocks.ASTRAL_FENCE : ModBlocks.VOIDVINE_FENCE).get().defaultBlockState();
+            BlockState wall = (astral ? ModBlocks.ASTRAL_PLANKS : ModBlocks.VOIDVINE_PLANKS)
+                    .get()
+                    .defaultBlockState();
+            BlockState post =
+                    (astral ? ModBlocks.ASTRAL_LOG.get() : ModBlocks.VOIDVINE_BLOCK.get()).defaultBlockState();
+            BlockState window = (astral ? ModBlocks.ASTRAL_FENCE : ModBlocks.VOIDVINE_FENCE)
+                    .get()
+                    .defaultBlockState();
             BlockState roof = ModBlocks.GLOWCAP_BLOCK.get().defaultBlockState();
             BlockState foundation = Blocks.END_STONE.defaultBlockState();
             BlockState air = Blocks.AIR.defaultBlockState();
@@ -162,7 +180,12 @@ public final class EndlingVillagePieces {
         if (endling == null) {
             return;
         }
-        endling.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, level.getRandom().nextFloat() * 360.0F, 0.0F);
+        endling.moveTo(
+                pos.getX() + 0.5,
+                pos.getY(),
+                pos.getZ() + 0.5,
+                level.getRandom().nextFloat() * 360.0F,
+                0.0F);
         endling.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null);
         endling.setVillage(village, EndlingVillageLayout.RADIUS);
         level.addFreshEntityWithPassengers(endling);
@@ -173,9 +196,16 @@ public final class EndlingVillagePieces {
         private final BlockPos base;
 
         public Glowcap(BlockPos base) {
-            super(EndlingVillages.GLOWCAP_PIECE.get(), 0, new BoundingBox(base.getX() - 3, base.getY() - 1,
-                    base.getZ() - 3, base.getX() + 3, base.getY() + HugeGlowcapFeature.MAX_STEM_HEIGHT + 1,
-                    base.getZ() + 3));
+            super(
+                    EndlingVillages.GLOWCAP_PIECE.get(),
+                    0,
+                    new BoundingBox(
+                            base.getX() - 3,
+                            base.getY() - 1,
+                            base.getZ() - 3,
+                            base.getX() + 3,
+                            base.getY() + HugeGlowcapFeature.MAX_STEM_HEIGHT + 1,
+                            base.getZ() + 3));
             this.base = base.immutable();
         }
 
@@ -194,8 +224,14 @@ public final class EndlingVillagePieces {
          * into neighboring chunks, which the feature step allows.
          */
         @Override
-        public void postProcess(WorldGenLevel level, StructureManager structures, ChunkGenerator generator,
-                RandomSource random, BoundingBox box, ChunkPos chunk, BlockPos pivot) {
+        public void postProcess(
+                WorldGenLevel level,
+                StructureManager structures,
+                ChunkGenerator generator,
+                RandomSource random,
+                BoundingBox box,
+                ChunkPos chunk,
+                BlockPos pivot) {
             if (!box.isInside(base)) {
                 return;
             }
@@ -214,7 +250,8 @@ public final class EndlingVillagePieces {
             if (!level.getBlockState(base.below()).is(ModBlockTags.END_PLANT_SOIL)) {
                 level.setBlock(base.below(), ModBlocks.END_TURF.get().defaultBlockState(), Block.UPDATE_CLIENTS);
             }
-            level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE)
+            level.registryAccess()
+                    .registryOrThrow(Registries.CONFIGURED_FEATURE)
                     .getHolder(ModFeatures.HUGE_GLOWCAP_CONFIGURED)
                     .ifPresent(feature -> feature.value().place(level, generator, random, base));
         }

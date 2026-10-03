@@ -12,11 +12,9 @@ import java.util.function.Predicate;
  * changes. When several recipes name the same target, the last one wins.
  */
 public final class RecolorPrecedence {
-    private RecolorPrecedence() {
-    }
+    private RecolorPrecedence() {}
 
-    public record Plan(List<RecolorRecipe> generate, List<RecolorRecipe> overridden) {
-    }
+    public record Plan(List<RecolorRecipe> generate, List<RecolorRecipe> overridden) {}
 
     /**
      * @param recipes recipes in load order (later recipes override earlier ones with the same target)

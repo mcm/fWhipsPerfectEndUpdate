@@ -49,16 +49,17 @@ public final class ModRegistries {
 
     public static final String TAB_TRANSLATION_KEY = "itemGroup." + SomeonesPerfectEnd.MOD_ID + ".main";
 
-    public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_TABS.register("main",
-            () -> CreativeTabRegistry.create(Component.translatable(TAB_TRANSLATION_KEY),
-                    () -> new ItemStack(ModBlocks.END_TURF.get())));
+    public static final RegistrySupplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_TABS.register(
+            "main",
+            () -> CreativeTabRegistry.create(
+                    Component.translatable(TAB_TRANSLATION_KEY), () -> new ItemStack(ModBlocks.END_TURF.get())));
 
     private static boolean registered;
 
-    private ModRegistries() {
-    }
+    private ModRegistries() {}
 
-    private static <T> DeferredRegister<T> create(net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key) {
+    private static <T> DeferredRegister<T> create(
+            net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key) {
         return DeferredRegister.create(SomeonesPerfectEnd.MOD_ID, key);
     }
 
@@ -85,8 +86,8 @@ public final class ModRegistries {
         return block(name, block, b -> new BlockItem(b, itemProperties()));
     }
 
-    public static <T extends Block> RegistrySupplier<T> block(String name, Supplier<T> block,
-            Function<T, ? extends Item> itemFactory) {
+    public static <T extends Block> RegistrySupplier<T> block(
+            String name, Supplier<T> block, Function<T, ? extends Item> itemFactory) {
         RegistrySupplier<T> registered = BLOCKS.register(name, block);
         ITEMS.register(name, () -> itemFactory.apply(registered.get()));
         return registered;

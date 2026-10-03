@@ -11,11 +11,11 @@ import java.util.function.BiPredicate;
 import org.junit.jupiter.api.Test;
 
 class EndChanterRulesTest {
-    private record Offer(String enchantment, int level) {
-    }
+    private record Offer(String enchantment, int level) {}
 
     /** Sharpness, Smite, and Bane of Arthropods exclude each other; everything else is compatible. */
     private static final Set<String> DAMAGE = Set.of("sharpness", "smite", "bane_of_arthropods");
+
     private static final BiPredicate<String, String> COMPATIBLE =
             (a, b) -> !a.equals(b) && !(DAMAGE.contains(a) && DAMAGE.contains(b));
 
@@ -47,9 +47,14 @@ class EndChanterRulesTest {
 
     @Test
     void offersAreFilteredPerEnchantmentKeepingOrder() {
-        assertEquals(List.of(new Offer("unbreaking", 1), new Offer("sharpness", 5)),
-                filter(SHARPNESS_III_SWORD, new Offer("unbreaking", 1), new Offer("smite", 2),
-                        new Offer("sharpness", 5), new Offer("sharpness", 1)));
+        assertEquals(
+                List.of(new Offer("unbreaking", 1), new Offer("sharpness", 5)),
+                filter(
+                        SHARPNESS_III_SWORD,
+                        new Offer("unbreaking", 1),
+                        new Offer("smite", 2),
+                        new Offer("sharpness", 5),
+                        new Offer("sharpness", 1)));
     }
 
     @Test

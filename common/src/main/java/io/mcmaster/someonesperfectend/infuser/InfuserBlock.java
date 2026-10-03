@@ -33,8 +33,8 @@ public class InfuserBlock extends BeaconBlock {
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
-            BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type) {
         return createTickerHelper(type, Infusers.BLOCK_ENTITY.get(), BeaconBlockEntity::tick);
     }
 }

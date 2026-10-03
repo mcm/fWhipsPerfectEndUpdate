@@ -25,8 +25,7 @@ import net.minecraft.world.phys.Vec3;
 
 /** US-038: sleeping in an Ender Bed to travel between the Overworld and the End. */
 public final class EnderBedTravelGameTests {
-    private EnderBedTravelGameTests() {
-    }
+    private EnderBedTravelGameTests() {}
 
     /** End beds for these tests, away from the US-037 ones. */
     private static BlockPos endFoot(int slot) {
@@ -45,8 +44,9 @@ public final class EnderBedTravelGameTests {
     private static void sleep(ServerPlayer player, int ticks) {
         for (int i = 0; i < ticks; i++) {
             if (player.isSleeping()) {
-                ((PlayerAccessor) player).someonesperfectend$setSleepCounter(
-                        Math.min(player.getSleepTimer() + 1, EnderBedTravel.SLEEP_TICKS));
+                ((PlayerAccessor) player)
+                        .someonesperfectend$setSleepCounter(
+                                Math.min(player.getSleepTimer() + 1, EnderBedTravel.SLEEP_TICKS));
             }
             EnderBedTravel.tick(player);
         }
@@ -61,12 +61,16 @@ public final class EnderBedTravelGameTests {
     }
 
     private static void assertArrived(GameTestHelper helper, ServerPlayer player, ServerLevel level, BlockPos head) {
-        helper.assertTrue(player.level() == level, "should arrive in " + level.dimension().location() + ", got "
-                + player.level().dimension().location());
-        helper.assertTrue(player.position().equals(EnderBedRules.arrivalPos(head)),
+        helper.assertTrue(
+                player.level() == level,
+                "should arrive in " + level.dimension().location() + ", got "
+                        + player.level().dimension().location());
+        helper.assertTrue(
+                player.position().equals(EnderBedRules.arrivalPos(head)),
                 "should arrive at the drop point " + EnderBedRules.arrivalPos(head) + ", got " + player.position());
-        helper.assertTrue(player.getDeltaMovement().equals(Vec3.ZERO), "should arrive with zero velocity, got "
-                + player.getDeltaMovement());
+        helper.assertTrue(
+                player.getDeltaMovement().equals(Vec3.ZERO),
+                "should arrive with zero velocity, got " + player.getDeltaMovement());
         helper.assertFalse(player.isSleeping(), "should be awake on arrival");
         helper.assertTrue(level.noCollision(player.getBoundingBox()), "should have room to fall at the drop point");
         helper.assertFalse(player.wonGame, "arriving should never show the End credits");
@@ -86,7 +90,8 @@ public final class EnderBedTravelGameTests {
 
         // A hostile mob right next to the bed and daytime (vanilla beds refuse both and wake sleepers at day)
         // don't matter. The test runs synchronously, so the time is restored before anything else ticks.
-        Zombie zombie = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, EnderBedGameTests.FOOT.below(2).west());
+        Zombie zombie = helper.spawnWithNoFreeWill(
+                EntityType.ZOMBIE, EnderBedGameTests.FOOT.below(2).west());
         long time = overworld.getDayTime();
         overworld.setDayTime(6000);
         overworld.updateSkyBrightness();
@@ -96,26 +101,34 @@ public final class EnderBedTravelGameTests {
         ServerPlayer player = playerUnderOverworldBed(helper, detached);
         beds(player).set(Level.END, endHead);
         EnderBedGameTests.use(overworld, overworldHead, player);
-        helper.assertTrue(beds(player).overworld().equals(Optional.of(overworldHead)),
+        helper.assertTrue(
+                beds(player).overworld().equals(Optional.of(overworldHead)),
                 "using the bed should still store it first");
-        helper.assertTrue(player.isSleeping() && overworldHead.equals(player.getSleepingPos().orElse(null)),
+        helper.assertTrue(
+                player.isSleeping()
+                        && overworldHead.equals(player.getSleepingPos().orElse(null)),
                 "with `end` stored, using an Overworld bed should lie the player down in it");
-        helper.assertTrue(overworld.getBlockState(overworldHead).getValue(EnderBedBlock.OCCUPIED),
+        helper.assertTrue(
+                overworld.getBlockState(overworldHead).getValue(EnderBedBlock.OCCUPIED),
                 "the bed should be occupied while sleeping");
         helper.assertTrue(player.getRespawnPosition() == null, "travel sleep should not set the vanilla spawn");
 
         sleep(player, EnderBedTravel.SLEEP_TICKS - 1);
-        helper.assertTrue(player.isSleeping() && player.level() == overworld,
+        helper.assertTrue(
+                player.isSleeping() && player.level() == overworld,
                 "the player should still be asleep in the Overworld before 100 ticks");
-        helper.assertTrue(player.getY() == overworldHead.getY() + 0.6875,
+        helper.assertTrue(
+                player.getY() == overworldHead.getY() + 0.6875,
                 "the sleeper should stay in the hanging bed, got y=" + player.getY());
         sleep(player, 1);
         try {
             assertArrived(helper, player, end, endHead);
-            helper.assertFalse(overworld.getBlockState(overworldHead).getValue(EnderBedBlock.OCCUPIED),
+            helper.assertFalse(
+                    overworld.getBlockState(overworldHead).getValue(EnderBedBlock.OCCUPIED),
                     "the Overworld bed should be free after leaving");
             helper.assertTrue(zombie.level() == overworld, "only the player should travel");
-            helper.assertTrue(end.getBlockState(platform).is(Blocks.OBSIDIAN) == platformBefore,
+            helper.assertTrue(
+                    end.getBlockState(platform).is(Blocks.OBSIDIAN) == platformBefore,
                     "arriving should not build the End platform");
             helper.assertTrue(beds(player).end().equals(Optional.of(endHead)), "a trip should keep `end`");
 
@@ -158,14 +171,17 @@ public final class EnderBedTravelGameTests {
             overworld.setDayTime(6000);
             overworld.updateSkyBrightness();
             helper.assertTrue(overworld.isDay(), "the test expects daytime");
-            helper.assertTrue(player.isSleeping(), "an Ender Bed sleeper should stay asleep during the day, tick "
-                    + tick[0]);
-            helper.assertTrue(player.getY() == head.getY() + 0.6875 && player.getDeltaMovement().equals(Vec3.ZERO),
+            helper.assertTrue(
+                    player.isSleeping(), "an Ender Bed sleeper should stay asleep during the day, tick " + tick[0]);
+            helper.assertTrue(
+                    player.getY() == head.getY() + 0.6875
+                            && player.getDeltaMovement().equals(Vec3.ZERO),
                     "the sleeper should stay in the hanging bed, got y=" + player.getY());
             if (++tick[0] > 120) {
                 helper.assertTrue(player.isSleepingLongEnough(), "the player should be fully asleep");
                 player.stopSleepInBed(false, true);
-                helper.assertTrue(player.position().equals(EnderBedRules.arrivalPos(head)),
+                helper.assertTrue(
+                        player.position().equals(EnderBedRules.arrivalPos(head)),
                         "waking should drop the player under the bed, got " + player.position());
                 player.discard();
                 overworld.setDayTime(time);
@@ -194,7 +210,8 @@ public final class EnderBedTravelGameTests {
         helper.assertTrue(player.level() == helper.getLevel(), "leaving the bed early should cancel the trip");
         helper.assertFalse(player.isSleeping(), "the player should be awake");
         helper.assertTrue(beds(player).end().equals(Optional.of(endFoot.south())), "cancelling should keep `end`");
-        helper.assertFalse(helper.getLevel().getBlockState(overworldHead).getValue(EnderBedBlock.OCCUPIED),
+        helper.assertFalse(
+                helper.getLevel().getBlockState(overworldHead).getValue(EnderBedBlock.OCCUPIED),
                 "the bed should be free again");
         helper.succeed();
     }
@@ -211,9 +228,11 @@ public final class EnderBedTravelGameTests {
         sleep(player, 1);
         helper.assertTrue(player.level() == helper.getLevel(), "a missing destination keeps the player here");
         helper.assertFalse(player.isSleeping(), "the player should wake");
-        helper.assertTrue(player.position().equals(EnderBedRules.arrivalPos(overworldHead)),
+        helper.assertTrue(
+                player.position().equals(EnderBedRules.arrivalPos(overworldHead)),
                 "the player should wake under the same bed, got " + player.position());
-        helper.assertTrue(detached.sentActionBar(EnderBedTravel.MISSING_KEY),
+        helper.assertTrue(
+                detached.sentActionBar(EnderBedTravel.MISSING_KEY),
                 "expected \"Your Ender Bed was missing or obstructed\"");
         helper.assertTrue(beds(player).end().isEmpty(), "the missing destination should be cleared");
         helper.assertTrue(beds(player).overworld().equals(Optional.of(overworldHead)), "`overworld` should stay");
@@ -250,7 +269,8 @@ public final class EnderBedTravelGameTests {
         SleepStatus status = new SleepStatus();
         status.update(List.of(player));
         helper.assertTrue(status.amountSleeping() == 0, "an Ender Bed sleeper should not count as sleeping");
-        helper.assertFalse(status.areEnoughDeepSleeping(0, List.of(player)),
+        helper.assertFalse(
+                status.areEnoughDeepSleeping(0, List.of(player)),
                 "an Ender Bed sleeper should never let the night be skipped");
         player.stopSleepInBed(false, true);
         helper.succeed();

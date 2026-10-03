@@ -14,8 +14,7 @@ import net.minecraft.world.level.material.FluidState;
  * are end stone. Obsidian and basalt are unchanged.
  */
 public final class OasisWaterInteractions {
-    private OasisWaterInteractions() {
-    }
+    private OasisWaterInteractions() {}
 
     /** What lava next to water turns into: obsidian for a lava source, otherwise end stone (vanilla: cobblestone). */
     public static BlockState lavaResult(boolean lavaIsSource) {

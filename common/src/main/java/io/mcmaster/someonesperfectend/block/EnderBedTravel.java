@@ -26,8 +26,7 @@ public final class EnderBedTravel {
     /** Vanilla's fully-asleep time ({@link Player#isSleepingLongEnough()}). */
     public static final int SLEEP_TICKS = 100;
 
-    private EnderBedTravel() {
-    }
+    private EnderBedTravel() {}
 
     /** The dimension an Ender Bed in {@code dimension} leads to: the End from the Overworld and back. */
     @Nullable

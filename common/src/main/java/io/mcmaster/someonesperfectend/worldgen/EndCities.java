@@ -15,8 +15,7 @@ public final class EndCities {
     /** Vanilla's minimum start height, hard-coded in {@code EndCityStructure#findGenerationPoint}. */
     public static final int VANILLA_MIN_Y = 60;
 
-    private EndCities() {
-    }
+    private EndCities() {}
 
     /** Minimum start height at column (x, z) for a generator with this random state (unchanged without bands). */
     public static int minimumY(RandomState randomState, int vanillaMinY, int x, int z) {

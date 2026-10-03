@@ -38,15 +38,14 @@ public final class EnderBedRespawnGameTests {
     private static final String END_SET = "message.someonesperfectend.ender_bed_end_set";
     private static final String OVERWORLD_SET = "message.someonesperfectend.ender_bed_overworld_set";
 
-    private EnderBedRespawnGameTests() {
-    }
+    private EnderBedRespawnGameTests() {}
 
     /** A real {@link ServerPlayer} (not in the level or player list) whose sent packets land in {@link #channel}. */
     record Detached(ServerPlayer player, EmbeddedChannel channel) {
         static Detached in(ServerLevel level) {
             MinecraftServer server = level.getServer();
-            CommonListenerCookie cookie = CommonListenerCookie.createInitial(
-                    new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
+            CommonListenerCookie cookie =
+                    CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
             ServerPlayer player = new ServerPlayer(server, level, cookie.gameProfile(), cookie.clientInformation());
             Connection connection = new Connection(PacketFlow.SERVERBOUND);
             EmbeddedChannel channel = new EmbeddedChannel(connection);
@@ -66,8 +65,10 @@ public final class EnderBedRespawnGameTests {
 
         /** Whether a translated action-bar ({@code overlay}) message with this key was sent. */
         boolean sentActionBar(String key) {
-            return sent(packet -> packet instanceof ClientboundSystemChatPacket chat && chat.overlay()
-                    && chat.content().getContents() instanceof TranslatableContents text && text.getKey().equals(key));
+            return sent(packet -> packet instanceof ClientboundSystemChatPacket chat
+                    && chat.overlay()
+                    && chat.content().getContents() instanceof TranslatableContents text
+                    && text.getKey().equals(key));
         }
 
         /** Whether vanilla's "no respawn block" event ({@code block.minecraft.spawn.not_valid}) was sent. */
@@ -98,7 +99,8 @@ public final class EnderBedRespawnGameTests {
     }
 
     private static void assertVanillaSpawn(GameTestHelper helper, ServerPlayer player, BlockPos spawn) {
-        helper.assertTrue(spawn.equals(player.getRespawnPosition()) && player.getRespawnDimension() == Level.OVERWORLD,
+        helper.assertTrue(
+                spawn.equals(player.getRespawnPosition()) && player.getRespawnDimension() == Level.OVERWORLD,
                 "the vanilla respawn point should be unchanged, got " + player.getRespawnPosition() + " in "
                         + player.getRespawnDimension().location());
     }
@@ -119,8 +121,10 @@ public final class EnderBedRespawnGameTests {
 
         // Using the foot stores the head half.
         helper.assertTrue(EnderBedGameTests.use(end, foot, player).consumesAction(), "using the bed should act");
-        helper.assertTrue(beds(player).end().equals(Optional.of(foot.south())),
-                "using an End bed should store its head as `end`, got " + beds(player).end());
+        helper.assertTrue(
+                beds(player).end().equals(Optional.of(foot.south())),
+                "using an End bed should store its head as `end`, got "
+                        + beds(player).end());
         helper.assertTrue(beds(player).overworld().isEmpty(), "an End bed should not set `overworld`");
         helper.assertTrue(detached.sentActionBar(END_SET), "expected the \"End spawn point set\" action bar message");
         assertVanillaSpawn(helper, player, spawn);
@@ -130,7 +134,8 @@ public final class EnderBedRespawnGameTests {
         BlockPos otherFoot = endFoot(1);
         EnderBedGameTests.hangBedIn(end, otherFoot);
         EnderBedGameTests.use(end, otherFoot.south(), player);
-        helper.assertTrue(beds(player).end().equals(Optional.of(otherFoot.south())),
+        helper.assertTrue(
+                beds(player).end().equals(Optional.of(otherFoot.south())),
                 "a second End bed should replace `end`, got " + beds(player).end());
         assertVanillaSpawn(helper, player, spawn);
         helper.succeed();
@@ -143,8 +148,10 @@ public final class EnderBedRespawnGameTests {
         ServerPlayer player = detached.player();
         BlockPos spawn = setVanillaSpawn(helper, player);
         EnderBedGameTests.use(helper.getLevel(), helper.absolutePos(EnderBedGameTests.HEAD), player);
-        helper.assertTrue(beds(player).overworld().equals(Optional.of(helper.absolutePos(EnderBedGameTests.HEAD))),
-                "using an Overworld bed should store its head as `overworld`, got " + beds(player).overworld());
+        helper.assertTrue(
+                beds(player).overworld().equals(Optional.of(helper.absolutePos(EnderBedGameTests.HEAD))),
+                "using an Overworld bed should store its head as `overworld`, got "
+                        + beds(player).overworld());
         helper.assertTrue(beds(player).end().isEmpty(), "an Overworld bed should not set `end`");
         helper.assertTrue(detached.sentActionBar(OVERWORLD_SET), "expected the \"Ender Bed location set\" message");
         assertVanillaSpawn(helper, player, spawn);
@@ -176,15 +183,19 @@ public final class EnderBedRespawnGameTests {
         EnderBedGameTests.use(end, head, player);
 
         DimensionTransition transition = respawnAfterDeath(player);
-        helper.assertTrue(transition.newLevel() == end, "should respawn in the End, got "
-                + transition.newLevel().dimension().location());
+        helper.assertTrue(
+                transition.newLevel() == end,
+                "should respawn in the End, got "
+                        + transition.newLevel().dimension().location());
         Vec3 expected = Vec3.atBottomCenterOf(head.below(2));
-        helper.assertTrue(transition.pos().equals(expected) && expected.equals(EnderBedRules.arrivalPos(head)),
+        helper.assertTrue(
+                transition.pos().equals(expected) && expected.equals(EnderBedRules.arrivalPos(head)),
                 "should respawn under the bed at " + expected + ", got " + transition.pos());
         helper.assertTrue(transition.speed().equals(Vec3.ZERO), "should arrive with zero velocity");
         helper.assertFalse(transition.missingRespawnBlock(), "a valid Ender Bed is not a missing respawn block");
         helper.assertFalse(detached.sentSpawnNotValid(), "a valid Ender Bed should not show the not-valid message");
-        helper.assertTrue(end.noCollision(player.getType().getDimensions().makeBoundingBox(transition.pos())),
+        helper.assertTrue(
+                end.noCollision(player.getType().getDimensions().makeBoundingBox(transition.pos())),
                 "the player should have room to fall at the drop point");
         assertVanillaSpawn(helper, player, spawn);
         helper.assertTrue(beds(player).end().equals(Optional.of(head)), "a valid respawn keeps `end`");
@@ -192,8 +203,8 @@ public final class EnderBedRespawnGameTests {
         // The new player entity created on respawn keeps both locations.
         ServerPlayer respawned = Detached.in(end).player();
         respawned.restoreFrom(player, false);
-        helper.assertTrue(beds(respawned).end().equals(Optional.of(head)),
-                "`end` should be copied to the respawned player");
+        helper.assertTrue(
+                beds(respawned).end().equals(Optional.of(head)), "`end` should be copied to the respawned player");
         helper.succeed();
     }
 
@@ -208,18 +219,22 @@ public final class EnderBedRespawnGameTests {
         EnderBedGameTests.use(end, foot, player);
         end.setBlock(foot.above(), Blocks.AIR.defaultBlockState(), 3);
         end.setBlock(foot.south().above(), Blocks.AIR.defaultBlockState(), 3);
-        helper.assertFalse(end.getBlockState(foot.south()).getBlock() instanceof EnderBedBlock,
+        helper.assertFalse(
+                end.getBlockState(foot.south()).getBlock() instanceof EnderBedBlock,
                 "the bed should break without support");
 
         DimensionTransition transition = respawnAfterDeath(player);
-        helper.assertTrue(transition.newLevel().dimension() == Level.OVERWORLD,
-                "a missing bed should give vanilla respawn, got " + transition.newLevel().dimension().location());
-        helper.assertTrue(BlockPos.containing(transition.pos()).equals(spawn),
+        helper.assertTrue(
+                transition.newLevel().dimension() == Level.OVERWORLD,
+                "a missing bed should give vanilla respawn, got "
+                        + transition.newLevel().dimension().location());
+        helper.assertTrue(
+                BlockPos.containing(transition.pos()).equals(spawn),
                 "vanilla respawn should use the vanilla respawn point " + spawn + ", got " + transition.pos());
         helper.assertTrue(beds(player).end().isEmpty(), "a missing bed should clear `end`");
         helper.assertTrue(detached.sentSpawnNotValid(), "a missing bed should show block.minecraft.spawn.not_valid");
-        helper.assertFalse(transition.missingRespawnBlock(),
-                "the vanilla respawn point is valid, so PlayerList must keep it");
+        helper.assertFalse(
+                transition.missingRespawnBlock(), "the vanilla respawn point is valid, so PlayerList must keep it");
         assertVanillaSpawn(helper, player, spawn);
         helper.succeed();
     }
@@ -237,10 +252,13 @@ public final class EnderBedRespawnGameTests {
 
         // No vanilla respawn point: the world spawn in the Overworld.
         DimensionTransition transition = respawnAfterDeath(player);
-        helper.assertTrue(transition.newLevel().dimension() == Level.OVERWORLD,
-                "an obstructed bed should give vanilla respawn, got " + transition.newLevel().dimension().location());
+        helper.assertTrue(
+                transition.newLevel().dimension() == Level.OVERWORLD,
+                "an obstructed bed should give vanilla respawn, got "
+                        + transition.newLevel().dimension().location());
         helper.assertTrue(beds(player).end().isEmpty(), "an obstructed bed should clear `end`");
-        helper.assertTrue(detached.sentSpawnNotValid(), "an obstructed bed should show block.minecraft.spawn.not_valid");
+        helper.assertTrue(
+                detached.sentSpawnNotValid(), "an obstructed bed should show block.minecraft.spawn.not_valid");
         helper.succeed();
     }
 
@@ -279,19 +297,21 @@ public final class EnderBedRespawnGameTests {
         ServerPlayer loaded = Detached.in(helper.getLevel()).player();
         loaded.load(tag);
         helper.assertTrue(beds(loaded).end().equals(Optional.of(endBed)), "`end` should survive save/load");
-        helper.assertTrue(beds(loaded).overworld().equals(Optional.of(overworldBed)),
-                "`overworld` should survive save/load");
+        helper.assertTrue(
+                beds(loaded).overworld().equals(Optional.of(overworldBed)), "`overworld` should survive save/load");
 
         beds(player).set(Level.END, null);
         ServerPlayer partial = Detached.in(helper.getLevel()).player();
         partial.load(player.saveWithoutId(new CompoundTag()));
-        helper.assertTrue(beds(partial).end().isEmpty() && beds(partial).overworld().isPresent(),
+        helper.assertTrue(
+                beds(partial).end().isEmpty() && beds(partial).overworld().isPresent(),
                 "a cleared `end` should stay cleared after save/load");
 
         // The End-exit respawn (keepEverything) copies them too.
         ServerPlayer exited = Detached.in(helper.getLevel()).player();
         exited.restoreFrom(loaded, true);
-        helper.assertTrue(beds(exited).end().equals(Optional.of(endBed))
+        helper.assertTrue(
+                beds(exited).end().equals(Optional.of(endBed))
                         && beds(exited).overworld().equals(Optional.of(overworldBed)),
                 "the End-exit respawn should copy both locations");
         helper.succeed();

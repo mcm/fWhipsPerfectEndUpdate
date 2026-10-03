@@ -47,13 +47,20 @@ import org.jetbrains.annotations.Nullable;
 public final class EndlingBarterGameTests {
     private static final int TIMEOUT = 200;
 
-    private EndlingBarterGameTests() {
-    }
+    private EndlingBarterGameTests() {}
 
     private static Set<Item> barterOutputs() {
         Set<Item> items = new HashSet<>();
-        for (String name : List.of("astral_sapling", "astral_log", "voidvine", "voidsoil", "end_turf", "void_petals",
-                "glowcap", "bounce_cap", "voidfruit")) {
+        for (String name : List.of(
+                "astral_sapling",
+                "astral_log",
+                "voidvine",
+                "voidsoil",
+                "end_turf",
+                "void_petals",
+                "glowcap",
+                "bounce_cap",
+                "voidfruit")) {
             items.add(BuiltInRegistries.ITEM.get(SomeonesPerfectEnd.id(name)));
         }
         return items;
@@ -75,8 +82,8 @@ public final class EndlingBarterGameTests {
                     end.setChunkForced(chunk.x + dx, chunk.z + dz, true);
                 }
             }
-            for (BlockPos pos : BlockPos.betweenClosed(center.offset(-RADIUS, -1, -RADIUS),
-                    center.offset(RADIUS, -1, RADIUS))) {
+            for (BlockPos pos :
+                    BlockPos.betweenClosed(center.offset(-RADIUS, -1, -RADIUS), center.offset(RADIUS, -1, RADIUS))) {
                 end.setBlockAndUpdate(pos, Blocks.END_STONE.defaultBlockState());
             }
             Endling endling = Endlings.TYPE.get().create(end);
@@ -96,8 +103,8 @@ public final class EndlingBarterGameTests {
 
         /** Drops an item thrown by {@code thrower}, or with no thrower (like a dispenser) if null. */
         ItemEntity drop(ItemStack stack, double dx, @Nullable Entity thrower) {
-            ItemEntity item = new ItemEntity(end, center.getX() + 0.5 + dx, center.getY(), center.getZ() + 0.5, stack,
-                    0.0, 0.0, 0.0);
+            ItemEntity item = new ItemEntity(
+                    end, center.getX() + 0.5 + dx, center.getY(), center.getZ() + 0.5, stack, 0.0, 0.0, 0.0);
             if (thrower != null) {
                 item.setThrower(thrower);
             }
@@ -113,8 +120,8 @@ public final class EndlingBarterGameTests {
             for (Entity entity : end.getEntitiesOfClass(Entity.class, area(), e -> !(e instanceof Player))) {
                 entity.discard();
             }
-            for (BlockPos pos : BlockPos.betweenClosed(center.offset(-RADIUS, -1, -RADIUS),
-                    center.offset(RADIUS, -1, RADIUS))) {
+            for (BlockPos pos :
+                    BlockPos.betweenClosed(center.offset(-RADIUS, -1, -RADIUS), center.offset(RADIUS, -1, RADIUS))) {
                 end.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
             }
             ChunkPos chunk = new ChunkPos(center);
@@ -132,8 +139,8 @@ public final class EndlingBarterGameTests {
      */
     static ServerPlayer serverPlayerIn(ServerLevel level, ItemStack held, boolean killedDragon) {
         MinecraftServer server = level.getServer();
-        CommonListenerCookie cookie = CommonListenerCookie.createInitial(
-                new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
+        CommonListenerCookie cookie =
+                CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
         ServerPlayer player = new ServerPlayer(server, level, cookie.gameProfile(), cookie.clientInformation());
         Connection connection = new Connection(PacketFlow.SERVERBOUND);
         new EmbeddedChannel(connection);
@@ -173,22 +180,28 @@ public final class EndlingBarterGameTests {
             tick[0]++;
             if (takenAt[0] < 0 && site.endling().isInspecting()) {
                 takenAt[0] = tick[0];
-                helper.assertTrue(site.endling().getMainHandItem().is(input) && site.endling().getMainHandItem()
-                        .getCount() == 1, "the endling should hold exactly one input, holds "
-                        + site.endling().getMainHandItem());
+                helper.assertTrue(
+                        site.endling().getMainHandItem().is(input)
+                                && site.endling().getMainHandItem().getCount() == 1,
+                        "the endling should hold exactly one input, holds "
+                                + site.endling().getMainHandItem());
             }
         });
         helper.succeedWhen(() -> {
             List<ItemEntity> items = site.items();
-            boolean paid = items.stream().anyMatch(item -> outputs.contains(item.getItem().getItem()));
-            helper.assertTrue(paid, "no barter output yet after " + tick[0] + " ticks (items: "
-                    + items.stream().map(ItemEntity::getItem).toList() + ")");
-            helper.assertTrue(takenAt[0] > 0 && tick[0] - takenAt[0] >= Endling.INSPECT_TICKS - 5,
+            boolean paid = items.stream()
+                    .anyMatch(item -> outputs.contains(item.getItem().getItem()));
+            helper.assertTrue(
+                    paid,
+                    "no barter output yet after " + tick[0] + " ticks (items: "
+                            + items.stream().map(ItemEntity::getItem).toList() + ")");
+            helper.assertTrue(
+                    takenAt[0] > 0 && tick[0] - takenAt[0] >= Endling.INSPECT_TICKS - 5,
                     "the endling should inspect for 6 seconds, took the item at " + takenAt[0] + " and paid at "
                             + tick[0]);
             helper.assertFalse(site.endling().isInspecting(), "the endling should be done inspecting");
-            helper.assertTrue(items.stream().noneMatch(item -> item.getItem().is(input)),
-                    "the input should have been consumed");
+            helper.assertTrue(
+                    items.stream().noneMatch(item -> item.getItem().is(input)), "the input should have been consumed");
             site.close();
         });
     }
@@ -207,9 +220,11 @@ public final class EndlingBarterGameTests {
         InteractionResult result = site.endling().interact(player, InteractionHand.MAIN_HAND);
         helper.assertTrue(result.consumesAction(), "handing over a log should succeed, got " + result);
         helper.assertTrue(player.getMainHandItem().getCount() == 4, "handing over should take exactly one log");
-        helper.assertTrue(site.endling().inspectTicks() == Endling.INSPECT_TICKS, "the endling should start inspecting");
+        helper.assertTrue(
+                site.endling().inspectTicks() == Endling.INSPECT_TICKS, "the endling should start inspecting");
         // Busy: a second hand-over is refused.
-        helper.assertFalse(site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
+        helper.assertFalse(
+                site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "an endling inspects one item at a time");
         helper.assertTrue(player.getMainHandItem().getCount() == 4, "a busy endling takes nothing");
         expectBarterOutput(helper, site, Items.OAK_LOG);
@@ -221,7 +236,8 @@ public final class EndlingBarterGameTests {
         ItemEntity cobble = site.drop(new ItemStack(Items.COBBLESTONE), 0.0);
         ItemEntity diamond = site.drop(new ItemStack(Items.DIAMOND), 0.5);
         Player player = serverPlayerIn(site.end(), new ItemStack(Items.END_STONE, 2), true);
-        helper.assertFalse(site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
+        helper.assertFalse(
+                site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "handing over end stone should do nothing");
         helper.assertTrue(player.getMainHandItem().getCount() == 2, "end stone should stay in the hand");
         helper.runAfterDelay(100, () -> {
@@ -238,13 +254,17 @@ public final class EndlingBarterGameTests {
         site.endling().setLost();
         ItemEntity dirt = site.drop(new ItemStack(Items.DIRT), 0.0);
         Player player = serverPlayerIn(site.end(), new ItemStack(Items.DIRT), true);
-        helper.assertFalse(site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
+        helper.assertFalse(
+                site.endling().interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "a Lost endling should refuse a hand-over");
         helper.assertTrue(player.getMainHandItem().getCount() == 1, "a Lost endling takes nothing");
         helper.runAfterDelay(100, () -> {
             helper.assertFalse(site.endling().isInspecting(), "a Lost endling should not pick up barter items");
             helper.assertTrue(dirt.isAlive(), "the dirt should stay on the ground");
-            helper.assertTrue(site.items().stream().noneMatch(item -> barterOutputs().contains(item.getItem().getItem())),
+            helper.assertTrue(
+                    site.items().stream()
+                            .noneMatch(item ->
+                                    barterOutputs().contains(item.getItem().getItem())),
                     "a Lost endling should give nothing");
             helper.assertTrue(site.endling().refusals() == 0, "a Lost endling ignores items silently");
             site.close();
@@ -265,7 +285,8 @@ public final class EndlingBarterGameTests {
         Player player = serverPlayerIn(helper.getLevel(), new ItemStack(Items.SAND), true);
         ItemEntity dirt = helper.spawnItem(Items.DIRT, 3.5F, 1.0F, 3.5F);
         dirt.setThrower(player);
-        helper.assertFalse(endling.interact(player, InteractionHand.MAIN_HAND).consumesAction(),
+        helper.assertFalse(
+                endling.interact(player, InteractionHand.MAIN_HAND).consumesAction(),
                 "an endling outside the End should refuse a hand-over");
         helper.runAfterDelay(60, () -> {
             helper.assertFalse(endling.isInspecting(), "an endling outside the End should not pick up barter items");
@@ -286,7 +307,8 @@ public final class EndlingBarterGameTests {
         site.endling().kill();
         // The freshly force-loaded chunk may take a few ticks before its entities show up in lookups.
         helper.succeedWhen(() -> {
-            helper.assertTrue(site.items().stream().anyMatch(item -> item.getItem().is(Items.MOSS_BLOCK)),
+            helper.assertTrue(
+                    site.items().stream().anyMatch(item -> item.getItem().is(Items.MOSS_BLOCK)),
                     "a killed endling should drop the item it was inspecting");
             site.close();
         });
@@ -298,13 +320,17 @@ public final class EndlingBarterGameTests {
         Site site = Site.open(helper, 9);
         ServerPlayer locked = serverPlayerIn(site.end(), new ItemStack(Items.DIRT, 3), false);
         ItemEntity dirt = site.drop(new ItemStack(Items.DIRT), 0.0, locked);
-        helper.assertTrue(EndlingBarters.mayBarter(site.player()) && !EndlingBarters.mayBarter(locked),
+        helper.assertTrue(
+                EndlingBarters.mayBarter(site.player()) && !EndlingBarters.mayBarter(locked),
                 "only the player with the advancement may barter");
         int[] tick = {0};
         helper.onEachTick(() -> {
             if (++tick[0] == 60) {
                 // Hand-over, after the drop's refusal cooldown has run out.
-                helper.assertFalse(site.endling().interact(locked, InteractionHand.MAIN_HAND).consumesAction(),
+                helper.assertFalse(
+                        site.endling()
+                                .interact(locked, InteractionHand.MAIN_HAND)
+                                .consumesAction(),
                         "a player who hasn't beaten the dragon should be refused");
                 helper.assertTrue(locked.getMainHandItem().getCount() == 3, "a refused item stays in the hand");
             }
@@ -313,9 +339,14 @@ public final class EndlingBarterGameTests {
             helper.assertTrue(tick[0] >= 100, "waiting");
             helper.assertTrue(dirt.isAlive() && dirt.getItem().getCount() == 1, "the refused dirt stays on the ground");
             helper.assertFalse(site.endling().isInspecting(), "the endling should not take a refused item");
-            helper.assertTrue(site.endling().refusals() == 2, "the endling should refuse the drop once and the "
-                    + "hand-over once, refused " + site.endling().refusals() + " times");
-            helper.assertTrue(site.items().stream().noneMatch(item -> barterOutputs().contains(item.getItem().getItem())),
+            helper.assertTrue(
+                    site.endling().refusals() == 2,
+                    "the endling should refuse the drop once and the " + "hand-over once, refused "
+                            + site.endling().refusals() + " times");
+            helper.assertTrue(
+                    site.items().stream()
+                            .noneMatch(item ->
+                                    barterOutputs().contains(item.getItem().getItem())),
                     "a refused barter gives nothing");
             site.close();
         });
@@ -338,16 +369,23 @@ public final class EndlingBarterGameTests {
                 helper.assertTrue(site.endling().headShakeTicks() > 0, "a refusing endling should shake its head");
             }
             if (firstRefusal[0] > 0 && tick[0] < firstRefusal[0] + Endling.REFUSE_COOLDOWN) {
-                helper.assertTrue(site.endling().refusals() == 1,
+                helper.assertTrue(
+                        site.endling().refusals() == 1,
                         "an endling should refuse at most once every " + Endling.REFUSE_COOLDOWN + " ticks");
             }
         });
         helper.succeedWhen(() -> {
             helper.assertTrue(firstRefusal[0] > 0 && tick[0] >= firstRefusal[0] + 100, "waiting");
-            helper.assertTrue(site.endling().refusals() <= 1 + 100 / Endling.REFUSE_COOLDOWN,
+            helper.assertTrue(
+                    site.endling().refusals() <= 1 + 100 / Endling.REFUSE_COOLDOWN,
                     "too many refusals: " + site.endling().refusals());
-            helper.assertTrue(site.items().stream().filter(item -> item.getItem().is(Items.SAND))
-                    .mapToInt(item -> item.getItem().getCount()).sum() == 5, "all the sand stays on the ground");
+            helper.assertTrue(
+                    site.items().stream()
+                                    .filter(item -> item.getItem().is(Items.SAND))
+                                    .mapToInt(item -> item.getItem().getCount())
+                                    .sum()
+                            == 5,
+                    "all the sand stays on the ground");
             site.close();
         });
     }
@@ -360,8 +398,10 @@ public final class EndlingBarterGameTests {
         helper.runAfterDelay(100, () -> {
             helper.assertTrue(log.isAlive() && log.getItem().getCount() == 1, "the log should stay on the ground");
             helper.assertFalse(site.endling().isInspecting(), "the endling should not take an item with no thrower");
-            helper.assertTrue(site.endling().refusals() == 1, "the endling should refuse it once, refused "
-                    + site.endling().refusals() + " times");
+            helper.assertTrue(
+                    site.endling().refusals() == 1,
+                    "the endling should refuse it once, refused "
+                            + site.endling().refusals() + " times");
             site.close();
             helper.succeed();
         });
@@ -369,23 +409,37 @@ public final class EndlingBarterGameTests {
 
     @GameTest(template = ModGameTests.EMPTY_TEMPLATE)
     public static void barterInputTag(GameTestHelper helper) {
-        for (Item item : List.of(Items.DIRT, Items.COARSE_DIRT, Items.ROOTED_DIRT, Items.OAK_SAPLING,
-                Items.CHERRY_SAPLING, Items.DANDELION, Items.POPPY, Items.OAK_LOG, Items.BIRCH_LOG, Items.CRIMSON_STEM,
-                Items.GRASS_BLOCK, Items.MOSS_BLOCK, Items.SAND, Items.RED_SAND)) {
+        for (Item item : List.of(
+                Items.DIRT,
+                Items.COARSE_DIRT,
+                Items.ROOTED_DIRT,
+                Items.OAK_SAPLING,
+                Items.CHERRY_SAPLING,
+                Items.DANDELION,
+                Items.POPPY,
+                Items.OAK_LOG,
+                Items.BIRCH_LOG,
+                Items.CRIMSON_STEM,
+                Items.GRASS_BLOCK,
+                Items.MOSS_BLOCK,
+                Items.SAND,
+                Items.RED_SAND)) {
             ItemStack stack = new ItemStack(item);
             helper.assertTrue(stack.is(EndlingBarters.INPUTS), item + " should be a barter input");
-            helper.assertTrue(EndlingBarters.DEFAULT_LOOT_TABLE.equals(EndlingBarters.lootTableFor(stack)),
+            helper.assertTrue(
+                    EndlingBarters.DEFAULT_LOOT_TABLE.equals(EndlingBarters.lootTableFor(stack)),
                     item + " should roll the default barter table");
         }
-        for (Item item : List.of(Items.COBBLESTONE, Items.END_STONE, Items.DIAMOND, Items.OAK_PLANKS, Items.GRAVEL,
-                Items.AIR)) {
+        for (Item item :
+                List.of(Items.COBBLESTONE, Items.END_STONE, Items.DIAMOND, Items.OAK_PLANKS, Items.GRAVEL, Items.AIR)) {
             helper.assertFalse(EndlingBarters.isInput(new ItemStack(item)), item + " should not be a barter input");
         }
         // Special barter inputs (US-034, US-025) are accepted, but never roll the default table.
         for (Item item : List.of(Items.BEACON, Items.TOTEM_OF_UNDYING, Items.RED_BED)) {
             ItemStack stack = new ItemStack(item);
             helper.assertFalse(stack.is(EndlingBarters.INPUTS), item + " should not be in the barter input tag");
-            helper.assertFalse(EndlingBarters.DEFAULT_LOOT_TABLE.equals(EndlingBarters.lootTableFor(stack)),
+            helper.assertFalse(
+                    EndlingBarters.DEFAULT_LOOT_TABLE.equals(EndlingBarters.lootTableFor(stack)),
                     item + " should not roll the default barter table");
         }
         helper.succeed();
@@ -404,8 +458,10 @@ public final class EndlingBarterGameTests {
                 seen.add(stack.getItem());
             }
         }
-        helper.assertTrue(seen.equals(expected), "every End block should be bartered, missing "
-                + expected.stream().filter(item -> !seen.contains(item)).toList());
+        helper.assertTrue(
+                seen.equals(expected),
+                "every End block should be bartered, missing "
+                        + expected.stream().filter(item -> !seen.contains(item)).toList());
         endling.discard();
         helper.succeed();
     }

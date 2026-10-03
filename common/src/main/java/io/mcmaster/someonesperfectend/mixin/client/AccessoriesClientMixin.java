@@ -20,10 +20,12 @@ public abstract class AccessoriesClientMixin {
         ci.cancel();
     }
 
-    @Inject(method = "attemptToOpenScreen(ZLio/wispforest/accessories/compat/config/ScreenType;)Z", at = @At("HEAD"),
+    @Inject(
+            method = "attemptToOpenScreen(ZLio/wispforest/accessories/compat/config/ScreenType;)Z",
+            at = @At("HEAD"),
             cancellable = true)
-    private static void someonesperfectend$noAccessoriesScreen(boolean targetingLookingEntity, ScreenType screenType,
-            CallbackInfoReturnable<Boolean> cir) {
+    private static void someonesperfectend$noAccessoriesScreen(
+            boolean targetingLookingEntity, ScreenType screenType, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(false);
     }
 }

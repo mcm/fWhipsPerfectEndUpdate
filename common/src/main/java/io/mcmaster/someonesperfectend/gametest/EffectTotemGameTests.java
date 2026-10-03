@@ -2,8 +2,8 @@ package io.mcmaster.someonesperfectend.gametest;
 
 import com.mojang.authlib.GameProfile;
 import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
-import io.mcmaster.someonesperfectend.infuser.InfusionEffect;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
+import io.mcmaster.someonesperfectend.infuser.InfusionEffect;
 import io.mcmaster.someonesperfectend.totem.EffectTotemItem;
 import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import io.mcmaster.someonesperfectend.totem.TotemRules;
@@ -39,8 +39,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 
 public final class EffectTotemGameTests {
-    private EffectTotemGameTests() {
-    }
+    private EffectTotemGameTests() {}
 
     private static Slot equip(GameTestHelper helper, Player player, ItemStack totem) {
         int index = TrinketSlot.indexIn(player.inventoryMenu);
@@ -88,23 +87,36 @@ public final class EffectTotemGameTests {
 
     @GameTest
     public static void totemItemBasics(GameTestHelper helper) {
-        List<InfusionEffect> expected = List.of(InfusionEffect.SPEED, InfusionEffect.HASTE, InfusionEffect.RESISTANCE,
-                InfusionEffect.JUMP_BOOST, InfusionEffect.STRENGTH);
-        helper.assertTrue(EffectTotems.ALL.stream().map(totem -> totem.get().effect()).toList().equals(expected),
+        List<InfusionEffect> expected = List.of(
+                InfusionEffect.SPEED,
+                InfusionEffect.HASTE,
+                InfusionEffect.RESISTANCE,
+                InfusionEffect.JUMP_BOOST,
+                InfusionEffect.STRENGTH);
+        helper.assertTrue(
+                EffectTotems.ALL.stream()
+                        .map(totem -> totem.get().effect())
+                        .toList()
+                        .equals(expected),
                 "there should be one totem per effect");
-        List<RecipeHolder<?>> recipes = List.copyOf(helper.getLevel().getRecipeManager().getRecipes());
+        List<RecipeHolder<?>> recipes =
+                List.copyOf(helper.getLevel().getRecipeManager().getRecipes());
         for (var supplier : EffectTotems.ALL) {
             EffectTotemItem item = supplier.get();
             ItemStack stack = new ItemStack(item);
             helper.assertTrue(stack.getMaxStackSize() == 1, item + " should not stack");
             helper.assertTrue(stack.getRarity() == Rarity.UNCOMMON, item + " should be uncommon");
-            helper.assertTrue(stack.is(Infusers.EFFECT_TOTEMS) && stack.is(Trinkets.TRINKETS)
-                    && stack.is(Infusers.INFUSABLE), item + " should be an effect totem, trinket, and infusable");
+            helper.assertTrue(
+                    stack.is(Infusers.EFFECT_TOTEMS) && stack.is(Trinkets.TRINKETS) && stack.is(Infusers.INFUSABLE),
+                    item + " should be an effect totem, trinket, and infusable");
             helper.assertFalse(EffectTotems.isActive(stack), "a new totem should be inactive");
             helper.assertFalse(stack.hasFoil(), "an inactive totem has no glint");
             helper.assertTrue(EffectTotems.activated(item).hasFoil(), "an active totem has the enchantment glint");
             for (RecipeHolder<?> recipe : recipes) {
-                helper.assertFalse(recipe.value().getResultItem(helper.getLevel().registryAccess()).is(item),
+                helper.assertFalse(
+                        recipe.value()
+                                .getResultItem(helper.getLevel().registryAccess())
+                                .is(item),
                         item + " should not be craftable (" + recipe.id() + ")");
             }
         }
@@ -117,22 +129,28 @@ public final class EffectTotemGameTests {
         ItemStack active = EffectTotems.activated(EffectTotems.TOTEM_OF_STRENGTH.get());
         ItemStack loaded = ItemStack.parse(registries, active.save(registries)).orElseThrow();
         helper.assertTrue(EffectTotems.isActive(loaded), "activation should survive save/load");
-        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), helper.getLevel().registryAccess());
+        RegistryFriendlyByteBuf buf =
+                new RegistryFriendlyByteBuf(Unpooled.buffer(), helper.getLevel().registryAccess());
         ItemStack.STREAM_CODEC.encode(buf, active);
         helper.assertTrue(EffectTotems.isActive(ItemStack.STREAM_CODEC.decode(buf)), "activation should sync");
 
         String activeTooltip = tooltip(active);
         String inactiveTooltip = tooltip(new ItemStack(EffectTotems.TOTEM_OF_STRENGTH.get()));
-        helper.assertTrue(activeTooltip.contains(EffectTotems.ACTIVE_TOOLTIP_KEY)
-                && !activeTooltip.contains(EffectTotems.INACTIVE_TOOLTIP_KEY), "active tooltip was " + activeTooltip);
-        helper.assertTrue(inactiveTooltip.contains(EffectTotems.INACTIVE_TOOLTIP_KEY),
-                "inactive tooltip was " + inactiveTooltip);
+        helper.assertTrue(
+                activeTooltip.contains(EffectTotems.ACTIVE_TOOLTIP_KEY)
+                        && !activeTooltip.contains(EffectTotems.INACTIVE_TOOLTIP_KEY),
+                "active tooltip was " + activeTooltip);
+        helper.assertTrue(
+                inactiveTooltip.contains(EffectTotems.INACTIVE_TOOLTIP_KEY), "inactive tooltip was " + inactiveTooltip);
         helper.succeed();
     }
 
     private static String tooltip(ItemStack stack) {
         return stack.getTooltipLines(Item.TooltipContext.EMPTY, null, TooltipFlag.NORMAL).stream()
-                .map(Component::getContents).map(Object::toString).toList().toString();
+                .map(Component::getContents)
+                .map(Object::toString)
+                .toList()
+                .toString();
     }
 
     @GameTest
@@ -140,8 +158,13 @@ public final class EffectTotemGameTests {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         equip(helper, player, EffectTotems.activated(EffectTotems.TOTEM_OF_HASTE.get()));
         MobEffectInstance haste = player.getEffect(MobEffects.DIG_SPEED);
-        helper.assertTrue(haste != null && haste.getAmplifier() == 0 && haste.getDuration() == TotemRules.EFFECT_DURATION
-                        && haste.isAmbient() && !haste.isVisible() && haste.showIcon(),
+        helper.assertTrue(
+                haste != null
+                        && haste.getAmplifier() == 0
+                        && haste.getDuration() == TotemRules.EFFECT_DURATION
+                        && haste.isAmbient()
+                        && !haste.isVisible()
+                        && haste.showIcon(),
                 "an active Haste totem should give ambient Haste I for 340 ticks, was " + haste);
         helper.succeed();
     }
@@ -164,7 +187,8 @@ public final class EffectTotemGameTests {
             EffectTotemItem item = supplier.get();
             equip(helper, player, EffectTotems.activated(item));
             MobEffectInstance effect = player.getEffect(item.effect().holder());
-            helper.assertTrue(effect != null && effect.getAmplifier() == 0, item + " should give level I, was " + effect);
+            helper.assertTrue(
+                    effect != null && effect.getAmplifier() == 0, item + " should give level I, was " + effect);
             helper.assertTrue(player.getActiveEffects().size() == 1, item + " should give only its own effect");
         }
         helper.succeed();
@@ -176,7 +200,8 @@ public final class EffectTotemGameTests {
             ServerLevel level = level(helper, key);
             Player player = playerIn(level);
             equip(helper, player, EffectTotems.activated(EffectTotems.TOTEM_OF_SPEED.get()));
-            helper.assertTrue(player.hasEffect(MobEffects.MOVEMENT_SPEED), "the totem should work in " + key.location());
+            helper.assertTrue(
+                    player.hasEffect(MobEffects.MOVEMENT_SPEED), "the totem should work in " + key.location());
         }
         helper.succeed();
     }
@@ -186,14 +211,13 @@ public final class EffectTotemGameTests {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         equip(helper, player, EffectTotems.activated(EffectTotems.TOTEM_OF_RESISTANCE.get()));
         player.removeAllEffects();
-        player.setItemInHand(InteractionHand.MAIN_HAND,
-                EffectTotems.activated(EffectTotems.TOTEM_OF_HASTE.get()));
-        player.setItemInHand(InteractionHand.OFF_HAND,
-                new ItemStack(EffectTotems.TOTEM_OF_STRENGTH.get()));
+        player.setItemInHand(InteractionHand.MAIN_HAND, EffectTotems.activated(EffectTotems.TOTEM_OF_HASTE.get()));
+        player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(EffectTotems.TOTEM_OF_STRENGTH.get()));
         player.setHealth(1.0F);
         player.hurt(helper.getLevel().damageSources().generic(), 100.0F);
         helper.assertTrue(player.isDeadOrDying(), "effect totems must not act as a Totem of Undying");
-        helper.assertFalse(player.hasEffect(MobEffects.ABSORPTION) || player.hasEffect(MobEffects.FIRE_RESISTANCE),
+        helper.assertFalse(
+                player.hasEffect(MobEffects.ABSORPTION) || player.hasEffect(MobEffects.FIRE_RESISTANCE),
                 "no Totem of Undying effects should be applied");
         helper.succeed();
     }
@@ -203,7 +227,8 @@ public final class EffectTotemGameTests {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         ServerLevel end = level(helper, Level.END);
         InfuserMenu menu = menuAtTier(end, player, 4);
-        helper.assertTrue(menu.getInfusionSlot().mayPlace(new ItemStack(EffectTotems.TOTEM_OF_JUMP_BOOST.get())),
+        helper.assertTrue(
+                menu.getInfusionSlot().mayPlace(new ItemStack(EffectTotems.TOTEM_OF_JUMP_BOOST.get())),
                 "the infusion slot should accept totems in the End");
         menu.getInfusionSlot().set(new ItemStack(EffectTotems.TOTEM_OF_JUMP_BOOST.get()));
         menu.getSlot(InfuserMenu.PAYMENT_SLOT).set(new ItemStack(Items.NETHERITE_INGOT));
@@ -212,16 +237,19 @@ public final class EffectTotemGameTests {
         // The packet's effect is ignored: the totem's effect is fixed.
         menu.updateEffects(Optional.of(MobEffects.DIG_SPEED), Optional.empty());
         ItemStack totem = menu.getInfusionSlot().getItem();
-        helper.assertTrue(totem.is(EffectTotems.TOTEM_OF_JUMP_BOOST.get()) && EffectTotems.isActive(totem),
+        helper.assertTrue(
+                totem.is(EffectTotems.TOTEM_OF_JUMP_BOOST.get()) && EffectTotems.isActive(totem),
                 "confirming should activate the totem");
-        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().isEmpty(), "one netherite ingot is consumed");
+        helper.assertTrue(
+                menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().isEmpty(), "one netherite ingot is consumed");
         helper.assertTrue(totem.get(Infusers.INFUSION.get()) == null, "a totem is not infused like gear");
 
         // An already-active totem can't be activated again.
         menu.getSlot(InfuserMenu.PAYMENT_SLOT).set(new ItemStack(Items.NETHERITE_INGOT));
         helper.assertFalse(menu.canActivateTotem(), "an active totem leaves confirm disabled");
         menu.updateEffects(Optional.empty(), Optional.empty());
-        helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.NETHERITE_INGOT),
+        helper.assertTrue(
+                menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.NETHERITE_INGOT),
                 "an active totem should not consume netherite");
         helper.succeed();
     }
@@ -234,18 +262,21 @@ public final class EffectTotemGameTests {
             InfuserMenu menu = menuAtTier(end, player, 4);
             ItemStack totem = confirm(menu, new ItemStack(EffectTotems.TOTEM_OF_HASTE.get()), payment);
             helper.assertFalse(EffectTotems.isActive(totem), payment + " should not activate a totem");
-            helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(payment), payment + " should be kept");
+            helper.assertTrue(
+                    menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(payment), payment + " should be kept");
         }
         for (int tier = 0; tier < 4; tier++) {
             InfuserMenu menu = menuAtTier(end, player, tier);
             ItemStack totem = confirm(menu, new ItemStack(EffectTotems.TOTEM_OF_HASTE.get()), Items.NETHERITE_INGOT);
             helper.assertFalse(EffectTotems.isActive(totem), "tier " + tier + " should not activate a totem");
-            helper.assertTrue(menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.NETHERITE_INGOT),
+            helper.assertTrue(
+                    menu.getSlot(InfuserMenu.PAYMENT_SLOT).getItem().is(Items.NETHERITE_INGOT),
                     "netherite should be kept at tier " + tier);
         }
         for (var key : List.of(Level.OVERWORLD, Level.NETHER)) {
             InfuserMenu menu = menuAtTier(level(helper, key), player, 4);
-            helper.assertFalse(menu.getInfusionSlot().mayPlace(new ItemStack(EffectTotems.TOTEM_OF_HASTE.get())),
+            helper.assertFalse(
+                    menu.getInfusionSlot().mayPlace(new ItemStack(EffectTotems.TOTEM_OF_HASTE.get())),
                     "the infusion slot is locked in " + key.location());
             ItemStack totem = confirm(menu, new ItemStack(EffectTotems.TOTEM_OF_HASTE.get()), Items.NETHERITE_INGOT);
             helper.assertFalse(EffectTotems.isActive(totem), "no activation in " + key.location());

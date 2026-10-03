@@ -3,11 +3,11 @@ package io.mcmaster.someonesperfectend.worldgen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.KeyDispatchDataCodec;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
+import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.RandomState;
@@ -30,22 +30,28 @@ public final class ElevationBandsFunction implements DensityFunction {
     private static final int BOTTOM_SLIDE_TO = 32;
     private static final double BOTTOM_SLIDE_VALUE = -0.234375;
 
-    public static final MapCodec<ElevationBandsFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance
-            .group(
+    public static final MapCodec<ElevationBandsFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                     DensityFunction.HOLDER_HELPER_CODEC.fieldOf("argument").forGetter(f -> f.argument),
                     NoiseHolder.CODEC.fieldOf("noise").forGetter(f -> f.noise),
-                    Codec.INT.optionalFieldOf("lower_offset", ElevationBands.DEFAULT.lowerOffset())
+                    Codec.INT
+                            .optionalFieldOf("lower_offset", ElevationBands.DEFAULT.lowerOffset())
                             .forGetter(f -> f.layout.lowerOffset()),
-                    Codec.INT.optionalFieldOf("upper_offset", ElevationBands.DEFAULT.upperOffset())
+                    Codec.INT
+                            .optionalFieldOf("upper_offset", ElevationBands.DEFAULT.upperOffset())
                             .forGetter(f -> f.layout.upperOffset()),
-                    Codec.intRange(16, 4096).optionalFieldOf("region_size", ElevationBands.DEFAULT.regionSize())
+                    Codec.intRange(16, 4096)
+                            .optionalFieldOf("region_size", ElevationBands.DEFAULT.regionSize())
                             .forGetter(f -> f.layout.regionSize()),
-                    Codec.intRange(0, 256).optionalFieldOf("gap_width", ElevationBands.DEFAULT.gapWidth())
+                    Codec.intRange(0, 256)
+                            .optionalFieldOf("gap_width", ElevationBands.DEFAULT.gapWidth())
                             .forGetter(f -> f.layout.gapWidth()),
-                    Codec.intRange(0, 1 << 20).optionalFieldOf("min_distance", ElevationBands.DEFAULT.minDistance())
+                    Codec.intRange(0, 1 << 20)
+                            .optionalFieldOf("min_distance", ElevationBands.DEFAULT.minDistance())
                             .forGetter(f -> f.layout.minDistance()))
-            .apply(instance, (argument, noise, lower, upper, size, gap, distance) ->
-                    new ElevationBandsFunction(argument, noise, new ElevationBands(lower, upper, size, gap, distance))));
+            .apply(
+                    instance,
+                    (argument, noise, lower, upper, size, gap, distance) -> new ElevationBandsFunction(
+                            argument, noise, new ElevationBands(lower, upper, size, gap, distance))));
 
     private static final KeyDispatchDataCodec<ElevationBandsFunction> DISPATCH = KeyDispatchDataCodec.of(CODEC);
 

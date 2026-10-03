@@ -41,18 +41,18 @@ import net.minecraft.world.phys.Vec3;
 public final class EnderBedGameTests {
     /** Where the foot of a test bed goes; mock players face south, so the head is at {@code FOOT.south()}. */
     static final BlockPos FOOT = new BlockPos(3, 3, 3);
+
     static final BlockPos HEAD = FOOT.south();
 
-    private EnderBedGameTests() {
-    }
+    private EnderBedGameTests() {}
 
     private static Item vanillaBed(DyeColor color) {
         return BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(color.getName() + "_bed"));
     }
 
     private static ResourceKey<LootTable> barterTable(DyeColor color) {
-        return ResourceKey.create(Registries.LOOT_TABLE,
-                SomeonesPerfectEnd.id("gameplay/endling_barter/" + color.getName() + "_bed"));
+        return ResourceKey.create(
+                Registries.LOOT_TABLE, SomeonesPerfectEnd.id("gameplay/endling_barter/" + color.getName() + "_bed"));
     }
 
     /** Uses a red Ender Bed item on {@code face} of the block at {@code target}; returns the player. */
@@ -76,8 +76,9 @@ public final class EnderBedGameTests {
 
     private static List<ItemEntity> droppedBeds(GameTestHelper helper) {
         AABB area = new AABB(helper.absolutePos(FOOT)).inflate(4.0);
-        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area,
-                item -> item.getItem().is(EnderBeds.ITEM_TAG));
+        return helper.getLevel()
+                .getEntitiesOfClass(
+                        ItemEntity.class, area, item -> item.getItem().is(EnderBeds.ITEM_TAG));
     }
 
     /** Succeeds once both halves are gone and exactly one red Ender Bed item was dropped. */
@@ -86,9 +87,14 @@ public final class EnderBedGameTests {
             helper.assertBlockNotPresent(EnderBeds.get(DyeColor.RED), FOOT);
             helper.assertBlockNotPresent(EnderBeds.get(DyeColor.RED), HEAD);
             List<ItemEntity> drops = droppedBeds(helper);
-            helper.assertTrue(drops.size() == 1 && drops.get(0).getItem().getCount() == 1
-                            && drops.get(0).getItem().is(EnderBeds.get(DyeColor.RED).asItem()),
-                    "expected exactly one red Ender Bed item, got " + drops.stream().map(ItemEntity::getItem).toList());
+            helper.assertTrue(
+                    drops.size() == 1
+                            && drops.get(0).getItem().getCount() == 1
+                            && drops.get(0)
+                                    .getItem()
+                                    .is(EnderBeds.get(DyeColor.RED).asItem()),
+                    "expected exactly one red Ender Bed item, got "
+                            + drops.stream().map(ItemEntity::getItem).toList());
         });
     }
 
@@ -99,7 +105,8 @@ public final class EnderBedGameTests {
         BlockState head = helper.getBlockState(HEAD);
         helper.assertTrue(foot.getValue(EnderBedBlock.PART) == BedPart.FOOT, "the clicked block should be the foot");
         helper.assertTrue(head.getValue(EnderBedBlock.PART) == BedPart.HEAD, "the head should be beside the foot");
-        helper.assertTrue(foot.getValue(EnderBedBlock.FACING) == Direction.SOUTH, "the bed should face the player's way");
+        helper.assertTrue(
+                foot.getValue(EnderBedBlock.FACING) == Direction.SOUTH, "the bed should face the player's way");
         helper.succeed();
     }
 
@@ -186,10 +193,12 @@ public final class EnderBedGameTests {
             EnderBedBlock bed = EnderBeds.get(color);
             BlockState state = bed.defaultBlockState();
             helper.assertTrue(bed.getColor() == color, EnderBeds.name(color) + " has the wrong color");
-            helper.assertTrue(BuiltInRegistries.BLOCK.getKey(bed).equals(SomeonesPerfectEnd.id(EnderBeds.name(color))),
+            helper.assertTrue(
+                    BuiltInRegistries.BLOCK.getKey(bed).equals(SomeonesPerfectEnd.id(EnderBeds.name(color))),
                     "unexpected id " + BuiltInRegistries.BLOCK.getKey(bed));
             helper.assertTrue(state.is(EnderBeds.BLOCK_TAG), EnderBeds.name(color) + " should be in the block tag");
-            helper.assertTrue(new ItemStack(bed).is(EnderBeds.ITEM_TAG), EnderBeds.name(color) + " should be in the item tag");
+            helper.assertTrue(
+                    new ItemStack(bed).is(EnderBeds.ITEM_TAG), EnderBeds.name(color) + " should be in the item tag");
             helper.assertTrue(new ItemStack(bed).getMaxStackSize() == 1, "Ender Beds should stack to 1");
             helper.assertTrue(state.is(BlockTags.MINEABLE_WITH_AXE), "Ender Beds should be mineable with an axe");
             helper.assertFalse(state.requiresCorrectToolForDrops(), "Ender Beds should drop when mined by hand");
@@ -199,8 +208,8 @@ public final class EnderBedGameTests {
     }
 
     static InteractionResult use(ServerLevel level, BlockPos pos, Player player) {
-        return level.getBlockState(pos).useWithoutItem(level, player,
-                new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
+        return level.getBlockState(pos)
+                .useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
     }
 
     @GameTest(template = ModGameTests.EMPTY_TEMPLATE)
@@ -240,7 +249,8 @@ public final class EnderBedGameTests {
         helper.assertTrue(use(nether, foot, player).consumesAction(), "using an Ender Bed in the Nether should act");
         helper.assertFalse(nether.getBlockState(foot).is(EnderBeds.BLOCK_TAG), "the foot should be gone");
         helper.assertFalse(nether.getBlockState(foot.south()).is(EnderBeds.BLOCK_TAG), "the head should be gone");
-        helper.assertTrue(netherrack.stream().noneMatch(pos -> nether.getBlockState(pos).is(Blocks.NETHERRACK)),
+        helper.assertTrue(
+                netherrack.stream().noneMatch(pos -> nether.getBlockState(pos).is(Blocks.NETHERRACK)),
                 "the explosion should destroy the netherrack around the head");
         helper.succeed();
     }
@@ -250,13 +260,16 @@ public final class EnderBedGameTests {
         Endling endling = helper.spawn(Endlings.TYPE.get(), new Vec3(3.5, 1.0, 3.5));
         for (DyeColor color : DyeColor.values()) {
             ItemStack input = new ItemStack(vanillaBed(color));
-            helper.assertTrue(barterTable(color).equals(EndlingSpecialBarters.lootTableFor(input.getItem())),
+            helper.assertTrue(
+                    barterTable(color).equals(EndlingSpecialBarters.lootTableFor(input.getItem())),
                     input + " should map to " + barterTable(color).location() + ", got "
                             + EndlingSpecialBarters.lootTableFor(input.getItem()));
             helper.assertTrue(EndlingBarters.isInput(input), input + " should be accepted by endlings");
             helper.assertFalse(input.is(EndlingBarters.INPUTS), input + " should not be a default barter input");
             List<ItemStack> roll = EndlingBarters.roll(endling, barterTable(color));
-            helper.assertTrue(roll.size() == 1 && roll.get(0).getCount() == 1
+            helper.assertTrue(
+                    roll.size() == 1
+                            && roll.get(0).getCount() == 1
                             && roll.get(0).is(EnderBeds.get(color).asItem()),
                     input + " should barter for one " + EnderBeds.name(color) + ", gave " + roll);
         }
@@ -271,10 +284,15 @@ public final class EnderBedGameTests {
         Item red = EnderBeds.get(DyeColor.RED).asItem();
         helper.succeedWhen(() -> {
             List<ItemEntity> items = site.items();
-            helper.assertTrue(items.stream().anyMatch(item -> item.getItem().is(red) && item.getItem().getCount() == 1),
-                    "no red Ender Bed yet (items: " + items.stream().map(ItemEntity::getItem).toList() + ")");
+            helper.assertTrue(
+                    items.stream()
+                            .anyMatch(item ->
+                                    item.getItem().is(red) && item.getItem().getCount() == 1),
+                    "no red Ender Bed yet (items: "
+                            + items.stream().map(ItemEntity::getItem).toList() + ")");
             helper.assertFalse(site.endling().isInspecting(), "the endling should be done inspecting");
-            helper.assertTrue(items.stream().noneMatch(item -> item.getItem().is(vanillaBed(DyeColor.RED))),
+            helper.assertTrue(
+                    items.stream().noneMatch(item -> item.getItem().is(vanillaBed(DyeColor.RED))),
                     "the red bed should have been consumed");
             site.close();
         });

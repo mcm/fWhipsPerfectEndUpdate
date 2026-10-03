@@ -21,8 +21,8 @@ public abstract class InventoryScreenMixin extends AbstractContainerScreen<Inven
     }
 
     @Inject(method = "renderBg", at = @At("TAIL"))
-    private void someonesperfectend$drawTrinketSlot(GuiGraphics graphics, float partialTick, int mouseX, int mouseY,
-            CallbackInfo ci) {
+    private void someonesperfectend$drawTrinketSlot(
+            GuiGraphics graphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
         TrinketSlotClient.drawSlotFrame(graphics, this.leftPos + TrinketSlot.X, this.topPos + TrinketSlot.Y);
     }
 }

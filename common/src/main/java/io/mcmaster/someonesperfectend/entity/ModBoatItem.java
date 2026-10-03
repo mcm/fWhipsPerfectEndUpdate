@@ -43,8 +43,8 @@ public class ModBoatItem extends BoatItem {
             return InteractionResultHolder.pass(stack);
         }
         Vec3 view = player.getViewVector(1.0F);
-        List<Entity> entities = level.getEntities(player,
-                player.getBoundingBox().expandTowards(view.scale(5.0)).inflate(1.0), ENTITY_PREDICATE);
+        List<Entity> entities = level.getEntities(
+                player, player.getBoundingBox().expandTowards(view.scale(5.0)).inflate(1.0), ENTITY_PREDICATE);
         Vec3 eye = player.getEyePosition();
         for (Entity entity : entities) {
             AABB box = entity.getBoundingBox().inflate(entity.getPickRadius());
@@ -56,7 +56,8 @@ public class ModBoatItem extends BoatItem {
         Vec3 location = hit.getLocation();
         Boat boat = ModBoats.create(level, type, chest, location.x, location.y, location.z);
         if (level instanceof ServerLevel serverLevel) {
-            EntityType.<Boat>createDefaultStackConfig(serverLevel, stack, player).accept(boat);
+            EntityType.<Boat>createDefaultStackConfig(serverLevel, stack, player)
+                    .accept(boat);
         }
         boat.setYRot(player.getYRot());
         if (!level.noCollision(boat, boat.getBoundingBox())) {

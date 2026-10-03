@@ -10,8 +10,7 @@ import net.neoforged.neoforge.fluids.FluidType;
  * different look is applied by {@code LiquidBlockRendererMixin}.
  */
 public final class OasisWaterPlatformImpl {
-    private OasisWaterPlatformImpl() {
-    }
+    private OasisWaterPlatformImpl() {}
 
     public static OasisWaterFluid.Source createSource() {
         return new OasisWaterFluid.Source() {

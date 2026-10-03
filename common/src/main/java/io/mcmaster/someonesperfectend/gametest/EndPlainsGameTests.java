@@ -30,10 +30,10 @@ public final class EndPlainsGameTests {
     private static final String TALL = "someonesperfectend:gametest/empty_tall";
     /** Chorus plants spread less than 8 blocks from their stem, so this margin keeps neighbors' chorus out. */
     private static final int MARGIN = 8;
+
     private static final int CHUNKS = 8;
 
-    private EndPlainsGameTests() {
-    }
+    private EndPlainsGameTests() {}
 
     /**
      * Generates outer-End chunks of the (fixed-seed) GameTest world that lie entirely inside {@code end_plains},
@@ -49,9 +49,16 @@ public final class EndPlainsGameTests {
         for (int cx = 70; cx < 400 && found.size() < CHUNKS; cx += 3) {
             for (int cz = -200; cz <= 200 && found.size() < CHUNKS; cz += 3) {
                 ChunkPos chunk = new ChunkPos(cx, cz);
-                if (allPlains(source, sampler, chunk) && end.getChunkSource().getGenerator().getBaseHeight(
-                        chunk.getMiddleBlockX(), chunk.getMiddleBlockZ(), Heightmap.Types.WORLD_SURFACE_WG, end,
-                        end.getChunkSource().randomState()) > end.getMinBuildHeight()) {
+                if (allPlains(source, sampler, chunk)
+                        && end.getChunkSource()
+                                        .getGenerator()
+                                        .getBaseHeight(
+                                                chunk.getMiddleBlockX(),
+                                                chunk.getMiddleBlockZ(),
+                                                Heightmap.Types.WORLD_SURFACE_WG,
+                                                end,
+                                                end.getChunkSource().randomState())
+                                > end.getMinBuildHeight()) {
                     found.add(chunk);
                 }
             }
@@ -72,7 +79,8 @@ public final class EndPlainsGameTests {
                         BlockState state = levelChunk.getBlockState(pos.set(x, y, z));
                         if (state.is(ModBlocks.BOUNCE_CAP.get())) {
                             caps++;
-                            helper.assertTrue(levelChunk.getBlockState(pos.below()).is(ModBlockTags.END_PLANT_SOIL),
+                            helper.assertTrue(
+                                    levelChunk.getBlockState(pos.below()).is(ModBlockTags.END_PLANT_SOIL),
                                     "Bounce cap without soil at " + pos);
                         } else if (state.is(ModBlocks.SHORT_VOID_GRASS.get())) {
                             grass++;
@@ -85,8 +93,13 @@ public final class EndPlainsGameTests {
                 }
             }
         }
-        LOGGER.info("End Plains chunks {}: {} bounce caps, {} short void grass, {} void petals, {} chorus", found,
-                caps, grass, petals, chorus);
+        LOGGER.info(
+                "End Plains chunks {}: {} bounce caps, {} short void grass, {} void petals, {} chorus",
+                found,
+                caps,
+                grass,
+                petals,
+                chorus);
         helper.assertTrue(caps > 0, "No bounce caps in End Plains chunks " + found);
         helper.assertTrue(grass > 0, "No short void grass in End Plains chunks " + found);
         helper.assertTrue(chorus == 0, chorus + " chorus blocks in End Plains chunks " + found);
@@ -115,11 +128,15 @@ public final class EndPlainsGameTests {
             }
         }
         BlockPos origin = helper.absolutePos(new BlockPos(8, 11, 8));
-        boolean placed = level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE)
+        boolean placed = level.registryAccess()
+                .registryOrThrow(Registries.CONFIGURED_FEATURE)
                 .getOrThrow(ModFeatures.BOUNCE_CAP_CLUSTER_CONFIGURED)
                 .place(level, level.getChunkSource().getGenerator(), level.random, origin);
-        helper.assertTrue(placed, "Cluster was not placed; surface at origin is y="
-                + level.getHeight(Heightmap.Types.MOTION_BLOCKING, origin.getX(), origin.getZ()) + ", origin " + origin);
+        helper.assertTrue(
+                placed,
+                "Cluster was not placed; surface at origin is y="
+                        + level.getHeight(Heightmap.Types.MOTION_BLOCKING, origin.getX(), origin.getZ()) + ", origin "
+                        + origin);
         int caps = 0;
         for (int x = 0; x <= 16; x++) {
             for (int y = 0; y < 24; y++) {
@@ -127,7 +144,8 @@ public final class EndPlainsGameTests {
                     BlockPos pos = new BlockPos(x, y, z);
                     if (helper.getBlockState(pos).is(ModBlocks.BOUNCE_CAP.get())) {
                         caps++;
-                        helper.assertTrue(y == 11 && helper.getBlockState(pos.below()).is(ModBlocks.END_TURF.get()),
+                        helper.assertTrue(
+                                y == 11 && helper.getBlockState(pos.below()).is(ModBlocks.END_TURF.get()),
                                 "Bounce cap off the island at " + pos);
                     }
                 }
@@ -141,8 +159,8 @@ public final class EndPlainsGameTests {
     private static boolean allPlains(BiomeSource source, Climate.Sampler sampler, ChunkPos chunk) {
         for (int x = chunk.getMinBlockX() - MARGIN; x <= chunk.getMaxBlockX() + MARGIN + 3; x += 4) {
             for (int z = chunk.getMinBlockZ() - MARGIN; z <= chunk.getMaxBlockZ() + MARGIN + 3; z += 4) {
-                if (!source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z),
-                        sampler).is(ModBiomes.END_PLAINS)) {
+                if (!source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z), sampler)
+                        .is(ModBiomes.END_PLAINS)) {
                     return false;
                 }
             }

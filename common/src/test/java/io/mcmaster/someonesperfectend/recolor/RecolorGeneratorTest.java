@@ -16,8 +16,8 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 
 class RecolorGeneratorTest {
-    private static final Palette RED = Palette.gradient(
-            Palette.Gradient.evenlySpaced(new int[] {0x000000, 0xFF0000}, false));
+    private static final Palette RED =
+            Palette.gradient(Palette.Gradient.evenlySpaced(new int[] {0x000000, 0xFF0000}, false));
 
     static byte[] png(int width, int height, int[] argb) throws IOException {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -42,26 +42,34 @@ class RecolorGeneratorTest {
         byte[] mcmeta = "{\"animation\":{\"frametime\":3}}".getBytes(StandardCharsets.UTF_8);
         // 1x2: two animation frames stacked vertically
         byte[] source = png(1, 2, new int[] {0xFFFFFFFF, 0xFF000000});
-        RecolorRecipe recipe = new RecolorRecipe(TextureId.parse("block/water_still"),
-                TextureId.parse("someonesperfectend:block/oasis_water_still"), RED);
+        RecolorRecipe recipe = new RecolorRecipe(
+                TextureId.parse("block/water_still"),
+                TextureId.parse("someonesperfectend:block/oasis_water_still"),
+                RED);
 
-        RecolorGenerator.Result result = RecolorGenerator.generate(List.of(recipe),
-                id -> Optional.of(new RecolorGenerator.SourceTexture(source, Optional.of(mcmeta))), id -> false);
+        RecolorGenerator.Result result = RecolorGenerator.generate(
+                List.of(recipe),
+                id -> Optional.of(new RecolorGenerator.SourceTexture(source, Optional.of(mcmeta))),
+                id -> false);
 
         Map<RecolorGenerator.GeneratedFile, byte[]> files = result.files();
-        assertArrayEquals(mcmeta, files.get(new RecolorGenerator.GeneratedFile("someonesperfectend",
-                "textures/block/oasis_water_still.png.mcmeta")));
-        assertArrayEquals(new int[] {0xFFFF0000, 0xFF000000}, pixels(files.get(new RecolorGenerator.GeneratedFile(
-                "someonesperfectend", "textures/block/oasis_water_still.png"))));
+        assertArrayEquals(
+                mcmeta,
+                files.get(new RecolorGenerator.GeneratedFile(
+                        "someonesperfectend", "textures/block/oasis_water_still.png.mcmeta")));
+        assertArrayEquals(
+                new int[] {0xFFFF0000, 0xFF000000},
+                pixels(files.get(new RecolorGenerator.GeneratedFile(
+                        "someonesperfectend", "textures/block/oasis_water_still.png"))));
         assertEquals(List.of(recipe.target()), result.generated());
     }
 
     @Test
     void missingSourceIsReportedAndSkipped() {
-        RecolorRecipe recipe = new RecolorRecipe(TextureId.parse("block/missing"),
-                TextureId.parse("someonesperfectend:block/x"), RED);
-        RecolorGenerator.Result result = RecolorGenerator.generate(List.of(recipe), id -> Optional.empty(),
-                id -> false);
+        RecolorRecipe recipe =
+                new RecolorRecipe(TextureId.parse("block/missing"), TextureId.parse("someonesperfectend:block/x"), RED);
+        RecolorGenerator.Result result =
+                RecolorGenerator.generate(List.of(recipe), id -> Optional.empty(), id -> false);
         assertTrue(result.files().isEmpty());
         assertFalse(result.errors().isEmpty());
         assertTrue(result.generated().isEmpty());

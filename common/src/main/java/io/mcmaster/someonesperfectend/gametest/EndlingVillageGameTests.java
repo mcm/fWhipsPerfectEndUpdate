@@ -44,8 +44,7 @@ public final class EndlingVillageGameTests {
     private static final BlockPos SEARCH_FROM = new BlockPos(2000, 64, 0);
     private static final int SEARCH_DISTANCE = 4096;
 
-    private EndlingVillageGameTests() {
-    }
+    private EndlingVillageGameTests() {}
 
     private static ServerLevel end(GameTestHelper helper) {
         return helper.getLevel().getServer().getLevel(Level.END);
@@ -56,8 +55,10 @@ public final class EndlingVillageGameTests {
     }
 
     private static RandomSpreadStructurePlacement placement(ServerLevel end) {
-        return (RandomSpreadStructurePlacement) end.registryAccess().registryOrThrow(Registries.STRUCTURE_SET)
-                .getOrThrow(EndlingVillages.STRUCTURE_SET).placement();
+        return (RandomSpreadStructurePlacement) end.registryAccess()
+                .registryOrThrow(Registries.STRUCTURE_SET)
+                .getOrThrow(EndlingVillages.STRUCTURE_SET)
+                .placement();
     }
 
     /**
@@ -76,11 +77,13 @@ public final class EndlingVillageGameTests {
         double best = Double.MAX_VALUE;
         for (int rx = -regions; rx <= regions; rx++) {
             for (int rz = -regions; rz <= regions; rz++) {
-                ChunkPos chunk = placement.getPotentialStructureChunk(state.getLevelSeed(), fromX + rx * spacing,
-                        fromZ + rz * spacing);
-                double distance = Math.hypot(chunk.getMinBlockX() - SEARCH_FROM.getX(),
-                        chunk.getMinBlockZ() - SEARCH_FROM.getZ());
-                if (distance > SEARCH_DISTANCE || distance >= best || !placement.isStructureChunk(state, chunk.x, chunk.z)) {
+                ChunkPos chunk = placement.getPotentialStructureChunk(
+                        state.getLevelSeed(), fromX + rx * spacing, fromZ + rz * spacing);
+                double distance = Math.hypot(
+                        chunk.getMinBlockX() - SEARCH_FROM.getX(), chunk.getMinBlockZ() - SEARCH_FROM.getZ());
+                if (distance > SEARCH_DISTANCE
+                        || distance >= best
+                        || !placement.isStructureChunk(state, chunk.x, chunk.z)) {
                     continue;
                 }
                 // The check /locate runs before loading the chunk.
@@ -91,9 +94,14 @@ public final class EndlingVillageGameTests {
                 }
             }
         }
-        helper.assertTrue(nearest != null, "No Endling village within " + SEARCH_DISTANCE + " blocks of " + SEARCH_FROM);
-        LOGGER.info("Nearest Endling village to {} (End seed {}): chunk {} at distance {}", SEARCH_FROM,
-                end.getSeed(), nearest, (int) best);
+        helper.assertTrue(
+                nearest != null, "No Endling village within " + SEARCH_DISTANCE + " blocks of " + SEARCH_FROM);
+        LOGGER.info(
+                "Nearest Endling village to {} (End seed {}): chunk {} at distance {}",
+                SEARCH_FROM,
+                end.getSeed(),
+                nearest,
+                (int) best);
         return nearest;
     }
 
@@ -103,10 +111,16 @@ public final class EndlingVillageGameTests {
      * (and {@code /locate} finds nothing there); this is the code path a normal world runs.
      */
     private static StructureStart createStart(ServerLevel end, ChunkPos chunk) {
-        ProtoChunk proto = new ProtoChunk(chunk, UpgradeData.EMPTY, end,
-                end.registryAccess().registryOrThrow(Registries.BIOME), null);
-        end.getChunkSource().getGenerator().createStructures(end.registryAccess(),
-                end.getChunkSource().getGeneratorState(), end.structureManager(), proto, end.getStructureManager());
+        ProtoChunk proto = new ProtoChunk(
+                chunk, UpgradeData.EMPTY, end, end.registryAccess().registryOrThrow(Registries.BIOME), null);
+        end.getChunkSource()
+                .getGenerator()
+                .createStructures(
+                        end.registryAccess(),
+                        end.getChunkSource().getGeneratorState(),
+                        end.structureManager(),
+                        proto,
+                        end.getStructureManager());
         return proto.getStartForStructure(structure(end).value());
     }
 
@@ -134,40 +148,68 @@ public final class EndlingVillageGameTests {
         StructureStart start = createStart(end, nearestVillage(helper, end));
         helper.assertTrue(start != null && start.isValid(), "No village start");
         List<EndlingVillagePieces.Hut> huts = start.getPieces().stream()
-                .filter(EndlingVillagePieces.Hut.class::isInstance).map(EndlingVillagePieces.Hut.class::cast).toList();
-        long glowcaps = start.getPieces().stream().filter(EndlingVillagePieces.Glowcap.class::isInstance).count();
-        helper.assertTrue(huts.size() >= EndlingVillageLayout.MIN_HUTS && huts.size() <= EndlingVillageLayout.MAX_HUTS,
+                .filter(EndlingVillagePieces.Hut.class::isInstance)
+                .map(EndlingVillagePieces.Hut.class::cast)
+                .toList();
+        long glowcaps = start.getPieces().stream()
+                .filter(EndlingVillagePieces.Glowcap.class::isInstance)
+                .count();
+        helper.assertTrue(
+                huts.size() >= EndlingVillageLayout.MIN_HUTS && huts.size() <= EndlingVillageLayout.MAX_HUTS,
                 "Hut count out of range: " + huts.size());
-        helper.assertTrue(glowcaps >= EndlingVillageLayout.MIN_GLOWCAPS && glowcaps <= EndlingVillageLayout.MAX_GLOWCAPS,
+        helper.assertTrue(
+                glowcaps >= EndlingVillageLayout.MIN_GLOWCAPS && glowcaps <= EndlingVillageLayout.MAX_GLOWCAPS,
                 "Glowcap count out of range: " + glowcaps);
 
         // Pieces round-trip through NBT (chunk save/load).
         StructurePieceSerializationContext context = StructurePieceSerializationContext.fromLevel(end);
-        StructureStart loaded = StructureStart.loadStaticStart(context, start.createTag(context, start.getChunkPos()),
-                end.getSeed());
-        helper.assertTrue(loaded != null && loaded.getPieces().size() == start.getPieces().size()
-                && loaded.getBoundingBox().equals(start.getBoundingBox()), "Village start didn't survive NBT");
+        StructureStart loaded =
+                StructureStart.loadStaticStart(context, start.createTag(context, start.getChunkPos()), end.getSeed());
+        helper.assertTrue(
+                loaded != null
+                        && loaded.getPieces().size() == start.getPieces().size()
+                        && loaded.getBoundingBox().equals(start.getBoundingBox()),
+                "Village start didn't survive NBT");
 
         // Load the village area and place every chunk of it, as /place structure does.
         BoundingBox box = start.getBoundingBox();
-        ChunkPos min = new ChunkPos(SectionPos.blockToSectionCoord(box.minX()), SectionPos.blockToSectionCoord(box.minZ()));
-        ChunkPos max = new ChunkPos(SectionPos.blockToSectionCoord(box.maxX()), SectionPos.blockToSectionCoord(box.maxZ()));
-        List<ChunkPos> chunks = ChunkPos.rangeClosed(new ChunkPos(min.x - 1, min.z - 1), new ChunkPos(max.x + 1, max.z + 1))
+        ChunkPos min =
+                new ChunkPos(SectionPos.blockToSectionCoord(box.minX()), SectionPos.blockToSectionCoord(box.minZ()));
+        ChunkPos max =
+                new ChunkPos(SectionPos.blockToSectionCoord(box.maxX()), SectionPos.blockToSectionCoord(box.maxZ()));
+        List<ChunkPos> chunks = ChunkPos.rangeClosed(
+                        new ChunkPos(min.x - 1, min.z - 1), new ChunkPos(max.x + 1, max.z + 1))
                 .toList();
         for (ChunkPos chunk : chunks) {
             end.setChunkForced(chunk.x, chunk.z, true);
             end.getChunk(chunk.x, chunk.z);
         }
-        ChunkPos.rangeClosed(min, max).forEach(chunk -> start.placeInChunk(end, end.structureManager(),
-                end.getChunkSource().getGenerator(), end.getRandom(), new BoundingBox(chunk.getMinBlockX(),
-                        end.getMinBuildHeight(), chunk.getMinBlockZ(), chunk.getMaxBlockX(), end.getMaxBuildHeight(),
-                        chunk.getMaxBlockZ()), chunk));
+        ChunkPos.rangeClosed(min, max)
+                .forEach(chunk -> start.placeInChunk(
+                        end,
+                        end.structureManager(),
+                        end.getChunkSource().getGenerator(),
+                        end.getRandom(),
+                        new BoundingBox(
+                                chunk.getMinBlockX(),
+                                end.getMinBuildHeight(),
+                                chunk.getMinBlockZ(),
+                                chunk.getMaxBlockX(),
+                                end.getMaxBuildHeight(),
+                                chunk.getMaxBlockZ()),
+                        chunk));
 
         int stems = count(end, box, ModBlocks.GLOWCAP_STEM.get());
         int floors = count(end, box, ModBlocks.VOIDVINE_MOSAIC.get());
         int roofs = count(end, box, ModBlocks.GLOWCAP_BLOCK.get());
-        LOGGER.info("Endling village at {}: {} huts, {} glowcaps, {} glowcap stems, {} floor blocks, {} glowcap blocks",
-                box, huts.size(), glowcaps, stems, floors, roofs);
+        LOGGER.info(
+                "Endling village at {}: {} huts, {} glowcaps, {} glowcap stems, {} floor blocks, {} glowcap blocks",
+                box,
+                huts.size(),
+                glowcaps,
+                stems,
+                floors,
+                roofs);
         helper.assertTrue(stems > 0, "No huge glowcap stem in the village");
         int hutArea = EndlingVillageLayout.HUT_SIZE * EndlingVillageLayout.HUT_SIZE;
         helper.assertTrue(floors >= huts.size() * hutArea, "Missing hut floors: " + floors);
@@ -175,11 +217,12 @@ public final class EndlingVillageGameTests {
         helper.succeedWhen(() -> {
             List<Endling> endlings = end.getEntitiesOfClass(Endling.class, area);
             helper.assertTrue(endlings.size() >= 3, "Only " + endlings.size() + " endlings in the village");
-            helper.assertTrue(endlings.size() == huts.size(), endlings.size() + " endlings for " + huts.size() + " huts");
+            helper.assertTrue(
+                    endlings.size() == huts.size(), endlings.size() + " endlings for " + huts.size() + " huts");
             for (Endling endling : endlings) {
                 helper.assertTrue(endling.countsTowardVillage(), "Endling not bound to the village: " + endling);
-                helper.assertTrue(box.isInside(endling.village()), "Village point outside the village: "
-                        + endling.village());
+                helper.assertTrue(
+                        box.isInside(endling.village()), "Village point outside the village: " + endling.village());
             }
             chunks.forEach(chunk -> end.setChunkForced(chunk.x, chunk.z, false));
         });
@@ -205,26 +248,44 @@ public final class EndlingVillageGameTests {
         for (int rx = minRegion; rx <= maxRegion; rx++) {
             for (int rz = minRegion; rz <= maxRegion; rz++) {
                 ChunkPos chunk = placement.getPotentialStructureChunk(state.getLevelSeed(), rx * spacing, rz * spacing);
-                if (Math.abs(chunk.getMiddleBlockX()) >= half || Math.abs(chunk.getMiddleBlockZ()) >= half
+                if (Math.abs(chunk.getMiddleBlockX()) >= half
+                        || Math.abs(chunk.getMiddleBlockZ()) >= half
                         || !placement.isStructureChunk(state, chunk.x, chunk.z)) {
                     continue;
                 }
                 candidates++;
-                Optional<Structure.GenerationStub> stub = structure.findValidGenerationPoint(
-                        new Structure.GenerationContext(end.registryAccess(), generator, generator.getBiomeSource(),
-                                state.randomState(), end.getServer().getStructureManager(), state.getLevelSeed(), chunk,
-                                end, structure.biomes()::contains));
+                Optional<Structure.GenerationStub> stub =
+                        structure.findValidGenerationPoint(new Structure.GenerationContext(
+                                end.registryAccess(),
+                                generator,
+                                generator.getBiomeSource(),
+                                state.randomState(),
+                                end.getServer().getStructureManager(),
+                                state.getLevelSeed(),
+                                chunk,
+                                end,
+                                structure.biomes()::contains));
                 stub.ifPresent(s -> starts.add(s.position()));
             }
         }
         double areas = (4.0 * half * half) / (1500.0 * 1500.0);
         double perArea = starts.size() / areas;
-        LOGGER.info("Endling villages over {}x{}: {} of {} candidates, {} per 1500x1500", 2 * half, 2 * half,
-                starts.size(), candidates, String.format("%.2f", perArea));
+        LOGGER.info(
+                "Endling villages over {}x{}: {} of {} candidates, {} per 1500x1500",
+                2 * half,
+                2 * half,
+                starts.size(),
+                candidates,
+                String.format("%.2f", perArea));
         for (BlockPos pos : starts) {
             helper.assertTrue(EndlingVillageLayout.farEnough(pos.getX(), pos.getZ()), "Village too close: " + pos);
-            Holder<Biome> biome = generator.getBiomeSource().getNoiseBiome(QuartPos.fromBlock(pos.getX()),
-                    QuartPos.fromBlock(pos.getY()), QuartPos.fromBlock(pos.getZ()), state.randomState().sampler());
+            Holder<Biome> biome = generator
+                    .getBiomeSource()
+                    .getNoiseBiome(
+                            QuartPos.fromBlock(pos.getX()),
+                            QuartPos.fromBlock(pos.getY()),
+                            QuartPos.fromBlock(pos.getZ()),
+                            state.randomState().sampler());
             helper.assertTrue(structure.biomes().contains(biome), "Village in a wrong biome at " + pos);
         }
         helper.assertTrue(perArea >= 0.5 && perArea <= 1.5, "Village rarity " + perArea + " per 1500x1500");
@@ -233,8 +294,8 @@ public final class EndlingVillageGameTests {
 
     private static int count(ServerLevel level, BoundingBox box, Block block) {
         int count = 0;
-        for (BlockPos pos : BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(),
-                box.maxZ())) {
+        for (BlockPos pos :
+                BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ())) {
             ChunkAccess chunk = level.getChunk(pos);
             if (chunk.getBlockState(pos).is(block)) {
                 count++;

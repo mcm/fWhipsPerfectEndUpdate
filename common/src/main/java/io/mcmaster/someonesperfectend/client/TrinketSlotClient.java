@@ -9,10 +9,10 @@ public final class TrinketSlotClient {
      * the window's top border, so it sits immediately to the left of the off-hand slot instead.
      */
     public static final int CREATIVE_X = 16;
+
     public static final int CREATIVE_Y = 20;
 
-    private TrinketSlotClient() {
-    }
+    private TrinketSlotClient() {}
 
     /**
      * Draws an empty vanilla-style slot frame (dark top/left edge, light bottom/right edge, gray inside) around

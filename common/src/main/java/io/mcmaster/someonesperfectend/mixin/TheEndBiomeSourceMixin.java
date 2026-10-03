@@ -25,8 +25,8 @@ public abstract class TheEndBiomeSourceMixin {
     private Holder<Biome> islands;
 
     @Inject(method = "getNoiseBiome", at = @At("HEAD"), cancellable = true)
-    private void someonesperfectend$keepSmallIslands(int x, int y, int z, Climate.Sampler sampler,
-            CallbackInfoReturnable<Holder<Biome>> cir) {
+    private void someonesperfectend$keepSmallIslands(
+            int x, int y, int z, Climate.Sampler sampler, CallbackInfoReturnable<Holder<Biome>> cir) {
         if (EndBiomeCategories.at(x, y, z, sampler) == EndBiomeCategories.SMALL_ISLANDS) {
             cir.setReturnValue(this.islands);
         }

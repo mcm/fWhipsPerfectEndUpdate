@@ -26,7 +26,8 @@ public class DriftjellyDriftGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        return !jelly.isDormant() && jelly.getNavigation().isDone()
+        return !jelly.isDormant()
+                && jelly.getNavigation().isDone()
                 && jelly.getRandom().nextInt(reducedTickDelay(60)) == 0;
     }
 
@@ -52,8 +53,11 @@ public class DriftjellyDriftGoal extends Goal {
         for (int i = 0; i < ATTEMPTS; i++) {
             double x = Math.floor(from.x + random.nextInt(2 * RANGE + 1) - RANGE) + 0.5;
             double z = Math.floor(from.z + random.nextInt(2 * RANGE + 1) - RANGE) + 0.5;
-            if (jelly.hasRestriction() && jelly.getRestrictCenter().distToCenterSqr(x, jelly.getRestrictCenter().getY(), z)
-                    > (double) jelly.getRestrictRadius() * jelly.getRestrictRadius()) {
+            if (jelly.hasRestriction()
+                    && jelly.getRestrictCenter()
+                                    .distToCenterSqr(
+                                            x, jelly.getRestrictCenter().getY(), z)
+                            > (double) jelly.getRestrictRadius() * jelly.getRestrictRadius()) {
                 continue;
             }
             // Look for ground below the column, starting a little above the current height (for rising terrain).
@@ -66,7 +70,8 @@ public class DriftjellyDriftGoal extends Goal {
             double hover = jelly.minHover() + 1.0 + random.nextDouble() * (jelly.maxHover() - jelly.minHover() - 2.0);
             Vec3 target = new Vec3(x, ground + hover, z);
             if (overGroundAllTheWay(jelly, from, target)
-                    && level.noCollision(jelly, jelly.getDimensions(jelly.getPose()).makeBoundingBox(target))) {
+                    && level.noCollision(
+                            jelly, jelly.getDimensions(jelly.getPose()).makeBoundingBox(target))) {
                 return target;
             }
         }

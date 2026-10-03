@@ -56,8 +56,12 @@ public class BounceCapClusterFeature extends Feature<BounceCapClusterConfigurati
         int placed = 0;
         for (int i = 0; i < size * 4 && placed < size; i++) {
             int r = config.clusterRadius();
-            BlockPos pos = i == 0 ? best : surface(level, best.getX() + random.nextInt(r * 2 + 1) - r,
-                    best.getZ() + random.nextInt(r * 2 + 1) - r);
+            BlockPos pos = i == 0
+                    ? best
+                    : surface(
+                            level,
+                            best.getX() + random.nextInt(r * 2 + 1) - r,
+                            best.getZ() + random.nextInt(r * 2 + 1) - r);
             BlockState state = config.state().getState(random, pos);
             if (Math.abs(pos.getY() - best.getY()) <= 1 && canPlace(level, state, pos)) {
                 level.setBlock(pos, state, Block.UPDATE_CLIENTS);
@@ -80,8 +84,12 @@ public class BounceCapClusterFeature extends Feature<BounceCapClusterConfigurati
         int score = 0;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                if ((dx != 0 || dz != 0) && level.getHeight(Heightmap.Types.MOTION_BLOCKING,
-                        pos.getX() + dx * EDGE_PROBE, pos.getZ() + dz * EDGE_PROBE) < pos.getY() - DROP) {
+                if ((dx != 0 || dz != 0)
+                        && level.getHeight(
+                                        Heightmap.Types.MOTION_BLOCKING,
+                                        pos.getX() + dx * EDGE_PROBE,
+                                        pos.getZ() + dz * EDGE_PROBE)
+                                < pos.getY() - DROP) {
                     score++;
                 }
             }

@@ -10,7 +10,6 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javax.imageio.ImageIO;
 import net.minecraft.Util;
@@ -33,8 +32,7 @@ public final class RecolorGameTests {
     private static final String MCMETA = "{\"animation\":{\"frametime\":2}}";
     private static final int[] SOURCE_PIXELS = {0xFF333333, 0x80FFFFFF, 0x00123456, 0xFF000000};
 
-    private RecolorGameTests() {
-    }
+    private RecolorGameTests() {}
 
     @GameTest
     public static void clientReloadServesRecoloredTextures(GameTestHelper helper) {
@@ -57,46 +55,55 @@ public final class RecolorGameTests {
                 .put(NS, "textures/block/sps_user_pack.png", png(new int[] {0xFF0000FF, 0, 0, 0}));
 
         try (ReloadableResourceManager manager = new ReloadableResourceManager(PackType.CLIENT_RESOURCES)) {
-            manager.createReload(Util.backgroundExecutor(), Runnable::run,
-                    CompletableFuture.completedFuture(Unit.INSTANCE), List.of(vanilla, mod, userPack));
+            manager.createReload(
+                    Util.backgroundExecutor(),
+                    Runnable::run,
+                    CompletableFuture.completedFuture(Unit.INSTANCE),
+                    List.of(vanilla, mod, userPack));
 
             List<PackResources> packs = manager.listPacks().toList();
-            helper.assertTrue(packs.get(0) instanceof RecolorPackResources,
-                    "generated pack is not the lowest-priority pack: " + packs.stream().map(PackResources::packId).toList());
+            helper.assertTrue(
+                    packs.get(0) instanceof RecolorPackResources,
+                    "generated pack is not the lowest-priority pack: "
+                            + packs.stream().map(PackResources::packId).toList());
 
-            Resource generated = manager.getResource(id("textures/block/sps_generated.png")).orElseThrow(
-                    () -> new IllegalStateException("generated texture is missing"));
-            helper.assertTrue(generated.sourcePackId().equals(RecolorPackResources.PACK_ID),
+            Resource generated = manager.getResource(id("textures/block/sps_generated.png"))
+                    .orElseThrow(() -> new IllegalStateException("generated texture is missing"));
+            helper.assertTrue(
+                    generated.sourcePackId().equals(RecolorPackResources.PACK_ID),
                     "generated texture came from " + generated.sourcePackId());
             int[] expected = {0xFF330000, 0x80FF0000, 0x00123456, 0xFF000000};
             int[] actual = pixels(generated);
             helper.assertTrue(Arrays.equals(expected, actual), "recolored pixels were " + hex(actual));
             // atlases find block textures by listing the directory
-            helper.assertTrue(manager.listResources("textures/block", p -> true)
+            helper.assertTrue(
+                    manager.listResources("textures/block", p -> true)
                             .containsKey(id("textures/block/sps_generated.png")),
                     "generated texture is not listed");
 
-            Resource mcmeta = manager.getResource(id("textures/block/sps_generated.png.mcmeta")).orElseThrow(
-                    () -> new IllegalStateException("animation metadata is missing"));
+            Resource mcmeta = manager.getResource(id("textures/block/sps_generated.png.mcmeta"))
+                    .orElseThrow(() -> new IllegalStateException("animation metadata is missing"));
             helper.assertTrue(MCMETA.equals(text(mcmeta)), "animation metadata changed: " + text(mcmeta));
             // the texture loader reads the animation through the PNG resource's attached metadata
-            helper.assertTrue(metadata(generated) != ResourceMetadata.EMPTY,
+            helper.assertTrue(
+                    metadata(generated) != ResourceMetadata.EMPTY,
                     "generated texture has no attached .mcmeta metadata");
 
             assertServedBy(helper, manager, "textures/block/sps_hand_drawn.png", "test_mod", 0xFF00FF00);
             assertServedBy(helper, manager, "textures/block/sps_user_pack.png", "test_user_pack", 0xFF0000FF);
             RecolorPackResources pack = (RecolorPackResources) packs.get(0);
-            helper.assertTrue(pack.files().size() == 2,
-                    "hand-drawn targets must not be generated, pack holds " + pack.files());
+            helper.assertTrue(
+                    pack.files().size() == 2, "hand-drawn targets must not be generated, pack holds " + pack.files());
         }
         helper.succeed();
     }
 
-    private static void assertServedBy(GameTestHelper helper, ReloadableResourceManager manager, String path,
-            String packId, int firstPixel) {
-        Resource resource = manager.getResource(id(path)).orElseThrow(
-                () -> new IllegalStateException(path + " is missing"));
-        helper.assertTrue(resource.sourcePackId().equals(packId),
+    private static void assertServedBy(
+            GameTestHelper helper, ReloadableResourceManager manager, String path, String packId, int firstPixel) {
+        Resource resource =
+                manager.getResource(id(path)).orElseThrow(() -> new IllegalStateException(path + " is missing"));
+        helper.assertTrue(
+                resource.sourcePackId().equals(packId),
                 path + " came from " + resource.sourcePackId() + " instead of " + packId);
         helper.assertTrue(pixels(resource)[0] == firstPixel, path + " is not the real PNG");
     }

@@ -13,7 +13,10 @@ public abstract class EndCityStructureMixin {
     @ModifyConstant(method = "findGenerationPoint", constant = @Constant(intValue = EndCities.VANILLA_MIN_Y))
     private int someonesperfectend$bandMinimumY(int vanillaMinY, Structure.GenerationContext context) {
         // The start column: vanilla's getLowestYIn5by5BoxOffset7Blocks returns its Y at chunk block (7, 7).
-        return EndCities.minimumY(context.randomState(), vanillaMinY, context.chunkPos().getBlockX(7),
+        return EndCities.minimumY(
+                context.randomState(),
+                vanillaMinY,
+                context.chunkPos().getBlockX(7),
                 context.chunkPos().getBlockZ(7));
     }
 }

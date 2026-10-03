@@ -48,8 +48,7 @@ import java.util.Optional;
  * gradient or shift. Alpha is always kept.
  */
 public final class RecolorRecipeParser {
-    private RecolorRecipeParser() {
-    }
+    private RecolorRecipeParser() {}
 
     public static List<RecolorRecipe> parse(String json) {
         JsonElement root = JsonParser.parseString(json);
@@ -74,7 +73,8 @@ public final class RecolorRecipeParser {
     private static RecolorRecipe parseRecipe(JsonObject object, Optional<Palette> shared) {
         TextureId source = TextureId.parse(requireString(object, "source"));
         TextureId target = TextureId.parse(requireString(object, "target"));
-        Palette palette = object.has("palette") ? parsePalette(object.getAsJsonObject("palette"))
+        Palette palette = object.has("palette")
+                ? parsePalette(object.getAsJsonObject("palette"))
                 : shared.orElseThrow(() -> new JsonParseException("Recipe for " + target + " has no palette"));
         return new RecolorRecipe(source, target, palette);
     }
@@ -83,7 +83,8 @@ public final class RecolorRecipeParser {
         Optional<Palette.Gradient> gradient = Optional.empty();
         Optional<Palette.HsvShift> hsv = Optional.empty();
         if (object.has("gradient")) {
-            boolean normalize = !object.has("normalize") || object.get("normalize").getAsBoolean();
+            boolean normalize =
+                    !object.has("normalize") || object.get("normalize").getAsBoolean();
             gradient = Optional.of(parseGradient(object.getAsJsonArray("gradient"), normalize));
         }
         if (object.has("hsv")) {
@@ -96,8 +97,10 @@ public final class RecolorRecipeParser {
         }
         Map<Integer, Integer> colors = new HashMap<>();
         if (object.has("colors")) {
-            for (Map.Entry<String, JsonElement> entry : object.getAsJsonObject("colors").entrySet()) {
-                colors.put(parseColor(entry.getKey()), parseColor(entry.getValue().getAsString()));
+            for (Map.Entry<String, JsonElement> entry :
+                    object.getAsJsonObject("colors").entrySet()) {
+                colors.put(
+                        parseColor(entry.getKey()), parseColor(entry.getValue().getAsString()));
             }
         }
         try {
@@ -122,7 +125,8 @@ public final class RecolorRecipeParser {
             }
         }
         try {
-            return explicitPositions ? new Palette.Gradient(positions, rgb, normalize)
+            return explicitPositions
+                    ? new Palette.Gradient(positions, rgb, normalize)
                     : Palette.Gradient.evenlySpaced(rgb, normalize);
         } catch (IllegalArgumentException e) {
             throw new JsonParseException(e.getMessage(), e);

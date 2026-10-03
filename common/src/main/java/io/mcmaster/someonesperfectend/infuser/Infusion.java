@@ -22,15 +22,18 @@ import org.jetbrains.annotations.Nullable;
  */
 public record Infusion(Holder<MobEffect> effect, int amplifier, int remainingTicks) {
     public static final Codec<Infusion> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            MobEffect.CODEC.fieldOf("effect").forGetter(Infusion::effect),
-            Codec.intRange(0, 1).fieldOf("amplifier").forGetter(Infusion::amplifier),
-            ExtraCodecs.NON_NEGATIVE_INT.fieldOf("remaining_ticks").forGetter(Infusion::remainingTicks)
-    ).apply(instance, Infusion::new));
+                    MobEffect.CODEC.fieldOf("effect").forGetter(Infusion::effect),
+                    Codec.intRange(0, 1).fieldOf("amplifier").forGetter(Infusion::amplifier),
+                    ExtraCodecs.NON_NEGATIVE_INT.fieldOf("remaining_ticks").forGetter(Infusion::remainingTicks))
+            .apply(instance, Infusion::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Infusion> STREAM_CODEC = StreamCodec.composite(
-            MobEffect.STREAM_CODEC, Infusion::effect,
-            ByteBufCodecs.VAR_INT, Infusion::amplifier,
-            ByteBufCodecs.VAR_INT, Infusion::remainingTicks,
+            MobEffect.STREAM_CODEC,
+            Infusion::effect,
+            ByteBufCodecs.VAR_INT,
+            Infusion::amplifier,
+            ByteBufCodecs.VAR_INT,
+            Infusion::remainingTicks,
             Infusion::new);
 
     /** "Infused: %s — %s remaining" */
@@ -47,8 +50,8 @@ public record Infusion(Holder<MobEffect> effect, int amplifier, int remainingTic
     /** For example "Infused: Haste II — 12:34 remaining". */
     public Component tooltip() {
         Component level = Component.translatable("enchantment.level." + (amplifier + 1));
-        Component name = Component.translatable("potion.withAmplifier",
-                Component.translatable(effect.value().getDescriptionId()), level);
+        Component name = Component.translatable(
+                "potion.withAmplifier", Component.translatable(effect.value().getDescriptionId()), level);
         return Component.translatable(TOOLTIP_KEY, name, InfusionRules.formatTime(remainingTicks));
     }
 

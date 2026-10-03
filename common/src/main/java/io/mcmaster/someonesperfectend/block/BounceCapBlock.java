@@ -38,9 +38,8 @@ public class BounceCapBlock extends Block {
      */
     public static final double BOUNCE_VELOCITY = 1.49;
 
-    private static final VoxelShape SHAPE = Shapes.or(
-            Block.box(0.0, 6.0, 0.0, 16.0, 16.0, 16.0),
-            Block.box(5.0, 0.0, 5.0, 11.0, 6.0, 11.0));
+    private static final VoxelShape SHAPE =
+            Shapes.or(Block.box(0.0, 6.0, 0.0, 16.0, 16.0, 16.0), Block.box(5.0, 0.0, 5.0, 11.0, 6.0, 11.0));
 
     public BounceCapBlock(Properties properties) {
         super(properties);
@@ -62,8 +61,13 @@ public class BounceCapBlock extends Block {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
-            LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(
+            BlockState state,
+            Direction direction,
+            BlockState neighborState,
+            LevelAccessor level,
+            BlockPos pos,
+            BlockPos neighborPos) {
         return direction == Direction.DOWN && !state.canSurvive(level, pos)
                 ? Blocks.AIR.defaultBlockState()
                 : super.updateShape(state, direction, neighborState, level, pos, neighborPos);
@@ -77,7 +81,8 @@ public class BounceCapBlock extends Block {
 
     /** Whether {@code entity} is standing on a bounce cap. */
     public static boolean isStandingOn(LivingEntity entity) {
-        return entity.onGround() && entity.level().getBlockState(entity.getOnPos()).getBlock() instanceof BounceCapBlock;
+        return entity.onGround()
+                && entity.level().getBlockState(entity.getOnPos()).getBlock() instanceof BounceCapBlock;
     }
 
     /** Called every tick for every living entity (server side): refreshes Slow Falling while standing on a cap. */

@@ -29,6 +29,7 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 public class UnderIslandFoliageFeature extends Feature<UnderIslandFoliageConfiguration> {
     /** How far a patch column's bottom may be above or below the center column's bottom. */
     private static final int BOTTOM_SEARCH = 3;
+
     private static final long REGION_SALT = 0x5E0D_F011L;
 
     public UnderIslandFoliageFeature(Codec<UnderIslandFoliageConfiguration> codec) {
@@ -41,8 +42,8 @@ public class UnderIslandFoliageFeature extends Feature<UnderIslandFoliageConfigu
         RandomSource random = context.random();
         UnderIslandFoliageConfiguration config = context.config();
         BlockPos origin = context.origin();
-        if (!regionSelected(level.getSeed(), origin.getX(), origin.getZ(), config.regionSize(),
-                config.regionChance())) {
+        if (!regionSelected(
+                level.getSeed(), origin.getX(), origin.getZ(), config.regionSize(), config.regionChance())) {
             return false;
         }
         BlockPos bottom = islandBottom(level, origin);
@@ -108,11 +109,11 @@ public class UnderIslandFoliageFeature extends Feature<UnderIslandFoliageConfigu
     }
 
     /** The lowest replaceable bottom block of the column near {@code center}'s height, or {@code null}. */
-    private static BlockPos columnBottom(WorldGenLevel level, UnderIslandFoliageConfiguration config,
-            BlockPos center) {
+    private static BlockPos columnBottom(WorldGenLevel level, UnderIslandFoliageConfiguration config, BlockPos center) {
         for (int dy = -BOTTOM_SEARCH; dy <= BOTTOM_SEARCH; dy++) {
             BlockPos pos = center.above(dy);
-            if (pos.getY() > level.getMinBuildHeight() && level.getBlockState(pos.below()).isAir()
+            if (pos.getY() > level.getMinBuildHeight()
+                    && level.getBlockState(pos.below()).isAir()
                     && config.replaceable().test(level, pos)
                     && level.getBlockState(pos.above()).is(ModBlockTags.END_PLANT_SOIL)) {
                 return pos;
@@ -121,8 +122,8 @@ public class UnderIslandFoliageFeature extends Feature<UnderIslandFoliageConfigu
         return null;
     }
 
-    private static void hangVine(WorldGenLevel level, RandomSource random, UnderIslandFoliageConfiguration config,
-            BlockPos soil, int minY) {
+    private static void hangVine(
+            WorldGenLevel level, RandomSource random, UnderIslandFoliageConfiguration config, BlockPos soil, int minY) {
         int length = Math.min(config.vineLength().sample(random), soil.getY() - minY);
         int space = 0;
         while (space < length && level.getBlockState(soil.below(space + 1)).isAir()) {
@@ -135,8 +136,10 @@ public class UnderIslandFoliageFeature extends Feature<UnderIslandFoliageConfigu
         for (int i = 1; i <= length; i++) {
             boolean head = i == length;
             BlockState state = head
-                    ? ModBlocks.VOIDVINE_HEAD.get().defaultBlockState().setValue(GrowingPlantHeadBlock.AGE,
-                            GrowingPlantHeadBlock.MAX_AGE)
+                    ? ModBlocks.VOIDVINE_HEAD
+                            .get()
+                            .defaultBlockState()
+                            .setValue(GrowingPlantHeadBlock.AGE, GrowingPlantHeadBlock.MAX_AGE)
                     : ModBlocks.VOIDVINE_BODY.get().defaultBlockState();
             state = state.setValue(Voidvines.FRUIT, random.nextFloat() < config.fruitChance());
             level.setBlock(soil.below(i), state, Block.UPDATE_CLIENTS);

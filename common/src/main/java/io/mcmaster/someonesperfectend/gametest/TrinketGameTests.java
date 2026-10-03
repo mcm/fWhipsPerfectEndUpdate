@@ -21,8 +21,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 
 public final class TrinketGameTests {
-    private TrinketGameTests() {
-    }
+    private TrinketGameTests() {}
 
     private static Slot trinketSlot(GameTestHelper helper, Player player) {
         int index = TrinketSlot.indexIn(player.inventoryMenu);
@@ -46,18 +45,24 @@ public final class TrinketGameTests {
     @GameTest
     public static void trinketIsTheOnlyAccessorySlot(GameTestHelper helper) {
         Set<String> expected = Set.of(Trinkets.SLOT_NAME);
-        Set<String> playerSlots = EntitySlotLoader.getEntitySlots(helper.getLevel(), EntityType.PLAYER).keySet();
-        helper.assertTrue(playerSlots.equals(expected), "player accessory slots should be only the trinket slot, got "
-                + playerSlots);
+        Set<String> playerSlots = EntitySlotLoader.getEntitySlots(helper.getLevel(), EntityType.PLAYER)
+                .keySet();
+        helper.assertTrue(
+                playerSlots.equals(expected),
+                "player accessory slots should be only the trinket slot, got " + playerSlots);
 
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         AccessoriesCapability capability = AccessoriesCapability.get(player);
         helper.assertTrue(capability != null, "players should have an accessories capability");
-        helper.assertTrue(capability.getContainers().keySet().equals(expected),
-                "player accessory containers should be only the trinket slot, got " + capability.getContainers().keySet());
+        helper.assertTrue(
+                capability.getContainers().keySet().equals(expected),
+                "player accessory containers should be only the trinket slot, got "
+                        + capability.getContainers().keySet());
 
         // The library's default slots are bound to no entity (e.g. armor stands are a library default target).
-        helper.assertTrue(EntitySlotLoader.getEntitySlots(helper.getLevel(), EntityType.ARMOR_STAND).isEmpty(),
+        helper.assertTrue(
+                EntitySlotLoader.getEntitySlots(helper.getLevel(), EntityType.ARMOR_STAND)
+                        .isEmpty(),
                 "armor stands should have no accessory slots");
         helper.succeed();
     }
@@ -70,7 +75,8 @@ public final class TrinketGameTests {
         Slot offHand = menu.getSlot(InventoryMenu.SHIELD_SLOT);
         // Vanilla slot indices are unchanged; the trinket slot is added after them.
         helper.assertTrue(trinket.index == InventoryMenu.SHIELD_SLOT + 1, "trinket slot should follow the off hand");
-        helper.assertTrue(trinket.x == offHand.x && trinket.y == offHand.y - 18,
+        helper.assertTrue(
+                trinket.x == offHand.x && trinket.y == offHand.y - 18,
                 "trinket slot should be directly above the off-hand slot, was at " + trinket.x + "," + trinket.y);
         helper.succeed();
     }
@@ -82,8 +88,12 @@ public final class TrinketGameTests {
         ItemStack totem = hasteTotem();
         helper.assertTrue(totem.is(Trinkets.TRINKETS), "the haste totem should be tagged as a trinket");
         helper.assertTrue(trinket.mayPlace(totem), "the trinket slot should accept the haste totem");
-        for (ItemStack other : new ItemStack[] {new ItemStack(Items.DIAMOND), new ItemStack(Items.TOTEM_OF_UNDYING),
-                new ItemStack(Items.SHIELD), new ItemStack(Items.IRON_CHESTPLATE)}) {
+        for (ItemStack other : new ItemStack[] {
+            new ItemStack(Items.DIAMOND),
+            new ItemStack(Items.TOTEM_OF_UNDYING),
+            new ItemStack(Items.SHIELD),
+            new ItemStack(Items.IRON_CHESTPLATE)
+        }) {
             helper.assertFalse(trinket.mayPlace(other), "the trinket slot should refuse " + other);
         }
         helper.succeed();
@@ -98,10 +108,12 @@ public final class TrinketGameTests {
         int inventorySlot = 9; // inventory index 9 is menu slot 9 (first main-inventory slot)
 
         menu.quickMoveStack(player, inventorySlot);
-        helper.assertTrue(trinket.getItem().is(EffectTotems.TOTEM_OF_HASTE.get()), "shift-click should equip the totem");
+        helper.assertTrue(
+                trinket.getItem().is(EffectTotems.TOTEM_OF_HASTE.get()), "shift-click should equip the totem");
         helper.assertTrue(menu.getSlot(inventorySlot).getItem().isEmpty(), "the totem should leave the inventory");
         // The slot is backed by the Accessories container, so other mods using the library see the item.
-        helper.assertTrue(Trinkets.getEquipped(player).is(EffectTotems.TOTEM_OF_HASTE.get()),
+        helper.assertTrue(
+                Trinkets.getEquipped(player).is(EffectTotems.TOTEM_OF_HASTE.get()),
                 "the totem should be in the Accessories trinket container");
 
         // With the slot full, another trinket stays in the inventory (vanilla shift-click rules move it instead).
@@ -112,7 +124,8 @@ public final class TrinketGameTests {
         // Shift-clicking out of the trinket slot puts it back into the inventory.
         menu.quickMoveStack(player, trinket.index);
         helper.assertTrue(trinket.getItem().isEmpty(), "shift-click should unequip the totem");
-        helper.assertTrue(player.getInventory().countItem(EffectTotems.TOTEM_OF_HASTE.get()) == 2,
+        helper.assertTrue(
+                player.getInventory().countItem(EffectTotems.TOTEM_OF_HASTE.get()) == 2,
                 "both totems should be in the inventory");
 
         // Non-trinkets are never shift-clicked into the slot.

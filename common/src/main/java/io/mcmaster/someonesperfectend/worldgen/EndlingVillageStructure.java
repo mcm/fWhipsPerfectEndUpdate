@@ -28,6 +28,7 @@ public class EndlingVillageStructure extends Structure {
     public static final int MAX_GLOWCAP_STEP = 4;
     /** How far a hut floor may be above or below the center. */
     public static final int MAX_HUT_STEP = 8;
+
     private static final int EDGE_SAMPLES = 16;
 
     public EndlingVillageStructure(StructureSettings settings) {
@@ -48,15 +49,22 @@ public class EndlingVillageStructure extends Structure {
             return Optional.empty();
         }
         int centerY = surface(context, x, z);
-        if (centerY < MIN_SURFACE_Y || !context.validBiome().test(context.biomeSource().getNoiseBiome(
-                QuartPos.fromBlock(x), QuartPos.fromBlock(centerY + 1), QuartPos.fromBlock(z),
-                context.randomState().sampler()))) {
+        if (centerY < MIN_SURFACE_Y
+                || !context.validBiome()
+                        .test(context.biomeSource()
+                                .getNoiseBiome(
+                                        QuartPos.fromBlock(x),
+                                        QuartPos.fromBlock(centerY + 1),
+                                        QuartPos.fromBlock(z),
+                                        context.randomState().sampler()))) {
             return Optional.empty();
         }
         // The island must reach past the village radius all around (no hut hangs over the void).
         for (int i = 0; i < EDGE_SAMPLES; i++) {
             double angle = i * Math.PI * 2 / EDGE_SAMPLES;
-            int y = surface(context, x + (int) Math.round(Math.cos(angle) * EndlingVillageLayout.RADIUS),
+            int y = surface(
+                    context,
+                    x + (int) Math.round(Math.cos(angle) * EndlingVillageLayout.RADIUS),
                     z + (int) Math.round(Math.sin(angle) * EndlingVillageLayout.RADIUS));
             if (y < MIN_SURFACE_Y || y < centerY - MAX_EDGE_DROP) {
                 return Optional.empty();
@@ -85,12 +93,13 @@ public class EndlingVillageStructure extends Structure {
                 high = Math.max(high, y);
             }
             // The floor sits on the highest corner; the foundation fills down to the lowest one.
-            if (low < MIN_SURFACE_Y || high - low >= EndlingVillagePieces.FOUNDATION_DEPTH
+            if (low < MIN_SURFACE_Y
+                    || high - low >= EndlingVillagePieces.FOUNDATION_DEPTH
                     || Math.abs(high - centerY) > MAX_HUT_STEP) {
                 return Optional.empty();
             }
-            huts.add(new EndlingVillagePieces.Hut(new BlockPos(hx - half, high, hz - half), hut.door(), hut.astral(),
-                    center));
+            huts.add(new EndlingVillagePieces.Hut(
+                    new BlockPos(hx - half, high, hz - half), hut.door(), hut.astral(), center));
         }
         return Optional.of(new GenerationStub(center, (StructurePiecesBuilder builder) -> {
             glowcaps.forEach(pos -> builder.addPiece(new EndlingVillagePieces.Glowcap(pos)));
@@ -100,7 +109,8 @@ public class EndlingVillageStructure extends Structure {
 
     /** The Y of the top block of column (x, z), or below {@link #MIN_SURFACE_Y} over the void. */
     private static int surface(GenerationContext context, int x, int z) {
-        return context.chunkGenerator().getFirstOccupiedHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG,
-                context.heightAccessor(), context.randomState());
+        return context.chunkGenerator()
+                .getFirstOccupiedHeight(
+                        x, z, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState());
     }
 }

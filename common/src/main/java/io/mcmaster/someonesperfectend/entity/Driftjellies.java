@@ -17,26 +17,41 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * of the {@code end_plains}, {@code end_forest}, and {@code end_oasis} biome JSON.
  */
 public final class Driftjellies {
-    public static final RegistrySupplier<EntityType<Driftjelly>> TYPE = ModRegistries.ENTITY_TYPES.register("driftjelly",
+    public static final RegistrySupplier<EntityType<Driftjelly>> TYPE = ModRegistries.ENTITY_TYPES.register(
+            "driftjelly",
             () -> EntityType.Builder.<Driftjelly>of(Driftjelly::new, MobCategory.CREATURE)
-                    .sized(0.75F, 1.0F).eyeHeight(0.5F).clientTrackingRange(8).build("driftjelly"));
+                    .sized(0.75F, 1.0F)
+                    .eyeHeight(0.5F)
+                    .clientTrackingRange(8)
+                    .build("driftjelly"));
 
-    public static final RegistrySupplier<Item> GEL = ModRegistries.item("driftjelly_gel",
+    public static final RegistrySupplier<Item> GEL = ModRegistries.item(
+            "driftjelly_gel",
             () -> new Item(ModRegistries.itemProperties()
-                    .food(new FoodProperties.Builder().nutrition(3).saturationModifier(0.4F).build())));
-    public static final RegistrySupplier<Item> COOKED_GEL = ModRegistries.item("cooked_driftjelly_gel",
+                    .food(new FoodProperties.Builder()
+                            .nutrition(3)
+                            .saturationModifier(0.4F)
+                            .build())));
+    public static final RegistrySupplier<Item> COOKED_GEL = ModRegistries.item(
+            "cooked_driftjelly_gel",
             () -> new Item(ModRegistries.itemProperties()
-                    .food(new FoodProperties.Builder().nutrition(6).saturationModifier(0.6F).build())));
-    public static final RegistrySupplier<Item> SPAWN_EGG = ModRegistries.item("driftjelly_spawn_egg",
+                    .food(new FoodProperties.Builder()
+                            .nutrition(6)
+                            .saturationModifier(0.6F)
+                            .build())));
+    public static final RegistrySupplier<Item> SPAWN_EGG = ModRegistries.item(
+            "driftjelly_spawn_egg",
             () -> new ArchitecturySpawnEggItem(TYPE, 0xC9B6F2, 0x7FE3F0, ModRegistries.itemProperties()));
 
-    private Driftjellies() {
-    }
+    private Driftjellies() {}
 
     /** Must run after {@code ModRegistries.register()}. */
     public static void init() {
         EntityAttributeRegistry.register(TYPE, Driftjelly::createAttributes);
-        SpawnPlacementsRegistry.register(TYPE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+        SpawnPlacementsRegistry.register(
+                TYPE,
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Driftjelly::checkDriftjellySpawnRules);
     }
 }

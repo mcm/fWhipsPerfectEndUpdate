@@ -45,10 +45,10 @@ public final class UnderIslandFoliageGameTests {
     private static final int CHUNKS = 12;
     /** Absolute Y below which generated vines never reach. */
     private static final int MIN_VINE_Y = 5;
+
     private static final int PLATFORM_Y = 14;
 
-    private UnderIslandFoliageGameTests() {
-    }
+    private UnderIslandFoliageGameTests() {}
 
     /**
      * Generates outer-End island chunks of the (fixed-seed) GameTest world inside {@code end_forest} or
@@ -65,9 +65,16 @@ public final class UnderIslandFoliageGameTests {
         for (int cx = 70; cx < 500 && found.size() < CHUNKS; cx += 3) {
             for (int cz = -250; cz <= 250 && found.size() < CHUNKS; cz += 3) {
                 ChunkPos chunk = new ChunkPos(cx, cz);
-                if (allForestOrOasis(source, sampler, chunk) && end.getChunkSource().getGenerator().getBaseHeight(
-                        chunk.getMiddleBlockX(), chunk.getMiddleBlockZ(), Heightmap.Types.WORLD_SURFACE_WG, end,
-                        end.getChunkSource().randomState()) > end.getMinBuildHeight()) {
+                if (allForestOrOasis(source, sampler, chunk)
+                        && end.getChunkSource()
+                                        .getGenerator()
+                                        .getBaseHeight(
+                                                chunk.getMiddleBlockX(),
+                                                chunk.getMiddleBlockZ(),
+                                                Heightmap.Types.WORLD_SURFACE_WG,
+                                                end,
+                                                end.getChunkSource().randomState())
+                                > end.getMinBuildHeight()) {
                     found.add(chunk);
                 }
             }
@@ -93,7 +100,8 @@ public final class UnderIslandFoliageGameTests {
                     int top = end.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                     for (int y = end.getMinBuildHeight(); y <= top; y++) {
                         BlockState state = end.getBlockState(pos.set(x, y, z));
-                        if (state.is(ModBlocks.VOIDSOIL.get()) && end.getBlockState(pos.below()).isAir()) {
+                        if (state.is(ModBlocks.VOIDSOIL.get())
+                                && end.getBlockState(pos.below()).isAir()) {
                             soil++;
                         }
                         if (!Voidvines.isVine(state)) {
@@ -109,22 +117,29 @@ public final class UnderIslandFoliageGameTests {
                             continue;
                         }
                         vines++;
-                        helper.assertTrue(above.is(ModBlocks.VOIDSOIL.get()), "Voidvine top without voidsoil at "
-                                + pos);
-                        helper.assertTrue(end.getBlockState(pos.above(2)).is(ModBlockTags.END_PLANT_SOIL),
+                        helper.assertTrue(
+                                above.is(ModBlocks.VOIDSOIL.get()), "Voidvine top without voidsoil at " + pos);
+                        helper.assertTrue(
+                                end.getBlockState(pos.above(2)).is(ModBlockTags.END_PLANT_SOIL),
                                 "Voidsoil above the vine at " + pos + " has no island block above it");
                         int length = 1;
                         while (Voidvines.isVine(end.getBlockState(pos.below(length)))) {
                             length++;
                         }
-                        helper.assertTrue(length >= 4 && length <= Voidvines.MAX_LENGTH,
+                        helper.assertTrue(
+                                length >= 4 && length <= Voidvines.MAX_LENGTH,
                                 "Voidvine at " + pos + " has " + length + " segments");
                     }
                 }
             }
         }
-        LOGGER.info("End Forest/Oasis chunks {}: {} underside voidsoil, {} voidvines, {} segments, {} with fruit",
-                found, soil, vines, segments, fruit);
+        LOGGER.info(
+                "End Forest/Oasis chunks {}: {} underside voidsoil, {} voidvines, {} segments, {} with fruit",
+                found,
+                soil,
+                vines,
+                segments,
+                fruit);
         helper.assertTrue(vines > 0, "No voidvine hanging from voidsoil in chunks " + found);
         helper.succeed();
     }
@@ -136,31 +151,41 @@ public final class UnderIslandFoliageGameTests {
     @GameTest(timeoutTicks = 100)
     public static void foliageIsPlacedInTheRightBiomes(GameTestHelper helper) {
         Registry<Biome> biomes = helper.getLevel().registryAccess().registryOrThrow(Registries.BIOME);
-        ResourceKey<PlacedFeature> ours = ResourceKey.create(Registries.PLACED_FEATURE,
-                ModFeatures.UNDER_ISLAND_FOLIAGE_CONFIGURED.location());
+        ResourceKey<PlacedFeature> ours =
+                ResourceKey.create(Registries.PLACED_FEATURE, ModFeatures.UNDER_ISLAND_FOLIAGE_CONFIGURED.location());
         helper.assertTrue(hasFeature(biomes, ModBiomes.END_FOREST, ours), "end_forest lacks under_island_foliage");
         helper.assertTrue(hasFeature(biomes, ModBiomes.END_OASIS, ours), "end_oasis lacks under_island_foliage");
         helper.assertTrue(!hasFeature(biomes, ModBiomes.END_PLAINS, ours), "end_plains has under_island_foliage");
-        helper.assertTrue(hasFeature(biomes, Biomes.END_HIGHLANDS, ModFeatures.END_HIGHLANDS_UNDER_ISLAND_FOLIAGE),
+        helper.assertTrue(
+                hasFeature(biomes, Biomes.END_HIGHLANDS, ModFeatures.END_HIGHLANDS_UNDER_ISLAND_FOLIAGE),
                 "end_highlands lacks the under-island foliage feature");
-        for (ResourceKey<Biome> other : List.of(Biomes.END_MIDLANDS, Biomes.END_BARRENS, Biomes.SMALL_END_ISLANDS,
-                Biomes.THE_END)) {
-            helper.assertTrue(!hasFeature(biomes, other, ModFeatures.END_HIGHLANDS_UNDER_ISLAND_FOLIAGE)
-                    && !hasFeature(biomes, other, ours), other.location() + " has under-island foliage");
+        for (ResourceKey<Biome> other :
+                List.of(Biomes.END_MIDLANDS, Biomes.END_BARRENS, Biomes.SMALL_END_ISLANDS, Biomes.THE_END)) {
+            helper.assertTrue(
+                    !hasFeature(biomes, other, ModFeatures.END_HIGHLANDS_UNDER_ISLAND_FOLIAGE)
+                            && !hasFeature(biomes, other, ours),
+                    other.location() + " has under-island foliage");
         }
 
-        ConfiguredFeature<?, ?> highlands = helper.getLevel().registryAccess()
-                .registryOrThrow(Registries.CONFIGURED_FEATURE).getOrThrow(ResourceKey.create(
+        ConfiguredFeature<?, ?> highlands = helper.getLevel()
+                .registryAccess()
+                .registryOrThrow(Registries.CONFIGURED_FEATURE)
+                .getOrThrow(ResourceKey.create(
                         Registries.CONFIGURED_FEATURE, ModFeatures.END_HIGHLANDS_UNDER_ISLAND_FOLIAGE.location()));
         UnderIslandFoliageConfiguration config = (UnderIslandFoliageConfiguration) highlands.config();
-        long seed = helper.getLevel().getServer().getWorldData().worldGenOptions().seed();
+        long seed =
+                helper.getLevel().getServer().getWorldData().worldGenOptions().seed();
         int selected = 0;
         int regions = 0;
         for (int rx = -40; rx < 40; rx++) {
             for (int rz = -25; rz < 25; rz++) {
                 regions++;
-                if (UnderIslandFoliageFeature.regionSelected(seed, rx * config.regionSize(), rz * config.regionSize(),
-                        config.regionSize(), config.regionChance())) {
+                if (UnderIslandFoliageFeature.regionSelected(
+                        seed,
+                        rx * config.regionSize(),
+                        rz * config.regionSize(),
+                        config.regionSize(),
+                        config.regionChance())) {
                     selected++;
                 }
             }
@@ -180,20 +205,30 @@ public final class UnderIslandFoliageGameTests {
     public static void foliageHangsFromSlabUnderside(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         UnderIslandFoliageConfiguration base = (UnderIslandFoliageConfiguration) level.registryAccess()
-                .registryOrThrow(Registries.CONFIGURED_FEATURE).getOrThrow(ModFeatures.UNDER_ISLAND_FOLIAGE_CONFIGURED)
+                .registryOrThrow(Registries.CONFIGURED_FEATURE)
+                .getOrThrow(ModFeatures.UNDER_ISLAND_FOLIAGE_CONFIGURED)
                 .config();
         int minRel = 5;
         int minAbs = helper.absolutePos(new BlockPos(0, minRel, 0)).getY();
-        ConfiguredFeature<?, ?> feature = new ConfiguredFeature<>(ModFeatures.UNDER_ISLAND_FOLIAGE.get(),
-                new UnderIslandFoliageConfiguration(base.soil(), base.replaceable(), base.radius(), 1.0F,
-                        base.vineLength(), base.fruitChance(), VerticalAnchor.absolute(minAbs), base.regionSize(),
+        ConfiguredFeature<?, ?> feature = new ConfiguredFeature<>(
+                ModFeatures.UNDER_ISLAND_FOLIAGE.get(),
+                new UnderIslandFoliageConfiguration(
+                        base.soil(),
+                        base.replaceable(),
+                        base.radius(),
+                        1.0F,
+                        base.vineLength(),
+                        base.fruitChance(),
+                        VerticalAnchor.absolute(minAbs),
+                        base.regionSize(),
                         base.regionChance()));
         BlockPos origin = helper.absolutePos(new BlockPos(8, PLATFORM_Y + 1, 8));
 
         for (int attempt = 0; attempt < 10; attempt++) {
             clear(helper);
             slab(helper);
-            helper.assertTrue(feature.place(level, level.getChunkSource().getGenerator(), level.random, origin),
+            helper.assertTrue(
+                    feature.place(level, level.getChunkSource().getGenerator(), level.random, origin),
                     "Foliage refused under a slab");
             int soil = 0;
             int vines = 0;
@@ -206,31 +241,43 @@ public final class UnderIslandFoliageGameTests {
                     helper.assertTrue(pos.getY() >= minRel, "Voidvine below min_y at " + pos);
                     if (!Voidvines.isVine(helper.getBlockState(pos.above()))) {
                         vines++;
-                        helper.assertTrue(helper.getBlockState(pos.above()).is(ModBlocks.VOIDSOIL.get()),
+                        helper.assertTrue(
+                                helper.getBlockState(pos.above()).is(ModBlocks.VOIDSOIL.get()),
                                 "Voidvine not hanging from voidsoil at " + pos);
                     }
                     if (!Voidvines.isVine(helper.getBlockState(pos.below()))) {
                         int length = Voidvines.lengthAbove(level, helper.absolutePos(pos));
-                        helper.assertTrue(length >= 4 && length <= PLATFORM_Y - 2 - minRel,
+                        helper.assertTrue(
+                                length >= 4 && length <= PLATFORM_Y - 2 - minRel,
                                 "Vine at " + pos + " has " + length + " segments");
                     }
                 }
             }
             helper.assertTrue(soil >= 9, "Only " + soil + " voidsoil blocks under the slab");
             helper.assertTrue(vines == soil, vines + " vines for " + soil + " voidsoil blocks (vine chance 1)");
-            helper.assertTrue(helper.getBlockState(new BlockPos(8, PLATFORM_Y - 1, 8)).is(Blocks.END_STONE),
+            helper.assertTrue(
+                    helper.getBlockState(new BlockPos(8, PLATFORM_Y - 1, 8)).is(Blocks.END_STONE),
                     "The island above the soil was changed");
         }
 
         // With min_y 3 blocks below the underside, no 4-segment vine fits.
-        ConfiguredFeature<?, ?> shallow = new ConfiguredFeature<>(ModFeatures.UNDER_ISLAND_FOLIAGE.get(),
-                new UnderIslandFoliageConfiguration(base.soil(), base.replaceable(), base.radius(), 1.0F,
-                        base.vineLength(), base.fruitChance(),
-                        VerticalAnchor.absolute(helper.absolutePos(new BlockPos(0, PLATFORM_Y - 5, 0)).getY()),
-                        base.regionSize(), base.regionChance()));
+        ConfiguredFeature<?, ?> shallow = new ConfiguredFeature<>(
+                ModFeatures.UNDER_ISLAND_FOLIAGE.get(),
+                new UnderIslandFoliageConfiguration(
+                        base.soil(),
+                        base.replaceable(),
+                        base.radius(),
+                        1.0F,
+                        base.vineLength(),
+                        base.fruitChance(),
+                        VerticalAnchor.absolute(helper.absolutePos(new BlockPos(0, PLATFORM_Y - 5, 0))
+                                .getY()),
+                        base.regionSize(),
+                        base.regionChance()));
         clear(helper);
         slab(helper);
-        helper.assertTrue(shallow.place(level, level.getChunkSource().getGenerator(), level.random, origin),
+        helper.assertTrue(
+                shallow.place(level, level.getChunkSource().getGenerator(), level.random, origin),
                 "Foliage refused under a slab");
         for (BlockPos pos : BlockPos.betweenClosed(0, 1, 0, 16, PLATFORM_Y + 2, 16)) {
             helper.assertTrue(!Voidvines.isVine(helper.getBlockState(pos)), "Vine placed without room at " + pos);
@@ -246,8 +293,7 @@ public final class UnderIslandFoliageGameTests {
         helper.assertTrue(end != null, "No End level");
         BlockPos soil = new BlockPos(0, MIN_VINE_Y + 3, 600);
         end.getChunk(soil);
-        List<BlockPos> touched = List.of(soil.above(), soil, soil.below(), soil.below(2), soil.below(3),
-                soil.below(4));
+        List<BlockPos> touched = List.of(soil.above(), soil, soil.below(), soil.below(2), soil.below(3), soil.below(4));
         touched.forEach(pos -> end.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS));
         end.setBlock(soil.above(), Blocks.END_STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
         end.setBlock(soil, ModBlocks.VOIDSOIL.get().defaultBlockState(), Block.UPDATE_CLIENTS);
@@ -260,17 +306,20 @@ public final class UnderIslandFoliageGameTests {
             }
             end.getBlockState(head).randomTick(end, head, end.random);
         }
-        helper.assertTrue(Voidvines.isVine(end.getBlockState(new BlockPos(0, MIN_VINE_Y, 600))),
+        helper.assertTrue(
+                Voidvines.isVine(end.getBlockState(new BlockPos(0, MIN_VINE_Y, 600))),
                 "Vine did not grow down to Y=" + MIN_VINE_Y);
-        helper.assertTrue(!Voidvines.isVine(end.getBlockState(new BlockPos(0, MIN_VINE_Y - 1, 600))),
+        helper.assertTrue(
+                !Voidvines.isVine(end.getBlockState(new BlockPos(0, MIN_VINE_Y - 1, 600))),
                 "Vine grew below Y=" + MIN_VINE_Y);
         touched.forEach(pos -> end.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS));
         helper.succeed();
     }
 
-    private static boolean hasFeature(Registry<Biome> biomes, ResourceKey<Biome> biome,
-            ResourceKey<PlacedFeature> feature) {
-        List<HolderSet<PlacedFeature>> steps = biomes.getOrThrow(biome).getGenerationSettings().features();
+    private static boolean hasFeature(
+            Registry<Biome> biomes, ResourceKey<Biome> biome, ResourceKey<PlacedFeature> feature) {
+        List<HolderSet<PlacedFeature>> steps =
+                biomes.getOrThrow(biome).getGenerationSettings().features();
         int step = GenerationStep.Decoration.VEGETAL_DECORATION.ordinal();
         return steps.size() > step && steps.get(step).stream().anyMatch(holder -> holder.is(feature));
     }
@@ -289,8 +338,11 @@ public final class UnderIslandFoliageGameTests {
 
     private static void clear(GameTestHelper helper) {
         for (BlockPos pos : BlockPos.betweenClosed(0, 1, 0, 16, PLATFORM_Y + 4, 16)) {
-            helper.getLevel().setBlock(helper.absolutePos(pos), Blocks.AIR.defaultBlockState(),
-                    Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+            helper.getLevel()
+                    .setBlock(
+                            helper.absolutePos(pos),
+                            Blocks.AIR.defaultBlockState(),
+                            Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
         }
     }
 
@@ -298,8 +350,8 @@ public final class UnderIslandFoliageGameTests {
     private static boolean allForestOrOasis(BiomeSource source, Climate.Sampler sampler, ChunkPos chunk) {
         for (int x = chunk.getMinBlockX() - 8; x <= chunk.getMaxBlockX() + 11; x += 4) {
             for (int z = chunk.getMinBlockZ() - 8; z <= chunk.getMaxBlockZ() + 11; z += 4) {
-                var biome = source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z),
-                        sampler);
+                var biome = source.getNoiseBiome(
+                        QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z), sampler);
                 if (!biome.is(ModBiomes.END_FOREST) && !biome.is(ModBiomes.END_OASIS)) {
                     return false;
                 }

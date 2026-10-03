@@ -80,6 +80,5 @@ final class InMemoryPackResources implements PackResources {
     }
 
     @Override
-    public void close() {
-    }
+    public void close() {}
 }

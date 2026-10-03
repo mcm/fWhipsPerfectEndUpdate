@@ -21,8 +21,7 @@ import net.minecraft.world.phys.Vec3;
 public final class EndlingGameTests {
     private static final String TALL = "someonesperfectend:gametest/empty_tall";
 
-    private EndlingGameTests() {
-    }
+    private EndlingGameTests() {}
 
     private static void floor(GameTestHelper helper, int size) {
         for (int x = 0; x < size; x++) {
@@ -42,7 +41,8 @@ public final class EndlingGameTests {
         Endling endling = spawn(helper, 3.5, 3.5);
         helper.assertTrue(endling.getMaxHealth() == 20.0F, "endling should have 20 HP, has " + endling.getMaxHealth());
         EntityDimensions size = Endlings.TYPE.get().getDimensions();
-        helper.assertTrue(Math.abs(size.height() - 1.2F) < 0.01F && Math.abs(size.width() - 0.9F) < 0.01F,
+        helper.assertTrue(
+                Math.abs(size.height() - 1.2F) < 0.01F && Math.abs(size.width() - 0.9F) < 0.01F,
                 "endling should be 1.2 x 0.9 blocks, is " + size);
         helper.assertTrue(endling.isSensitiveToWater(), "water should hurt endlings");
         helper.assertFalse(endling.canPickUpLoot(), "endlings only take barter items (US-022)");
@@ -71,7 +71,8 @@ public final class EndlingGameTests {
         helper.runAfterDelay(20, () -> {
             double moved = endling.position().distanceTo(start);
             // Panicking for 20 ticks covers ~5 blocks; an Enderman teleport goes up to 32.
-            helper.assertTrue(moved < 8.0, "endling moved " + moved + " blocks after being hit; it should not teleport");
+            helper.assertTrue(
+                    moved < 8.0, "endling moved " + moved + " blocks after being hit; it should not teleport");
             helper.assertTrue(endling.getTarget() == null, "endling should never target the player");
             endling.discard();
             helper.succeed();
@@ -105,10 +106,11 @@ public final class EndlingGameTests {
         });
         helper.succeedWhen(() -> {
             helper.assertTrue(lostAt[0] > 0, "endling not Lost yet after " + tick[0] + " ticks");
-            helper.assertTrue(lostAt[0] >= Endling.LOST_DELAY - 5 && lostAt[0] <= Endling.LOST_DELAY + 5,
+            helper.assertTrue(
+                    lostAt[0] >= Endling.LOST_DELAY - 5 && lostAt[0] <= Endling.LOST_DELAY + 5,
                     "endling should become Lost after 300 ticks, became Lost at " + lostAt[0]);
-            helper.assertTrue(endling.village() == null && !endling.hasRestriction(),
-                    "a Lost endling should leave its village");
+            helper.assertTrue(
+                    endling.village() == null && !endling.hasRestriction(), "a Lost endling should leave its village");
             helper.assertFalse(endling.countsTowardVillage(), "a Lost endling should not count toward a village");
             endling.discard();
         });
@@ -147,7 +149,8 @@ public final class EndlingGameTests {
         villager.setVillage(new BlockPos(10, 64, 10), 7);
         Endling reloaded = Endlings.TYPE.get().create(helper.getLevel());
         reloaded.load(villager.saveWithoutId(new CompoundTag()));
-        helper.assertTrue(new BlockPos(10, 64, 10).equals(reloaded.village()) && reloaded.getRestrictRadius() == 7.0F,
+        helper.assertTrue(
+                new BlockPos(10, 64, 10).equals(reloaded.village()) && reloaded.getRestrictRadius() == 7.0F,
                 "the village binding should persist in NBT");
         helper.assertTrue(reloaded.countsTowardVillage(), "a village endling counts toward its village");
         endling.discard();
@@ -161,8 +164,9 @@ public final class EndlingGameTests {
         Endling endling = spawn(helper, 3.5, 3.5);
         endling.setLost();
         endling.kill();
-        List<ItemEntity> items = helper.getLevel().getEntitiesOfClass(ItemEntity.class,
-                new AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(8, 8, 8));
+        List<ItemEntity> items = helper.getLevel()
+                .getEntitiesOfClass(
+                        ItemEntity.class, new AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(8, 8, 8));
         helper.assertTrue(items.isEmpty(), "a Lost endling should drop nothing, dropped " + items);
         helper.succeed();
     }
@@ -177,7 +181,8 @@ public final class EndlingGameTests {
         endling.setLost();
         helper.succeedWhen(() -> {
             double distance = endling.distanceTo(player);
-            helper.assertTrue(distance > Endling.LOST_FLEE_DISTANCE,
+            helper.assertTrue(
+                    distance > Endling.LOST_FLEE_DISTANCE,
                     "a Lost endling should keep more than 6 blocks from players, is " + distance);
             helper.assertTrue(endling.getTarget() == null, "a Lost endling is still non-hostile");
             endling.discard();
