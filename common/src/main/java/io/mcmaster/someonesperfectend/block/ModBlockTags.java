@@ -14,8 +14,7 @@ public final class ModBlockTags {
     /** Logs that keep Astral leaves from decaying. */
     public static final TagKey<Block> ASTRAL_LOGS = create("astral_logs");
 
-    private ModBlockTags() {
-    }
+    private ModBlockTags() {}
 
     private static TagKey<Block> create(String name) {
         return TagKey.create(Registries.BLOCK, SomeonesPerfectEnd.id(name));

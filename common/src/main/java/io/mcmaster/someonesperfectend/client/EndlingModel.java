@@ -50,12 +50,13 @@ public class EndlingModel extends HierarchicalModel<Endling> implements ArmedMod
      * A box whose UVs come from a {@code uvW x uvH x uvD} box at {@code (u, v)} but which spans {@code w x h x d}
      * pixels starting at {@code (x, y, z)} (relative to the part's pivot).
      */
-    private static CubeListBuilder box(int u, int v, int uvW, int uvH, int uvD, float x, float y, float z, float w,
-            float h, float d) {
+    private static CubeListBuilder box(
+            int u, int v, int uvW, int uvH, int uvD, float x, float y, float z, float w, float h, float d) {
         float gx = (w - uvW) / 2.0F;
         float gy = (h - uvH) / 2.0F;
         float gz = (d - uvD) / 2.0F;
-        return CubeListBuilder.create().texOffs(u, v)
+        return CubeListBuilder.create()
+                .texOffs(u, v)
                 .addBox(x + gx, y + gy, z + gz, uvW, uvH, uvD, new CubeDeformation(gx, gy, gz));
     }
 
@@ -63,17 +64,21 @@ public class EndlingModel extends HierarchicalModel<Endling> implements ArmedMod
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         // Model y grows downward and y = 24 is the feet: legs 18..24, body 11..18, head 5..11.
-        root.addOrReplaceChild("body", box(32, 16, 8, 7, 4, -5.0F, 0.0F, -3.0F, 10, 7, 6),
-                PartPose.offset(0.0F, 11.0F, 0.0F));
-        root.addOrReplaceChild("head", box(0, 0, 8, 6, 8, -5.0F, -6.0F, -4.0F, 10, 6, 8),
-                PartPose.offset(0.0F, 11.0F, 0.0F));
-        root.addOrReplaceChild("right_arm", box(56, 0, 2, 9, 2, -3.0F, 0.0F, -1.5F, 3, 9, 3),
-                PartPose.offset(-5.0F, 11.5F, 0.0F));
-        root.addOrReplaceChild("left_arm", box(56, 0, 2, 9, 2, 0.0F, 0.0F, -1.5F, 3, 9, 3).mirror(),
+        root.addOrReplaceChild(
+                "body", box(32, 16, 8, 7, 4, -5.0F, 0.0F, -3.0F, 10, 7, 6), PartPose.offset(0.0F, 11.0F, 0.0F));
+        root.addOrReplaceChild(
+                "head", box(0, 0, 8, 6, 8, -5.0F, -6.0F, -4.0F, 10, 6, 8), PartPose.offset(0.0F, 11.0F, 0.0F));
+        root.addOrReplaceChild(
+                "right_arm", box(56, 0, 2, 9, 2, -3.0F, 0.0F, -1.5F, 3, 9, 3), PartPose.offset(-5.0F, 11.5F, 0.0F));
+        root.addOrReplaceChild(
+                "left_arm",
+                box(56, 0, 2, 9, 2, 0.0F, 0.0F, -1.5F, 3, 9, 3).mirror(),
                 PartPose.offset(5.0F, 11.5F, 0.0F));
-        root.addOrReplaceChild("right_leg", box(56, 0, 2, 6, 2, -2.0F, 0.0F, -2.0F, 4, 6, 4),
-                PartPose.offset(-2.5F, 18.0F, 0.0F));
-        root.addOrReplaceChild("left_leg", box(56, 0, 2, 6, 2, -2.0F, 0.0F, -2.0F, 4, 6, 4).mirror(),
+        root.addOrReplaceChild(
+                "right_leg", box(56, 0, 2, 6, 2, -2.0F, 0.0F, -2.0F, 4, 6, 4), PartPose.offset(-2.5F, 18.0F, 0.0F));
+        root.addOrReplaceChild(
+                "left_leg",
+                box(56, 0, 2, 6, 2, -2.0F, 0.0F, -2.0F, 4, 6, 4).mirror(),
                 PartPose.offset(2.5F, 18.0F, 0.0F));
         return LayerDefinition.create(mesh, 64, 32);
     }
@@ -84,7 +89,12 @@ public class EndlingModel extends HierarchicalModel<Endling> implements ArmedMod
     }
 
     @Override
-    public void setupAnim(Endling entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
+    public void setupAnim(
+            Endling entity,
+            float limbSwing,
+            float limbSwingAmount,
+            float ageInTicks,
+            float netHeadYaw,
             float headPitch) {
         head.yRot = netHeadYaw * Mth.DEG_TO_RAD;
         head.xRot = headPitch * Mth.DEG_TO_RAD;

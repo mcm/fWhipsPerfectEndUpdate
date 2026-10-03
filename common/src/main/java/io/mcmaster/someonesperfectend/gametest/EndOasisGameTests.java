@@ -32,13 +32,14 @@ public final class EndOasisGameTests {
     private static final String TALL = "someonesperfectend:gametest/empty_tall";
     /** Pools and their carpets reach at most 7 blocks from their origin; this keeps other biomes' features out. */
     private static final int MARGIN = 8;
+
     private static final int CHUNKS = 12;
-    private static final Direction[] ENCLOSING = {Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.WEST,
-            Direction.EAST};
+    private static final Direction[] ENCLOSING = {
+        Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST
+    };
     private static final int PLATFORM_Y = 8;
 
-    private EndOasisGameTests() {
-    }
+    private EndOasisGameTests() {}
 
     /**
      * Generates outer-End chunks of the (fixed-seed) GameTest world that lie entirely inside {@code end_oasis},
@@ -55,9 +56,16 @@ public final class EndOasisGameTests {
         for (int cx = 70; cx < 500 && found.size() < CHUNKS; cx += 3) {
             for (int cz = -250; cz <= 250 && found.size() < CHUNKS; cz += 3) {
                 ChunkPos chunk = new ChunkPos(cx, cz);
-                if (allOasis(source, sampler, chunk) && end.getChunkSource().getGenerator().getBaseHeight(
-                        chunk.getMiddleBlockX(), chunk.getMiddleBlockZ(), Heightmap.Types.WORLD_SURFACE_WG, end,
-                        end.getChunkSource().randomState()) > end.getMinBuildHeight()) {
+                if (allOasis(source, sampler, chunk)
+                        && end.getChunkSource()
+                                        .getGenerator()
+                                        .getBaseHeight(
+                                                chunk.getMiddleBlockX(),
+                                                chunk.getMiddleBlockZ(),
+                                                Heightmap.Types.WORLD_SURFACE_WG,
+                                                end,
+                                                end.getChunkSource().randomState())
+                                > end.getMinBuildHeight()) {
                     found.add(chunk);
                 }
             }
@@ -93,7 +101,8 @@ public final class EndOasisGameTests {
                             }
                             for (Direction direction : ENCLOSING) {
                                 BlockPos neighbor = pos.relative(direction);
-                                helper.assertTrue(!end.getBlockState(neighbor).isAir(),
+                                helper.assertTrue(
+                                        !end.getBlockState(neighbor).isAir(),
                                         "Oasis Water at " + pos + " touches air at " + neighbor);
                             }
                         } else if (state.is(ModBlocks.VOID_PETALS.get())) {
@@ -108,8 +117,15 @@ public final class EndOasisGameTests {
                 }
             }
         }
-        LOGGER.info("End Oasis chunks {}: {} oasis water sources, {} flowing, {} void petals, {} glowcaps,"
-                + " {} huge glowcaps", found, sources, flowing, petals, glowcaps, hugeGlowcaps);
+        LOGGER.info(
+                "End Oasis chunks {}: {} oasis water sources, {} flowing, {} void petals, {} glowcaps,"
+                        + " {} huge glowcaps",
+                found,
+                sources,
+                flowing,
+                petals,
+                glowcaps,
+                hugeGlowcaps);
         helper.assertTrue(sources > 0, "No Oasis Water source in End Oasis chunks " + found);
         helper.assertTrue(flowing == 0, flowing + " flowing Oasis Water blocks in End Oasis chunks " + found);
         helper.assertTrue(petals > 0, "No void petals in End Oasis chunks " + found);
@@ -124,7 +140,8 @@ public final class EndOasisGameTests {
     @GameTest(template = TALL, timeoutTicks = 200)
     public static void oasisPoolIsContained(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ConfiguredFeature<?, ?> feature = level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE)
+        ConfiguredFeature<?, ?> feature = level.registryAccess()
+                .registryOrThrow(Registries.CONFIGURED_FEATURE)
                 .getOrThrow(ModFeatures.OASIS_POOL_CONFIGURED);
         BlockState turf = ModBlocks.END_TURF.get().defaultBlockState();
         BlockPos origin = helper.absolutePos(new BlockPos(8, PLATFORM_Y + 1, 8));
@@ -132,14 +149,16 @@ public final class EndOasisGameTests {
         for (int attempt = 0; attempt < 20; attempt++) {
             clear(helper);
             platform(helper, 7, 9, turf);
-            helper.assertTrue(!feature.place(level, level.getChunkSource().getGenerator(), level.random, origin),
+            helper.assertTrue(
+                    !feature.place(level, level.getChunkSource().getGenerator(), level.random, origin),
                     "Pool placed on a 3x3 platform");
         }
 
         for (int attempt = 0; attempt < 10; attempt++) {
             clear(helper);
             platform(helper, 0, 16, turf);
-            helper.assertTrue(feature.place(level, level.getChunkSource().getGenerator(), level.random, origin),
+            helper.assertTrue(
+                    feature.place(level, level.getChunkSource().getGenerator(), level.random, origin),
                     "Pool refused on a 17x17 island");
             int water = 0;
             int petals = 0;
@@ -151,8 +170,10 @@ public final class EndOasisGameTests {
                     water++;
                     for (Direction direction : ENCLOSING) {
                         BlockState neighbor = helper.getBlockState(pos.relative(direction));
-                        helper.assertTrue(neighbor.isSolid() || neighbor.getFluidState().getType().isSame(
-                                ModFluids.OASIS_WATER.get()), "Pool water at " + pos + " not enclosed");
+                        helper.assertTrue(
+                                neighbor.isSolid()
+                                        || neighbor.getFluidState().getType().isSame(ModFluids.OASIS_WATER.get()),
+                                "Pool water at " + pos + " not enclosed");
                     }
                 } else if (state.is(ModBlocks.VOID_PETALS.get())) {
                     petals++;
@@ -179,8 +200,11 @@ public final class EndOasisGameTests {
 
     private static void clear(GameTestHelper helper) {
         for (BlockPos pos : BlockPos.betweenClosed(0, 1, 0, 16, PLATFORM_Y + 4, 16)) {
-            helper.getLevel().setBlock(helper.absolutePos(pos), Blocks.AIR.defaultBlockState(),
-                    Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+            helper.getLevel()
+                    .setBlock(
+                            helper.absolutePos(pos),
+                            Blocks.AIR.defaultBlockState(),
+                            Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
         }
     }
 
@@ -188,8 +212,8 @@ public final class EndOasisGameTests {
     private static boolean allOasis(BiomeSource source, Climate.Sampler sampler, ChunkPos chunk) {
         for (int x = chunk.getMinBlockX() - MARGIN; x <= chunk.getMaxBlockX() + MARGIN + 3; x += 4) {
             for (int z = chunk.getMinBlockZ() - MARGIN; z <= chunk.getMaxBlockZ() + MARGIN + 3; z += 4) {
-                if (!source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z),
-                        sampler).is(ModBiomes.END_OASIS)) {
+                if (!source.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(64), QuartPos.fromBlock(z), sampler)
+                        .is(ModBiomes.END_OASIS)) {
                     return false;
                 }
             }

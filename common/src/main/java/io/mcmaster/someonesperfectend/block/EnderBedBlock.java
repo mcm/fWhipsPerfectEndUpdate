@@ -37,10 +37,9 @@ import org.jetbrains.annotations.Nullable;
  * bed is stored, lies the player down to travel there (US-038, {@link EnderBedTravel}).
  */
 public class EnderBedBlock extends BedBlock {
-    public static final MapCodec<EnderBedBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            DyeColor.CODEC.fieldOf("color").forGetter(BedBlock::getColor),
-            propertiesCodec()
-    ).apply(instance, EnderBedBlock::new));
+    public static final MapCodec<EnderBedBlock> CODEC = RecordCodecBuilder.mapCodec(
+            instance -> instance.group(DyeColor.CODEC.fieldOf("color").forGetter(BedBlock::getColor), propertiesCodec())
+                    .apply(instance, EnderBedBlock::new));
 
     private static final VoxelShape BASE = Block.box(0, 7, 0, 16, 13, 16);
     private static final VoxelShape LEG_NORTH_WEST = Block.box(0, 13, 0, 3, 16, 3);
@@ -87,8 +86,13 @@ public class EnderBedBlock extends BedBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
-            LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(
+            BlockState state,
+            Direction direction,
+            BlockState neighborState,
+            LevelAccessor level,
+            BlockPos pos,
+            BlockPos neighborPos) {
         if (direction == Direction.UP && !canSurvive(state, level, pos)) {
             // Destroyed with drops by Block#updateOrDestroy; the loot table only drops from the head, and the
             // other half then goes too because its neighbour is no longer this bed.
@@ -98,11 +102,12 @@ public class EnderBedBlock extends BedBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
-            BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide) {
             return EnderBedRules.explodesIn(level.dimension().location())
-                    ? InteractionResult.CONSUME : InteractionResult.SUCCESS;
+                    ? InteractionResult.CONSUME
+                    : InteractionResult.SUCCESS;
         }
         if (state.getValue(PART) != BedPart.HEAD) {
             pos = pos.relative(state.getValue(FACING));
@@ -144,7 +149,13 @@ public class EnderBedBlock extends BedBlock {
             level.removeBlock(foot, false);
         }
         Vec3 center = head.getCenter();
-        level.explode(null, level.damageSources().badRespawnPointExplosion(center), null, center, 5.0F, true,
+        level.explode(
+                null,
+                level.damageSources().badRespawnPointExplosion(center),
+                null,
+                center,
+                5.0F,
+                true,
                 Level.ExplosionInteraction.BLOCK);
     }
 

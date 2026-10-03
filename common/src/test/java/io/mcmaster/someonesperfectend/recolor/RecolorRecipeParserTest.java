@@ -67,12 +67,18 @@ class RecolorRecipeParserTest {
     @Test
     void rejectsInvalidRecipes() {
         assertThrows(JsonParseException.class, () -> RecolorRecipeParser.parse("{\"target\": \"b\", \"palette\": {}}"));
-        assertThrows(JsonParseException.class, () -> RecolorRecipeParser.parse("{\"source\": \"a\", \"target\": \"b\"}"));
-        assertThrows(JsonParseException.class, () -> RecolorRecipeParser.parse(
-                "{\"source\": \"a\", \"target\": \"b\", \"palette\": {\"gradient\": [\"#fff\"]}}"));
-        assertThrows(JsonParseException.class, () -> RecolorRecipeParser.parse(
-                "{\"source\": \"a\", \"target\": \"b\", \"palette\": {\"gradient\": [\"#ffffff\"], \"hsv\": {}}}"));
-        assertThrows(IllegalArgumentException.class, () -> RecolorRecipeParser.parse(
-                "{\"source\": \"Bad Id\", \"target\": \"b\", \"palette\": {}}"));
+        assertThrows(
+                JsonParseException.class, () -> RecolorRecipeParser.parse("{\"source\": \"a\", \"target\": \"b\"}"));
+        assertThrows(
+                JsonParseException.class,
+                () -> RecolorRecipeParser.parse(
+                        "{\"source\": \"a\", \"target\": \"b\", \"palette\": {\"gradient\": [\"#fff\"]}}"));
+        assertThrows(
+                JsonParseException.class,
+                () -> RecolorRecipeParser.parse(
+                        "{\"source\": \"a\", \"target\": \"b\", \"palette\": {\"gradient\": [\"#ffffff\"], \"hsv\": {}}}"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> RecolorRecipeParser.parse("{\"source\": \"Bad Id\", \"target\": \"b\", \"palette\": {}}"));
     }
 }

@@ -35,8 +35,7 @@ public final class DriftjellyGameTests {
     /** {@code empty_tall} is 17 blocks wide; its middle column. */
     private static final int MID = 8;
 
-    private DriftjellyGameTests() {
-    }
+    private DriftjellyGameTests() {}
 
     private static Driftjelly spawn(GameTestHelper helper, double x, double y, double z) {
         return helper.spawn(Driftjellies.TYPE.get(), new Vec3(x, y, z));
@@ -53,19 +52,25 @@ public final class DriftjellyGameTests {
         jelly.restrictTo(helper.absolutePos(new BlockPos(MID, 1, MID)), 6);
         double groundY = helper.absolutePos(new BlockPos(0, 1, 0)).getY();
         double[] range = {Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY};
-        forTicks(helper, 200, () -> {
-            helper.assertTrue(jelly.isAlive(), "the driftjelly died");
-            double height = jelly.getY() - groundY;
-            helper.assertTrue(height >= Driftjelly.MIN_HOVER && height <= Driftjelly.MAX_HOVER,
-                    "driftjelly should hover 2-6 blocks above ground, got " + height);
-            range[0] = Math.min(range[0], jelly.getY());
-            range[1] = Math.max(range[1], jelly.getY());
-        }, () -> {
-            helper.assertTrue(range[1] - range[0] > 0.05, "driftjelly should bob, its height range was "
-                    + (range[1] - range[0]));
-            helper.assertTrue(jelly.isNoGravity(), "driftjelly should float");
-            jelly.discard();
-        });
+        forTicks(
+                helper,
+                200,
+                () -> {
+                    helper.assertTrue(jelly.isAlive(), "the driftjelly died");
+                    double height = jelly.getY() - groundY;
+                    helper.assertTrue(
+                            height >= Driftjelly.MIN_HOVER && height <= Driftjelly.MAX_HOVER,
+                            "driftjelly should hover 2-6 blocks above ground, got " + height);
+                    range[0] = Math.min(range[0], jelly.getY());
+                    range[1] = Math.max(range[1], jelly.getY());
+                },
+                () -> {
+                    helper.assertTrue(
+                            range[1] - range[0] > 0.05,
+                            "driftjelly should bob, its height range was " + (range[1] - range[0]));
+                    helper.assertTrue(jelly.isNoGravity(), "driftjelly should float");
+                    jelly.discard();
+                });
     }
 
     /** Runs {@code check} every tick for {@code ticks} ticks, then {@code last} and succeeds. */
@@ -101,12 +106,17 @@ public final class DriftjellyGameTests {
                 helper.assertTrue(overIsland(rel), "wander target over the void: " + rel);
             }
         }
-        forTicks(helper, 200, () -> {
-            Vec3 rel = jelly.position().subtract(origin);
-            // Allow the driftjelly's hitbox to reach a little past the edge.
-            helper.assertTrue(rel.x >= MID - 3 && rel.x <= MID + 4 && rel.z >= MID - 3 && rel.z <= MID + 4,
-                    "driftjelly drifted out over the void: " + rel);
-        }, jelly::discard);
+        forTicks(
+                helper,
+                200,
+                () -> {
+                    Vec3 rel = jelly.position().subtract(origin);
+                    // Allow the driftjelly's hitbox to reach a little past the edge.
+                    helper.assertTrue(
+                            rel.x >= MID - 3 && rel.x <= MID + 4 && rel.z >= MID - 3 && rel.z <= MID + 4,
+                            "driftjelly drifted out over the void: " + rel);
+                },
+                jelly::discard);
     }
 
     private static boolean overIsland(Vec3 rel) {
@@ -126,12 +136,14 @@ public final class DriftjellyGameTests {
         double[] maxX = {0.0};
         helper.onEachTick(() -> maxX[0] = Math.max(maxX[0], jelly.getX() - origin.x));
         helper.runAfterDelay(5, () -> jelly.setDeltaMovement(0.6, 0.0, 0.0));
-        helper.runAfterDelay(20, () -> helper.succeedWhen(() -> {
-            helper.assertTrue(maxX[0] > MID + 4, "the push should have sent the driftjelly over the void");
-            double x = jelly.getX() - origin.x;
-            helper.assertTrue(x <= MID + 3, "driftjelly has not come back over ground, x = " + x);
-            jelly.discard();
-        }));
+        helper.runAfterDelay(
+                20,
+                () -> helper.succeedWhen(() -> {
+                    helper.assertTrue(maxX[0] > MID + 4, "the push should have sent the driftjelly over the void");
+                    double x = jelly.getX() - origin.x;
+                    helper.assertTrue(x <= MID + 3, "driftjelly has not come back over ground, x = " + x);
+                    jelly.discard();
+                }));
     }
 
     @GameTest(template = ModGameTests.EMPTY_TEMPLATE)
@@ -149,8 +161,8 @@ public final class DriftjellyGameTests {
     }
 
     private static void assertDrops(GameTestHelper helper, BlockPos rel, Item expected, Item unexpected) {
-        List<ItemEntity> items = helper.getLevel().getEntitiesOfClass(ItemEntity.class,
-                new AABB(helper.absolutePos(rel)).inflate(1.5));
+        List<ItemEntity> items =
+                helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(rel)).inflate(1.5));
         int count = 0;
         for (ItemEntity item : items) {
             helper.assertFalse(item.getItem().is(unexpected), "unexpected drop " + item.getItem());
@@ -166,21 +178,27 @@ public final class DriftjellyGameTests {
     public static void gelItemsEggAndRecipes(GameTestHelper helper) {
         FoodProperties food = new ItemStack(Driftjellies.GEL.get()).get(DataComponents.FOOD);
         helper.assertTrue(food != null && food.nutrition() == 3, "driftjelly gel should restore 3 hunger");
-        helper.assertTrue(Math.abs(food.saturation() - 3 * 0.4F * 2.0F) < 1.0E-4,
+        helper.assertTrue(
+                Math.abs(food.saturation() - 3 * 0.4F * 2.0F) < 1.0E-4,
                 "driftjelly gel should have a 0.4 saturation modifier, saturation is " + food.saturation());
-        helper.assertTrue(new ItemStack(Driftjellies.COOKED_GEL.get()).has(DataComponents.FOOD),
+        helper.assertTrue(
+                new ItemStack(Driftjellies.COOKED_GEL.get()).has(DataComponents.FOOD),
                 "cooked driftjelly gel should be food");
 
         SpawnEggItem egg = SpawnEggItem.byId(Driftjellies.TYPE.get());
         helper.assertTrue(egg == Driftjellies.SPAWN_EGG.get(), "no spawn egg registered for driftjelly: " + egg);
-        helper.assertTrue(egg.getType(new ItemStack(egg)) == Driftjellies.TYPE.get(), "spawn egg spawns the wrong type");
+        helper.assertTrue(
+                egg.getType(new ItemStack(egg)) == Driftjellies.TYPE.get(), "spawn egg spawns the wrong type");
 
         for (RecipeType<?> type : List.of(RecipeType.SMELTING, RecipeType.SMOKING, RecipeType.CAMPFIRE_COOKING)) {
             @SuppressWarnings("unchecked")
             RecipeType<AbstractCookingRecipe> cooking = (RecipeType<AbstractCookingRecipe>) type;
-            ItemStack result = helper.getLevel().getRecipeManager()
-                    .getRecipeFor(cooking, new SingleRecipeInput(new ItemStack(Driftjellies.GEL.get())), helper.getLevel())
-                    .map(holder -> holder.value().getResultItem(helper.getLevel().registryAccess()))
+            ItemStack result = helper.getLevel()
+                    .getRecipeManager()
+                    .getRecipeFor(
+                            cooking, new SingleRecipeInput(new ItemStack(Driftjellies.GEL.get())), helper.getLevel())
+                    .map(holder ->
+                            holder.value().getResultItem(helper.getLevel().registryAccess()))
                     .orElse(ItemStack.EMPTY);
             helper.assertTrue(result.is(Driftjellies.COOKED_GEL.get()), type + " of gel gives " + result);
         }
@@ -193,11 +211,15 @@ public final class DriftjellyGameTests {
         helper.assertTrue(type.getCategory() == MobCategory.CREATURE, "driftjelly should be a passive creature");
         var biomes = helper.getLevel().registryAccess().registryOrThrow(Registries.BIOME);
         for (ResourceKey<Biome> key : ModBiomes.ALL) {
-            List<MobSpawnSettings.SpawnerData> spawners =
-                    biomes.getOrThrow(key).getMobSettings().getMobs(MobCategory.CREATURE).unwrap();
-            MobSpawnSettings.SpawnerData data = spawners.stream().filter(s -> s.type == type).findFirst().orElse(null);
+            List<MobSpawnSettings.SpawnerData> spawners = biomes.getOrThrow(key)
+                    .getMobSettings()
+                    .getMobs(MobCategory.CREATURE)
+                    .unwrap();
+            MobSpawnSettings.SpawnerData data =
+                    spawners.stream().filter(s -> s.type == type).findFirst().orElse(null);
             helper.assertTrue(data != null, key.location() + " has no driftjelly spawner");
-            helper.assertTrue(data.minCount == 2 && data.maxCount == 4,
+            helper.assertTrue(
+                    data.minCount == 2 && data.maxCount == 4,
                     key.location() + " should spawn driftjellies in groups of 2-4");
         }
 
@@ -205,12 +227,15 @@ public final class DriftjellyGameTests {
         helper.setBlock(3, 0, 3, Blocks.STONE);
         BlockPos onTurf = helper.absolutePos(new BlockPos(1, 1, 1));
         BlockPos onStone = helper.absolutePos(new BlockPos(3, 1, 3));
-        helper.assertTrue(SpawnPlacements.isSpawnPositionOk(type, helper.getLevel(), onTurf)
-                        && SpawnPlacements.checkSpawnRules(type, helper.getLevel(), MobSpawnType.NATURAL, onTurf,
-                                helper.getLevel().random),
+        helper.assertTrue(
+                SpawnPlacements.isSpawnPositionOk(type, helper.getLevel(), onTurf)
+                        && SpawnPlacements.checkSpawnRules(
+                                type, helper.getLevel(), MobSpawnType.NATURAL, onTurf, helper.getLevel().random),
                 "driftjellies should spawn on end turf");
-        helper.assertFalse(SpawnPlacements.checkSpawnRules(type, helper.getLevel(), MobSpawnType.NATURAL, onStone,
-                helper.getLevel().random), "driftjellies should not spawn on stone");
+        helper.assertFalse(
+                SpawnPlacements.checkSpawnRules(
+                        type, helper.getLevel(), MobSpawnType.NATURAL, onStone, helper.getLevel().random),
+                "driftjellies should not spawn on stone");
         helper.succeed();
     }
 }

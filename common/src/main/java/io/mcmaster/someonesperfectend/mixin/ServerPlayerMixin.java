@@ -14,8 +14,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin {
     @Inject(method = "findRespawnPositionAndUseSpawnBlock", at = @At("HEAD"), cancellable = true)
-    private void someonesperfectend$enderBedRespawn(boolean keepInventory,
-            DimensionTransition.PostDimensionTransition post, CallbackInfoReturnable<DimensionTransition> cir) {
+    private void someonesperfectend$enderBedRespawn(
+            boolean keepInventory,
+            DimensionTransition.PostDimensionTransition post,
+            CallbackInfoReturnable<DimensionTransition> cir) {
         DimensionTransition transition = EnderBedRespawn.findRespawn((ServerPlayer) (Object) this, keepInventory, post);
         if (transition != null) {
             cir.setReturnValue(transition);

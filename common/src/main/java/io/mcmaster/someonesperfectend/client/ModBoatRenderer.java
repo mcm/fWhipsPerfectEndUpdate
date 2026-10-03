@@ -36,10 +36,12 @@ public class ModBoatRenderer extends EntityRenderer<Boat> {
     public ModBoatRenderer(EntityRendererProvider.Context context, ModBoatType type, boolean chest) {
         super(context);
         this.shadowRadius = 0.8F;
-        this.texture = SomeonesPerfectEnd.id(
-                "textures/entity/" + (chest ? "chest_boat/" : "boat/") + type.getName() + ".png");
-        ModelPart root = context.bakeLayer(chest ? ModelLayers.createChestBoatModelName(type.shape())
-                : ModelLayers.createBoatModelName(type.shape()));
+        this.texture =
+                SomeonesPerfectEnd.id("textures/entity/" + (chest ? "chest_boat/" : "boat/") + type.getName() + ".png");
+        ModelPart root = context.bakeLayer(
+                chest
+                        ? ModelLayers.createChestBoatModelName(type.shape())
+                        : ModelLayers.createBoatModelName(type.shape()));
         if (type.isRaft()) {
             this.model = chest ? new ChestRaftModel(root) : new RaftModel(root);
         } else {
@@ -48,19 +50,21 @@ public class ModBoatRenderer extends EntityRenderer<Boat> {
     }
 
     @Override
-    public void render(Boat boat, float yaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers,
-            int light) {
+    public void render(
+            Boat boat, float yaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int light) {
         poseStack.pushPose();
         poseStack.translate(0.0F, 0.375F, 0.0F);
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - yaw));
         float hurtTime = boat.getHurtTime() - partialTick;
         float damage = Math.max(0.0F, boat.getDamage() - partialTick);
         if (hurtTime > 0.0F) {
-            poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(hurtTime) * hurtTime * damage / 10.0F * boat.getHurtDir()));
+            poseStack.mulPose(
+                    Axis.XP.rotationDegrees(Mth.sin(hurtTime) * hurtTime * damage / 10.0F * boat.getHurtDir()));
         }
         float bubbleAngle = boat.getBubbleAngle(partialTick);
         if (!Mth.equal(bubbleAngle, 0.0F)) {
-            poseStack.mulPose(new Quaternionf().setAngleAxis(bubbleAngle * (float) (Math.PI / 180.0), 1.0F, 0.0F, 1.0F));
+            poseStack.mulPose(
+                    new Quaternionf().setAngleAxis(bubbleAngle * (float) (Math.PI / 180.0), 1.0F, 0.0F, 1.0F));
         }
         poseStack.scale(-1.0F, -1.0F, 1.0F);
         poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
@@ -68,8 +72,9 @@ public class ModBoatRenderer extends EntityRenderer<Boat> {
         VertexConsumer consumer = buffers.getBuffer(model.renderType(texture));
         model.renderToBuffer(poseStack, consumer, light, OverlayTexture.NO_OVERLAY);
         if (!boat.isUnderWater() && model instanceof WaterPatchModel waterPatch) {
-            waterPatch.waterPatch().render(poseStack, buffers.getBuffer(RenderType.waterMask()), light,
-                    OverlayTexture.NO_OVERLAY);
+            waterPatch
+                    .waterPatch()
+                    .render(poseStack, buffers.getBuffer(RenderType.waterMask()), light, OverlayTexture.NO_OVERLAY);
         }
         poseStack.popPose();
         super.render(boat, yaw, partialTick, poseStack, buffers, light);

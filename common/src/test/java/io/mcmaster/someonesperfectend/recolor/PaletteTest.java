@@ -17,19 +17,19 @@ class PaletteTest {
     @Test
     void gradientMapsKnown4x4ImageAndPreservesAlpha() {
         int[] input = {
-                0xFF000000, 0xFF333333, 0x80666666, 0xFFFFFFFF,
-                0x00123456, 0xFF00FF00, 0x4000FF00, 0xFF999999,
-                0x01CCCCCC, 0xFFFF0000, 0xFF0000FF, 0xFF808080,
-                0xFFFFFFFF, 0xFF000000, 0xFF333333, 0x00000000,
+            0xFF000000, 0xFF333333, 0x80666666, 0xFFFFFFFF,
+            0x00123456, 0xFF00FF00, 0x4000FF00, 0xFF999999,
+            0x01CCCCCC, 0xFFFF0000, 0xFF0000FF, 0xFF808080,
+            0xFFFFFFFF, 0xFF000000, 0xFF333333, 0x00000000,
         };
         int[] expected = {
-                // grays: luminance g/255 -> red channel g
-                0xFF000000, 0xFF330000, 0x80660000, 0xFFFF0000,
-                // transparent pixel untouched; explicit #00ff00 -> #0000ff keeps each pixel's alpha
-                0x00123456, 0xFF0000FF, 0x400000FF, 0xFF990000,
-                // pure red has luma 0.299 -> 76 (0x4c), pure blue 0.114 -> 29 (0x1d)
-                0x01CC0000, 0xFF4C0000, 0xFF1D0000, 0xFF800000,
-                0xFFFF0000, 0xFF000000, 0xFF330000, 0x00000000,
+            // grays: luminance g/255 -> red channel g
+            0xFF000000, 0xFF330000, 0x80660000, 0xFFFF0000,
+            // transparent pixel untouched; explicit #00ff00 -> #0000ff keeps each pixel's alpha
+            0x00123456, 0xFF0000FF, 0x400000FF, 0xFF990000,
+            // pure red has luma 0.299 -> 76 (0x4c), pure blue 0.114 -> 29 (0x1d)
+            0x01CC0000, 0xFF4C0000, 0xFF1D0000, 0xFF800000,
+            0xFFFF0000, 0xFF000000, 0xFF330000, 0x00000000,
         };
         assertArrayEquals(expected, BLACK_TO_RED.apply(input));
     }
@@ -44,8 +44,8 @@ class PaletteTest {
 
     @Test
     void gradientWithExplicitStopPositions() {
-        Palette.Gradient gradient = new Palette.Gradient(new float[] {0f, 0.25f, 1f},
-                new int[] {0x000000, 0x0000FF, 0xFFFFFF}, false);
+        Palette.Gradient gradient =
+                new Palette.Gradient(new float[] {0f, 0.25f, 1f}, new int[] {0x000000, 0x0000FF, 0xFFFFFF}, false);
         assertEquals(0x000000, gradient.colorAt(0f));
         assertEquals(0x0000FF, gradient.colorAt(0.25f));
         assertEquals(0x000080, gradient.colorAt(0.125f) & 0xFFFFFF, "halfway to blue");
@@ -64,9 +64,12 @@ class PaletteTest {
 
     @Test
     void gradientAndHsvAreExclusive() {
-        assertThrows(IllegalArgumentException.class, () -> new Palette(Map.of(),
-                Optional.of(Palette.Gradient.evenlySpaced(new int[] {0}, false)),
-                Optional.of(new Palette.HsvShift(Optional.empty(), 0, 1, 1))));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Palette(
+                        Map.of(),
+                        Optional.of(Palette.Gradient.evenlySpaced(new int[] {0}, false)),
+                        Optional.of(new Palette.HsvShift(Optional.empty(), 0, 1, 1))));
     }
 
     private static Palette hsv(Optional<Float> hue, float shift, float saturation, float value) {

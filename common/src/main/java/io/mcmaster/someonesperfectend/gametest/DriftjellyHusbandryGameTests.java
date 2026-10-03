@@ -24,8 +24,7 @@ public final class DriftjellyHusbandryGameTests {
     private static final String TALL = "someonesperfectend:gametest/empty_tall";
     private static final int MID = 8;
 
-    private DriftjellyHusbandryGameTests() {
-    }
+    private DriftjellyHusbandryGameTests() {}
 
     private static void turfFloor(GameTestHelper helper) {
         for (int x = 0; x <= 16; x++) {
@@ -46,8 +45,9 @@ public final class DriftjellyHusbandryGameTests {
     }
 
     private static List<Driftjelly> jellies(GameTestHelper helper) {
-        return helper.getLevel().getEntitiesOfClass(Driftjelly.class, new AABB(helper.absolutePos(BlockPos.ZERO))
-                .expandTowards(17, 24, 17));
+        return helper.getLevel()
+                .getEntitiesOfClass(
+                        Driftjelly.class, new AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(17, 24, 17));
     }
 
     @GameTest(template = TALL, timeoutTicks = 200)
@@ -62,10 +62,14 @@ public final class DriftjellyHusbandryGameTests {
         helper.assertTrue(a.isInLove() && b.isInLove(), "feeding voidfruit should put both adults in love");
         helper.assertTrue(player.getMainHandItem().getCount() == 14, "feeding should use one voidfruit each");
         helper.succeedWhen(() -> {
-            Driftjelly baby = jellies(helper).stream().filter(Driftjelly::isBaby).findFirst().orElse(null);
+            Driftjelly baby = jellies(helper).stream()
+                    .filter(Driftjelly::isBaby)
+                    .findFirst()
+                    .orElse(null);
             helper.assertTrue(baby != null, "no baby driftjelly yet");
             helper.assertTrue(a.getAge() > 0 && b.getAge() > 0, "parents should get the vanilla breeding cooldown");
-            helper.assertTrue(baby.getAge() <= AgeableMob.BABY_START_AGE + 200,
+            helper.assertTrue(
+                    baby.getAge() <= AgeableMob.BABY_START_AGE + 200,
                     "a baby should take 20 minutes to grow up, age is " + baby.getAge());
             int before = baby.getAge();
             baby.mobInteract(player, InteractionHand.MAIN_HAND);
@@ -85,10 +89,14 @@ public final class DriftjellyHusbandryGameTests {
         helper.succeedWhen(() -> {
             helper.assertTrue(jelly.isTempted(), "driftjelly should be tempted by voidfruit");
             double height = jelly.getY() - groundY;
-            helper.assertTrue(height >= 0.8 && height <= 2.2, "tempted driftjelly should hover 1-2 blocks, got " + height);
+            helper.assertTrue(
+                    height >= 0.8 && height <= 2.2, "tempted driftjelly should hover 1-2 blocks, got " + height);
             double dx = jelly.getX() - player.getX();
             double dz = jelly.getZ() - player.getZ();
-            helper.assertTrue(dx * dx + dz * dz < 4.0 * 4.0, "tempted driftjelly should follow the player, offset " + jelly.position().subtract(player.position()));
+            helper.assertTrue(
+                    dx * dx + dz * dz < 4.0 * 4.0,
+                    "tempted driftjelly should follow the player, offset "
+                            + jelly.position().subtract(player.position()));
             jelly.discard();
             player.discard();
         });
@@ -98,8 +106,7 @@ public final class DriftjellyHusbandryGameTests {
     public static void becomesDormantOutsideTheEnd(GameTestHelper helper) {
         turfFloor(helper);
         Driftjelly jelly = spawn(helper, MID + 0.5, 5.0, MID + 0.5);
-        helper.assertTrue(helper.getLevel().dimension() != Level.END,
-                "this test must run outside the End");
+        helper.assertTrue(helper.getLevel().dimension() != Level.END, "this test must run outside the End");
         int[] tick = {0};
         int[] dormantAt = {-1};
         helper.onEachTick(() -> {
@@ -110,7 +117,8 @@ public final class DriftjellyHusbandryGameTests {
         });
         helper.succeedWhen(() -> {
             helper.assertTrue(dormantAt[0] > 0, "driftjelly not dormant yet after " + tick[0] + " ticks");
-            helper.assertTrue(dormantAt[0] >= Driftjelly.DORMANCY_DELAY - 5 && dormantAt[0] <= Driftjelly.DORMANCY_DELAY + 5,
+            helper.assertTrue(
+                    dormantAt[0] >= Driftjelly.DORMANCY_DELAY - 5 && dormantAt[0] <= Driftjelly.DORMANCY_DELAY + 5,
                     "driftjelly should turn dormant after 300 ticks, turned at " + dormantAt[0]);
             helper.assertFalse(jelly.isNoGravity(), "a dormant driftjelly should stop floating");
             helper.assertTrue(jelly.onGround(), "a dormant driftjelly should sink to the ground");
@@ -180,9 +188,11 @@ public final class DriftjellyHusbandryGameTests {
         jelly.setDormant(true);
         jelly.kill();
         AABB box = new AABB(helper.absolutePos(new BlockPos(2, 2, 2))).inflate(3.0);
-        helper.assertTrue(helper.getLevel().getEntitiesOfClass(ItemEntity.class, box).isEmpty(),
+        helper.assertTrue(
+                helper.getLevel().getEntitiesOfClass(ItemEntity.class, box).isEmpty(),
                 "a dormant driftjelly should drop nothing");
-        helper.assertTrue(helper.getLevel().getEntitiesOfClass(ExperienceOrb.class, box).isEmpty(),
+        helper.assertTrue(
+                helper.getLevel().getEntitiesOfClass(ExperienceOrb.class, box).isEmpty(),
                 "a dormant driftjelly should drop no experience");
         helper.succeed();
     }

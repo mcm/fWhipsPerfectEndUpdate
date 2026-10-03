@@ -12,8 +12,7 @@ public final class EndChanterRules {
     /** Enchanted items are accepted only while their repair cost is below this. */
     public static final int MAX_REPAIR_COST = 40;
 
-    private EndChanterRules() {
-    }
+    private EndChanterRules() {}
 
     public static boolean acceptsRepairCost(int repairCost) {
         return repairCost < MAX_REPAIR_COST;
@@ -33,8 +32,12 @@ public final class EndChanterRules {
      * @param existing   the item's enchantments and their levels
      * @param compatible whether two different enchantments may be on the same item
      */
-    public static <T, E> List<T> filterOffer(List<T> offered, Function<T, E> enchantment, ToIntFunction<T> level,
-            Map<E, Integer> existing, BiPredicate<E, E> compatible) {
+    public static <T, E> List<T> filterOffer(
+            List<T> offered,
+            Function<T, E> enchantment,
+            ToIntFunction<T> level,
+            Map<E, Integer> existing,
+            BiPredicate<E, E> compatible) {
         List<T> kept = new ArrayList<>();
         for (T offer : offered) {
             E ench = enchantment.apply(offer);

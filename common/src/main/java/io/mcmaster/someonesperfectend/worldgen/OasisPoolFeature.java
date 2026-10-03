@@ -23,8 +23,9 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
  * The pool plus carpet stay within 7 blocks of the origin, inside the region a feature may write to.
  */
 public class OasisPoolFeature extends Feature<OasisPoolConfiguration> {
-    private static final Direction[] ENCLOSING = {Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.WEST,
-            Direction.EAST};
+    private static final Direction[] ENCLOSING = {
+        Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST
+    };
 
     public OasisPoolFeature(Codec<OasisPoolConfiguration> codec) {
         super(codec);
@@ -58,8 +59,8 @@ public class OasisPoolFeature extends Feature<OasisPoolConfiguration> {
     }
 
     /** Pool columns (top block → depth): a jittered ellipse, keeping only columns whose surface is at pool level. */
-    private static Map<BlockPos, Integer> shape(WorldGenLevel level, RandomSource random, BlockPos surface,
-            int radius, int maxDepth) {
+    private static Map<BlockPos, Integer> shape(
+            WorldGenLevel level, RandomSource random, BlockPos surface, int radius, int maxDepth) {
         float rx = radius + random.nextFloat() * 0.8F;
         float rz = radius + random.nextFloat() * 0.8F;
         Map<BlockPos, Integer> columns = new HashMap<>();
@@ -80,7 +81,9 @@ public class OasisPoolFeature extends Feature<OasisPoolConfiguration> {
     private static boolean isSurface(WorldGenLevel level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         BlockState above = level.getBlockState(pos.above());
-        return state.isSolid() && state.getFluidState().isEmpty() && !above.isSolid()
+        return state.isSolid()
+                && state.getFluidState().isEmpty()
+                && !above.isSolid()
                 && above.getFluidState().isEmpty();
     }
 
@@ -97,8 +100,12 @@ public class OasisPoolFeature extends Feature<OasisPoolConfiguration> {
         return true;
     }
 
-    private static void fill(WorldGenLevel level, OasisPoolConfiguration config, RandomSource random,
-            Set<BlockPos> cells, Map<BlockPos, Integer> columns) {
+    private static void fill(
+            WorldGenLevel level,
+            OasisPoolConfiguration config,
+            RandomSource random,
+            Set<BlockPos> cells,
+            Map<BlockPos, Integer> columns) {
         for (BlockPos cell : cells) {
             level.setBlock(cell, config.fluid().getState(random, cell), Block.UPDATE_CLIENTS);
         }
@@ -111,8 +118,13 @@ public class OasisPoolFeature extends Feature<OasisPoolConfiguration> {
         }
     }
 
-    private static void carpet(WorldGenLevel level, OasisPoolConfiguration config, RandomSource random,
-            BlockPos surface, int radius, Map<BlockPos, Integer> columns) {
+    private static void carpet(
+            WorldGenLevel level,
+            OasisPoolConfiguration config,
+            RandomSource random,
+            BlockPos surface,
+            int radius,
+            Map<BlockPos, Integer> columns) {
         int reach = radius + 1 + config.carpetRadius();
         for (int dx = -reach; dx <= reach; dx++) {
             for (int dz = -reach; dz <= reach; dz++) {
@@ -122,7 +134,8 @@ public class OasisPoolFeature extends Feature<OasisPoolConfiguration> {
                 // Follow the surface up or down a block around the pool.
                 for (int dy = 1; dy >= -1; dy--) {
                     BlockPos pos = surface.offset(dx, dy + 1, dz);
-                    if (columns.containsKey(pos.below()) || !level.getBlockState(pos).isAir()) {
+                    if (columns.containsKey(pos.below())
+                            || !level.getBlockState(pos).isAir()) {
                         continue;
                     }
                     BlockState state = config.carpet().getState(random, pos);

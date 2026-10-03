@@ -71,11 +71,14 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
         tips.add(trunk.get(trunk.size() - 1));
 
         // Branches: out 2-3 blocks in distinct directions, then up 2-3 blocks (never above the trunk top).
-        List<Direction> directions = new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
+        List<Direction> directions =
+                new ArrayList<>(Direction.Plane.HORIZONTAL.stream().toList());
         Util.shuffle(directions, random);
         int branches = Math.min(config.branchCount().sample(random), directions.size());
         int lowest = origin.getY() + Math.max(3, height / 3);
-        List<BlockPos> starts = trunk.stream().filter(p -> p.getY() >= lowest && p.getY() <= topY - 2).toList();
+        List<BlockPos> starts = trunk.stream()
+                .filter(p -> p.getY() >= lowest && p.getY() <= topY - 2)
+                .toList();
         for (int i = 0; i < branches && !starts.isEmpty(); i++) {
             Direction direction = directions.get(i);
             BlockPos pos = starts.get(random.nextInt(starts.size()));
@@ -101,14 +104,16 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
         Set<BlockPos> leaves = new LinkedHashSet<>();
         for (BlockPos tip : tips) {
             BlockPos center = tip.above();
-            for (BlockPos pos : BlockPos.betweenClosed(center.offset(-CLUSTER_RADIUS, -CLUSTER_RADIUS, -CLUSTER_RADIUS),
+            for (BlockPos pos : BlockPos.betweenClosed(
+                    center.offset(-CLUSTER_RADIUS, -CLUSTER_RADIUS, -CLUSTER_RADIUS),
                     center.offset(CLUSTER_RADIUS, CLUSTER_RADIUS, CLUSTER_RADIUS))) {
                 int dx = pos.getX() - center.getX();
                 int dy = pos.getY() - center.getY();
                 int dz = pos.getZ() - center.getZ();
                 int distanceSq = dx * dx + dy * dy + dz * dz;
                 if ((distanceSq <= 4 || distanceSq == 5 && random.nextBoolean())
-                        && !logs.containsKey(pos) && isFree(level, pos)) {
+                        && !logs.containsKey(pos)
+                        && isFree(level, pos)) {
                     leaves.add(pos.immutable());
                 }
             }
@@ -116,7 +121,13 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
 
         Map<BlockPos, Integer> distances = leafDistances(logs.keySet(), leaves);
         if (config.maxOverhang().isPresent()
-                && overhangs(level, origin, topY, logs.keySet(), distances.keySet(), config.maxOverhang().get())) {
+                && overhangs(
+                        level,
+                        origin,
+                        topY,
+                        logs.keySet(),
+                        distances.keySet(),
+                        config.maxOverhang().get())) {
             return false;
         }
 
@@ -134,7 +145,8 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
                 state = state.setValue(LeavesBlock.DISTANCE, leaf.getValue());
             }
             if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
-                state = state.setValue(BlockStateProperties.WATERLOGGED,
+                state = state.setValue(
+                        BlockStateProperties.WATERLOGGED,
                         level.getFluidState(pos).isSourceOfType(Fluids.WATER));
             }
             level.setBlock(pos, state, Block.UPDATE_ALL | Block.UPDATE_KNOWN_SHAPE);
@@ -150,8 +162,8 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
      * Whether any tree column is more than {@code maxOverhang} blocks (horizontally, in both axes) away from every
      * ground column, i.e. whether the tree would stick out past the island edge by more than that.
      */
-    private static boolean overhangs(WorldGenLevel level, BlockPos origin, int topY, Set<BlockPos> logs,
-            Set<BlockPos> leaves, int maxOverhang) {
+    private static boolean overhangs(
+            WorldGenLevel level, BlockPos origin, int topY, Set<BlockPos> logs, Set<BlockPos> leaves, int maxOverhang) {
         Set<Long> columns = new LinkedHashSet<>();
         logs.forEach(pos -> columns.add(ChunkPos.asLong(pos.getX(), pos.getZ())));
         leaves.forEach(pos -> columns.add(ChunkPos.asLong(pos.getX(), pos.getZ())));
@@ -164,7 +176,8 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
                 for (int dz = -maxOverhang; dz <= maxOverhang && !supported; dz++) {
                     int gx = x + dx;
                     int gz = z + dz;
-                    supported = ground.computeIfAbsent(ChunkPos.asLong(gx, gz),
+                    supported = ground.computeIfAbsent(
+                            ChunkPos.asLong(gx, gz),
                             key -> isGround(level, gx, gz, origin.getY() - GROUND_DEPTH, topY));
                 }
             }

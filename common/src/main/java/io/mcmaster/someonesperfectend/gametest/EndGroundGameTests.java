@@ -19,8 +19,7 @@ import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class EndGroundGameTests {
-    private EndGroundGameTests() {
-    }
+    private EndGroundGameTests() {}
 
     @GameTest
     public static void turfSpreadsOntoEndStone(GameTestHelper helper) {
@@ -106,14 +105,20 @@ public final class EndGroundGameTests {
         BlockPos absPos = helper.absolutePos(pos);
 
         ItemStack pickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
-        helper.assertTrue(state.requiresCorrectToolForDrops() && pickaxe.isCorrectToolForDrops(state),
+        helper.assertTrue(
+                state.requiresCorrectToolForDrops() && pickaxe.isCorrectToolForDrops(state),
                 "end_turf should need a pickaxe");
         assertDrops(helper, Block.getDrops(state, level, absPos, null, null, pickaxe), Items.END_STONE);
 
         ItemStack silkPickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
-        silkPickaxe.enchant(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
-                .getHolderOrThrow(Enchantments.SILK_TOUCH), 1);
-        assertDrops(helper, Block.getDrops(state, level, absPos, null, null, silkPickaxe),
+        silkPickaxe.enchant(
+                level.registryAccess()
+                        .registryOrThrow(Registries.ENCHANTMENT)
+                        .getHolderOrThrow(Enchantments.SILK_TOUCH),
+                1);
+        assertDrops(
+                helper,
+                Block.getDrops(state, level, absPos, null, null, silkPickaxe),
                 ModBlocks.END_TURF.get().asItem());
         helper.succeed();
     }
@@ -155,7 +160,9 @@ public final class EndGroundGameTests {
         BlockState state = helper.getBlockState(pos);
         BlockPos absPos = helper.absolutePos(pos);
         assertDrops(helper, Block.getDrops(state, level, absPos, null, null, ItemStack.EMPTY));
-        assertDrops(helper, Block.getDrops(state, level, absPos, null, null, new ItemStack(Items.SHEARS)),
+        assertDrops(
+                helper,
+                Block.getDrops(state, level, absPos, null, null, new ItemStack(Items.SHEARS)),
                 ModBlocks.SHORT_VOID_GRASS.get().asItem());
         helper.succeed();
     }
@@ -168,8 +175,9 @@ public final class EndGroundGameTests {
                 helper.setBlock(new BlockPos(x, 1, z), ModBlocks.END_TURF.get());
             }
         }
-        helper.assertTrue(BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), helper.getLevel(),
-                helper.absolutePos(turf)), "bone meal was not used");
+        helper.assertTrue(
+                BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), helper.getLevel(), helper.absolutePos(turf)),
+                "bone meal was not used");
         helper.assertBlockPresent(ModBlocks.SHORT_VOID_GRASS.get(), turf.above());
         helper.succeed();
     }
@@ -180,15 +188,19 @@ public final class EndGroundGameTests {
         helper.setBlock(pos, ModBlocks.VOIDSOIL.get());
         BlockState state = helper.getBlockState(pos);
         helper.assertTrue(state.is(ModBlockTags.SUPPORTS_HANGING_PLANTS), "voidsoil is not a hanging-plant support");
-        helper.assertTrue(state.isFaceSturdy(helper.getLevel(), helper.absolutePos(pos), Direction.DOWN),
+        helper.assertTrue(
+                state.isFaceSturdy(helper.getLevel(), helper.absolutePos(pos), Direction.DOWN),
                 "voidsoil's underside is not sturdy");
-        helper.assertTrue(new ItemStack(Items.IRON_SHOVEL).getDestroySpeed(state) > 1.0F,
+        helper.assertTrue(
+                new ItemStack(Items.IRON_SHOVEL).getDestroySpeed(state) > 1.0F,
                 "voidsoil should be mined with a shovel");
         helper.succeed();
     }
 
-    private static void assertDrops(GameTestHelper helper, List<ItemStack> drops, net.minecraft.world.item.Item... expected) {
-        List<net.minecraft.world.item.Item> actual = drops.stream().map(ItemStack::getItem).toList();
+    private static void assertDrops(
+            GameTestHelper helper, List<ItemStack> drops, net.minecraft.world.item.Item... expected) {
+        List<net.minecraft.world.item.Item> actual =
+                drops.stream().map(ItemStack::getItem).toList();
         helper.assertTrue(actual.equals(List.of(expected)), "expected drops " + List.of(expected) + ", got " + actual);
     }
 }

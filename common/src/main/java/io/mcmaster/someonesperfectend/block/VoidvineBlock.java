@@ -103,8 +103,8 @@ public class VoidvineBlock extends GrowingPlantHeadBlock {
 
     @Override
     public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
-        int segments = Math.min(getBlocksToGrowWhenBonemealed(random),
-                Voidvines.MAX_LENGTH - Voidvines.lengthAbove(level, pos));
+        int segments = Math.min(
+                getBlocksToGrowWhenBonemealed(random), Voidvines.MAX_LENGTH - Voidvines.lengthAbove(level, pos));
         BlockPos head = pos;
         for (int i = 0; i < segments && canGrow(level, head); i++) {
             head = head.below();
@@ -113,8 +113,8 @@ public class VoidvineBlock extends GrowingPlantHeadBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
-            BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         return Voidvines.harvest(player, state, level, pos);
     }
 }

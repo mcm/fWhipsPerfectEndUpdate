@@ -10,8 +10,7 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 public final class SmokeGameTests {
-    private SmokeGameTests() {
-    }
+    private SmokeGameTests() {}
 
     @GameTest
     public static void placesBlockInTemplate(GameTestHelper helper) {
@@ -23,7 +22,8 @@ public final class SmokeGameTests {
 
     @GameTest
     public static void creativeTabIsRegistered(GameTestHelper helper) {
-        helper.assertTrue(BuiltInRegistries.CREATIVE_MODE_TAB.containsKey(SomeonesPerfectEnd.id("main")),
+        helper.assertTrue(
+                BuiltInRegistries.CREATIVE_MODE_TAB.containsKey(SomeonesPerfectEnd.id("main")),
                 "creative tab someonesperfectend:main is not registered");
         helper.succeed();
     }
@@ -37,8 +37,8 @@ public final class SmokeGameTests {
                 .filter(entry -> entry.getValue().getLootTable() != BuiltInLootTables.EMPTY)
                 .forEach(entry -> helper.assertTrue(
                         lootTables.getLootTable(entry.getValue().getLootTable()) != LootTable.EMPTY,
-                        "missing loot table " + entry.getValue().getLootTable().location()
-                                + " for " + entry.getKey().location()));
+                        "missing loot table " + entry.getValue().getLootTable().location() + " for "
+                                + entry.getKey().location()));
         helper.succeed();
     }
 }

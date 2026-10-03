@@ -25,8 +25,7 @@ public final class BounceCapGameTests {
     /** The cap sits on end stone at (8, 2, 8), so its top face is at relative y = 3. */
     private static final BlockPos CAP = new BlockPos(8, 2, 8);
 
-    private BounceCapGameTests() {
-    }
+    private BounceCapGameTests() {}
 
     private static void placeCap(GameTestHelper helper) {
         helper.setBlock(CAP.below(), Blocks.END_STONE);
@@ -51,11 +50,15 @@ public final class BounceCapGameTests {
         BlockState cap = ModBlocks.BOUNCE_CAP.get().defaultBlockState();
         for (Block soil : List.of(ModBlocks.END_TURF.get(), Blocks.END_STONE, ModBlocks.VOIDSOIL.get())) {
             helper.setBlock(pos.below(), soil);
-            helper.assertTrue(cap.canSurvive(helper.getLevel(), helper.absolutePos(pos)), "bounce cap should survive on " + soil);
+            helper.assertTrue(
+                    cap.canSurvive(helper.getLevel(), helper.absolutePos(pos)), "bounce cap should survive on " + soil);
         }
-        for (Block soil : List.of(Blocks.STONE, Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.AIR, ModBlocks.BOUNCE_CAP.get())) {
+        for (Block soil :
+                List.of(Blocks.STONE, Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.AIR, ModBlocks.BOUNCE_CAP.get())) {
             helper.setBlock(pos.below(), soil);
-            helper.assertFalse(cap.canSurvive(helper.getLevel(), helper.absolutePos(pos)), "bounce cap should not survive on " + soil);
+            helper.assertFalse(
+                    cap.canSurvive(helper.getLevel(), helper.absolutePos(pos)),
+                    "bounce cap should not survive on " + soil);
         }
         // It pops off when its soil goes away, and it never spreads.
         helper.setBlock(pos.below(), Blocks.END_STONE);
@@ -72,11 +75,14 @@ public final class BounceCapGameTests {
         BlockState state = helper.getBlockState(CAP);
         for (ItemStack tool : List.of(ItemStack.EMPTY, new ItemStack(Items.IRON_AXE))) {
             List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), helper.absolutePos(CAP), null, null, tool);
-            helper.assertTrue(drops.size() == 1 && drops.get(0).is(ModBlocks.BOUNCE_CAP.get().asItem()),
+            helper.assertTrue(
+                    drops.size() == 1
+                            && drops.get(0).is(ModBlocks.BOUNCE_CAP.get().asItem()),
                     "bounce cap should drop itself with " + tool + ", got " + drops);
         }
         helper.assertTrue(new ItemStack(Items.IRON_AXE).isCorrectToolForDrops(state), "axes should mine bounce caps");
-        helper.assertTrue(new ItemStack(Items.IRON_AXE).getDestroySpeed(state) > 1.0F, "axes should mine bounce caps faster");
+        helper.assertTrue(
+                new ItemStack(Items.IRON_AXE).getDestroySpeed(state) > 1.0F, "axes should mine bounce caps faster");
         helper.succeed();
     }
 
@@ -88,7 +94,8 @@ public final class BounceCapGameTests {
             MobEffectInstance effect = pig.getEffect(MobEffects.SLOW_FALLING);
             helper.assertTrue(effect != null, "a pig standing on a bounce cap should get Slow Falling");
             helper.assertFalse(effect.isVisible(), "Slow Falling particles should be hidden");
-            helper.assertTrue(effect.getDuration() > BounceCapBlock.SLOW_FALLING_TICKS - 2,
+            helper.assertTrue(
+                    effect.getDuration() > BounceCapBlock.SLOW_FALLING_TICKS - 2,
                     "Slow Falling should be refreshed every tick, got " + effect.getDuration());
         });
     }
@@ -112,7 +119,8 @@ public final class BounceCapGameTests {
         helper.succeedWhen(() -> {
             helper.assertTrue(jumped[0] && player.getDeltaMovement().y < 0.0, "still rising");
             double apex = maxY[0] - base;
-            helper.assertTrue(apex >= 11.0 && apex <= 13.0, "apex should be about 12 blocks above the cap, got " + apex);
+            helper.assertTrue(
+                    apex >= 11.0 && apex <= 13.0, "apex should be about 12 blocks above the cap, got " + apex);
             player.discard();
         });
     }
@@ -137,7 +145,8 @@ public final class BounceCapGameTests {
         LivingEntity pig = helper.spawn(EntityType.PIG, CAP.above(21));
         helper.succeedWhen(() -> {
             helper.assertTrue(pig.onGround(), "still falling");
-            helper.assertTrue(pig.isAlive() && pig.getHealth() == pig.getMaxHealth(),
+            helper.assertTrue(
+                    pig.isAlive() && pig.getHealth() == pig.getMaxHealth(),
                     "falling 20 blocks onto a bounce cap should cause no damage, health " + pig.getHealth());
         });
     }
@@ -146,7 +155,8 @@ public final class BounceCapGameTests {
     public static void fallOntoEndStoneHurts(GameTestHelper helper) {
         helper.setBlock(CAP, Blocks.END_STONE);
         LivingEntity pig = helper.spawn(EntityType.PIG, CAP.above(21));
-        helper.succeedWhen(() -> helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(),
+        helper.succeedWhen(() -> helper.assertTrue(
+                !pig.isAlive() || pig.getHealth() < pig.getMaxHealth(),
                 "control: a 20-block fall onto end stone should hurt"));
     }
 }

@@ -18,18 +18,18 @@ public final class ModFeatures {
     public static final RegistrySupplier<HugeGlowcapFeature> HUGE_GLOWCAP = ModRegistries.FEATURES.register(
             "huge_glowcap", () -> new HugeGlowcapFeature(HugeMushroomFeatureConfiguration.CODEC));
 
-    public static final RegistrySupplier<AstralTreeFeature> ASTRAL_TREE = ModRegistries.FEATURES.register(
-            "astral_tree", () -> new AstralTreeFeature(AstralTreeConfiguration.CODEC));
+    public static final RegistrySupplier<AstralTreeFeature> ASTRAL_TREE =
+            ModRegistries.FEATURES.register("astral_tree", () -> new AstralTreeFeature(AstralTreeConfiguration.CODEC));
 
     public static final RegistrySupplier<BounceCapClusterFeature> BOUNCE_CAP_CLUSTER = ModRegistries.FEATURES.register(
             "bounce_cap_cluster", () -> new BounceCapClusterFeature(BounceCapClusterConfiguration.CODEC));
 
-    public static final RegistrySupplier<OasisPoolFeature> OASIS_POOL = ModRegistries.FEATURES.register(
-            "oasis_pool", () -> new OasisPoolFeature(OasisPoolConfiguration.CODEC));
+    public static final RegistrySupplier<OasisPoolFeature> OASIS_POOL =
+            ModRegistries.FEATURES.register("oasis_pool", () -> new OasisPoolFeature(OasisPoolConfiguration.CODEC));
 
     public static final RegistrySupplier<UnderIslandFoliageFeature> UNDER_ISLAND_FOLIAGE =
-            ModRegistries.FEATURES.register("under_island_foliage",
-                    () -> new UnderIslandFoliageFeature(UnderIslandFoliageConfiguration.CODEC));
+            ModRegistries.FEATURES.register(
+                    "under_island_foliage", () -> new UnderIslandFoliageFeature(UnderIslandFoliageConfiguration.CODEC));
 
     /** Density function type used by the End noise settings override (US-012). */
     public static final RegistrySupplier<MapCodec<ElevationBandsFunction>> ELEVATION_BANDS =
@@ -55,11 +55,10 @@ public final class ModFeatures {
             configured("under_island_foliage");
 
     /** Placed in about 10% of vanilla {@code end_highlands} regions through a biome modification (US-017). */
-    public static final ResourceKey<PlacedFeature> END_HIGHLANDS_UNDER_ISLAND_FOLIAGE = ResourceKey.create(
-            Registries.PLACED_FEATURE, SomeonesPerfectEnd.id("end_highlands_under_island_foliage"));
+    public static final ResourceKey<PlacedFeature> END_HIGHLANDS_UNDER_ISLAND_FOLIAGE =
+            ResourceKey.create(Registries.PLACED_FEATURE, SomeonesPerfectEnd.id("end_highlands_under_island_foliage"));
 
-    private ModFeatures() {
-    }
+    private ModFeatures() {}
 
     private static ResourceKey<ConfiguredFeature<?, ?>> configured(String name) {
         return ResourceKey.create(Registries.CONFIGURED_FEATURE, SomeonesPerfectEnd.id(name));
@@ -67,8 +66,12 @@ public final class ModFeatures {
 
     /** Loads this class so its entries are added to the deferred registers, and adds features to vanilla biomes. */
     public static void init() {
-        BiomeModifications.addProperties(context -> context.getKey().filter(Biomes.END_HIGHLANDS.location()::equals)
-                .isPresent(), (context, properties) -> properties.getGenerationProperties().addFeature(
-                        GenerationStep.Decoration.VEGETAL_DECORATION, END_HIGHLANDS_UNDER_ISLAND_FOLIAGE));
+        BiomeModifications.addProperties(
+                context -> context.getKey()
+                        .filter(Biomes.END_HIGHLANDS.location()::equals)
+                        .isPresent(),
+                (context, properties) -> properties
+                        .getGenerationProperties()
+                        .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, END_HIGHLANDS_UNDER_ISLAND_FOLIAGE));
     }
 }

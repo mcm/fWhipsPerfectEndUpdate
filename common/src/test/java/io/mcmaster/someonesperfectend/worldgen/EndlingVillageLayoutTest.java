@@ -32,11 +32,13 @@ class EndlingVillageLayoutTest {
                 assertTrue(chebyshev(a.dx(), a.dz()) + ROOF_HALF <= EndlingVillageLayout.RADIUS, "hut outside radius");
                 for (int j = i + 1; j < huts.size(); j++) {
                     EndlingVillageLayout.Hut b = huts.get(j);
-                    assertTrue(chebyshev(a.dx() - b.dx(), a.dz() - b.dz()) > 2 * ROOF_HALF,
+                    assertTrue(
+                            chebyshev(a.dx() - b.dx(), a.dz() - b.dz()) > 2 * ROOF_HALF,
                             "hut roofs overlap, seed " + seed);
                 }
                 for (EndlingVillageLayout.Site cap : glowcaps) {
-                    assertTrue(chebyshev(a.dx() - cap.dx(), a.dz() - cap.dz()) > ROOF_HALF + CAP_HALF,
+                    assertTrue(
+                            chebyshev(a.dx() - cap.dx(), a.dz() - cap.dz()) > ROOF_HALF + CAP_HALF,
                             "hut overlaps a glowcap, seed " + seed);
                 }
             }
@@ -44,7 +46,8 @@ class EndlingVillageLayoutTest {
                 for (int j = i + 1; j < glowcaps.size(); j++) {
                     EndlingVillageLayout.Site a = glowcaps.get(i);
                     EndlingVillageLayout.Site b = glowcaps.get(j);
-                    assertTrue(chebyshev(a.dx() - b.dx(), a.dz() - b.dz()) > 2 * CAP_HALF,
+                    assertTrue(
+                            chebyshev(a.dx() - b.dx(), a.dz() - b.dz()) > 2 * CAP_HALF,
                             "glowcaps overlap, seed " + seed);
                 }
             }

@@ -23,13 +23,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(CreativeModeInventoryScreen.class)
 public abstract class CreativeModeInventoryScreenMixin
         extends AbstractContainerScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
-    private static final String NEW_SLOT_WRAPPER = "Lnet/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$SlotWrapper;<init>(Lnet/minecraft/world/inventory/Slot;III)V";
+    private static final String NEW_SLOT_WRAPPER =
+            "Lnet/minecraft/client/gui/screens/inventory/CreativeModeInventoryScreen$SlotWrapper;<init>(Lnet/minecraft/world/inventory/Slot;III)V";
 
     @Shadow
     private static CreativeModeTab selectedTab;
 
-    private CreativeModeInventoryScreenMixin(CreativeModeInventoryScreen.ItemPickerMenu menu, Inventory inventory,
-            Component title) {
+    private CreativeModeInventoryScreenMixin(
+            CreativeModeInventoryScreen.ItemPickerMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
     }
 
@@ -44,11 +45,11 @@ public abstract class CreativeModeInventoryScreenMixin
     }
 
     @Inject(method = "renderBg", at = @At("TAIL"))
-    private void someonesperfectend$drawTrinketSlot(GuiGraphics graphics, float partialTick, int mouseX, int mouseY,
-            CallbackInfo ci) {
+    private void someonesperfectend$drawTrinketSlot(
+            GuiGraphics graphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
         if (selectedTab.getType() == CreativeModeTab.Type.INVENTORY) {
-            TrinketSlotClient.drawSlotFrame(graphics, this.leftPos + TrinketSlotClient.CREATIVE_X,
-                    this.topPos + TrinketSlotClient.CREATIVE_Y);
+            TrinketSlotClient.drawSlotFrame(
+                    graphics, this.leftPos + TrinketSlotClient.CREATIVE_X, this.topPos + TrinketSlotClient.CREATIVE_Y);
         }
     }
 }

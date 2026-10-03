@@ -15,8 +15,7 @@ public final class VoidCleansingRules {
     /** The {@code enchantClue} value marking the Void Cleansing offer (vanilla uses -1 for "no clue"). */
     public static final int CLUE = -2;
 
-    private VoidCleansingRules() {
-    }
+    private VoidCleansingRules() {}
 
     /** Whether the table offers Void Cleansing for an item with this repair cost. */
     public static boolean offered(int repairCost, int power) {

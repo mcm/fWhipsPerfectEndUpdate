@@ -94,6 +94,7 @@ public class Endling extends PathfinderMob {
     private int refusals;
     /** Ids of dropped items this endling has already refused, so it doesn't walk back to them or refuse them again. */
     private final Set<Integer> refusedItems = new HashSet<>();
+
     @Nullable
     private BlockPos village;
 
@@ -104,9 +105,7 @@ public class Endling extends PathfinderMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 20.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.25);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 20.0).add(Attributes.MOVEMENT_SPEED, 0.25);
     }
 
     @Override
@@ -169,7 +168,8 @@ public class Endling extends PathfinderMob {
             }
             if (!refusedItems.isEmpty() && tickCount % 20 == 0) {
                 double forget = BARTER_SEARCH_RANGE * 2.0;
-                refusedItems.removeIf(id -> !(level().getEntity(id) instanceof ItemEntity item) || item.isRemoved()
+                refusedItems.removeIf(id -> !(level().getEntity(id) instanceof ItemEntity item)
+                        || item.isRemoved()
                         || distanceToSqr(item) > forget * forget);
             }
         }
@@ -180,7 +180,8 @@ public class Endling extends PathfinderMob {
         super.aiStep();
         if (!level().isClientSide && isAlive() && wantsToBarter()) {
             // Same reach as vanilla mob item pickup.
-            for (ItemEntity item : level().getEntitiesOfClass(ItemEntity.class, getBoundingBox().inflate(1.0, 0.0, 1.0))) {
+            for (ItemEntity item : level().getEntitiesOfClass(
+                            ItemEntity.class, getBoundingBox().inflate(1.0, 0.0, 1.0))) {
                 if (!item.isRemoved() && !item.hasPickUpDelay() && EndlingBarters.isInput(item.getItem())) {
                     if (!EndlingBarters.mayBarter(item.getOwner())) {
                         if (refusedItems.add(item.getId())) {
@@ -263,7 +264,9 @@ public class Endling extends PathfinderMob {
         // Lost or out of the End since it took the item: hand it back instead.
         List<ItemStack> output = canBarter() && table != null ? EndlingBarters.roll(this, table) : List.of(input);
         Player player = nearestPlayer(16.0);
-        Vec3 target = player != null ? player.position() : position().add(getLookAngle().scale(2.0));
+        Vec3 target = player != null
+                ? player.position()
+                : position().add(getLookAngle().scale(2.0));
         for (ItemStack stack : output) {
             BehaviorUtils.throwItem(this, stack, target.add(0.0, 1.0, 0.0));
         }
@@ -272,9 +275,10 @@ public class Endling extends PathfinderMob {
     /** Uses entity lookups (not {@code level.players()}) so GameTest mock players count. */
     @Nullable
     private Player nearestPlayer(double range) {
-        List<Player> players = level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(range),
-                p -> !p.isSpectator() && p.isAlive());
-        return level().getNearestEntity(players, TargetingConditions.forNonCombat().ignoreLineOfSight(), this, getX(), getY(), getZ());
+        List<Player> players = level().getEntitiesOfClass(
+                        Player.class, getBoundingBox().inflate(range), p -> !p.isSpectator() && p.isAlive());
+        return level().getNearestEntity(
+                        players, TargetingConditions.forNonCombat().ignoreLineOfSight(), this, getX(), getY(), getZ());
     }
 
     /**
@@ -368,8 +372,9 @@ public class Endling extends PathfinderMob {
         if (tag.getBoolean(TAG_LOST)) {
             setLost();
         } else {
-            NbtUtils.readBlockPos(tag, TAG_VILLAGE).ifPresent(pos -> setVillage(pos,
-                    tag.contains(TAG_VILLAGE_RADIUS) ? tag.getInt(TAG_VILLAGE_RADIUS) : VILLAGE_RADIUS));
+            NbtUtils.readBlockPos(tag, TAG_VILLAGE)
+                    .ifPresent(pos -> setVillage(
+                            pos, tag.contains(TAG_VILLAGE_RADIUS) ? tag.getInt(TAG_VILLAGE_RADIUS) : VILLAGE_RADIUS));
         }
     }
 
@@ -433,7 +438,8 @@ public class Endling extends PathfinderMob {
 
         @Override
         public void tick() {
-            Vec3 ahead = position().add(Vec3.directionFromRotation(0.0F, yBodyRot).scale(0.6));
+            Vec3 ahead =
+                    position().add(Vec3.directionFromRotation(0.0F, yBodyRot).scale(0.6));
             getLookControl().setLookAt(ahead.x, getY() + 0.3, ahead.z);
         }
     }
@@ -452,10 +458,12 @@ public class Endling extends PathfinderMob {
             if (!wantsToBarter() || getRandom().nextInt(reducedTickDelay(5)) != 0) {
                 return false;
             }
-            List<ItemEntity> items = level().getEntitiesOfClass(ItemEntity.class,
-                    getBoundingBox().inflate(BARTER_SEARCH_RANGE, 4.0, BARTER_SEARCH_RANGE),
-                    item -> EndlingBarters.isInput(item.getItem()) && (!refusedItems.contains(item.getId())
-                            || EndlingBarters.mayBarter(item.getOwner())));
+            List<ItemEntity> items = level().getEntitiesOfClass(
+                            ItemEntity.class,
+                            getBoundingBox().inflate(BARTER_SEARCH_RANGE, 4.0, BARTER_SEARCH_RANGE),
+                            item -> EndlingBarters.isInput(item.getItem())
+                                    && (!refusedItems.contains(item.getId())
+                                            || EndlingBarters.mayBarter(item.getOwner())));
             target = null;
             double best = Double.MAX_VALUE;
             for (ItemEntity item : items) {
@@ -470,7 +478,10 @@ public class Endling extends PathfinderMob {
 
         @Override
         public boolean canContinueToUse() {
-            return target != null && target.isAlive() && wantsToBarter() && !getNavigation().isDone();
+            return target != null
+                    && target.isAlive()
+                    && wantsToBarter()
+                    && !getNavigation().isDone();
         }
 
         @Override

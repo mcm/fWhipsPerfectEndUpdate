@@ -14,7 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class BrewingStandBlockEntityMixin {
     @Inject(method = "canPlaceItem", at = @At("RETURN"), cancellable = true)
     private void someonesperfectend$acceptOasisWater(int slot, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValueZ() && slot < 3 && stack.is(ModFluids.OASIS_WATER_BOTTLE.get())
+        if (!cir.getReturnValueZ()
+                && slot < 3
+                && stack.is(ModFluids.OASIS_WATER_BOTTLE.get())
                 && ((Container) this).getItem(slot).isEmpty()) {
             cir.setReturnValue(true);
         }

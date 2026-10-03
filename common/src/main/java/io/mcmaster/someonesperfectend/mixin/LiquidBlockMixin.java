@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LiquidBlock.class)
 public abstract class LiquidBlockMixin {
     @Inject(method = "shouldSpreadLiquid", at = @At("HEAD"), cancellable = true)
-    private void someonesperfectend$oasisWaterLava(Level level, BlockPos pos, BlockState state,
-            CallbackInfoReturnable<Boolean> cir) {
+    private void someonesperfectend$oasisWaterLava(
+            Level level, BlockPos pos, BlockState state, CallbackInfoReturnable<Boolean> cir) {
         if (OasisWaterInteractions.tryLavaInteraction(level, pos)) {
             cir.setReturnValue(false);
         }

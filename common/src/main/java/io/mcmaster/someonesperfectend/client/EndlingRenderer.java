@@ -19,8 +19,8 @@ public class EndlingRenderer extends MobRenderer<Endling, EndlingModel> {
     private static final ResourceLocation TEXTURE = SomeonesPerfectEnd.id("textures/entity/endling/endling.png");
     private static final ResourceLocation LOST_TEXTURE =
             SomeonesPerfectEnd.id("textures/entity/endling/endling_lost.png");
-    private static final RenderType EYES = RenderType.eyes(
-            SomeonesPerfectEnd.id("textures/entity/endling/endling_eyes.png"));
+    private static final RenderType EYES =
+            RenderType.eyes(SomeonesPerfectEnd.id("textures/entity/endling/endling_eyes.png"));
 
     public EndlingRenderer(EntityRendererProvider.Context context) {
         super(context, new EndlingModel(context.bakeLayer(EndlingModel.LAYER)), 0.45F);
@@ -31,12 +31,29 @@ public class EndlingRenderer extends MobRenderer<Endling, EndlingModel> {
             }
 
             @Override
-            public void render(PoseStack poseStack, MultiBufferSource buffers, int packedLight, Endling entity,
-                    float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw,
+            public void render(
+                    PoseStack poseStack,
+                    MultiBufferSource buffers,
+                    int packedLight,
+                    Endling entity,
+                    float limbSwing,
+                    float limbSwingAmount,
+                    float partialTick,
+                    float ageInTicks,
+                    float netHeadYaw,
                     float headPitch) {
                 if (!entity.isLost()) {
-                    super.render(poseStack, buffers, packedLight, entity, limbSwing, limbSwingAmount, partialTick,
-                            ageInTicks, netHeadYaw, headPitch);
+                    super.render(
+                            poseStack,
+                            buffers,
+                            packedLight,
+                            entity,
+                            limbSwing,
+                            limbSwingAmount,
+                            partialTick,
+                            ageInTicks,
+                            netHeadYaw,
+                            headPitch);
                 }
             }
         });

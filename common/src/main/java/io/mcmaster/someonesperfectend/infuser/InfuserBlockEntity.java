@@ -19,8 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * {@link BeaconBlockEntity#tick}) that opens an {@link InfuserMenu} instead of a beacon menu.
  */
 public class InfuserBlockEntity extends BeaconBlockEntity {
-    public static final Component DEFAULT_NAME = Component.translatable(
-            "container." + SomeonesPerfectEnd.MOD_ID + ".infuser");
+    public static final Component DEFAULT_NAME =
+            Component.translatable("container." + SomeonesPerfectEnd.MOD_ID + ".infuser");
 
     public InfuserBlockEntity(BlockPos pos, BlockState state) {
         super(pos, state);
@@ -40,7 +40,10 @@ public class InfuserBlockEntity extends BeaconBlockEntity {
         if (!BaseContainerBlockEntity.canUnlock(player, beacon.someonesperfectend$lockKey(), getDisplayName())) {
             return null;
         }
-        return new InfuserMenu(containerId, inventory, beacon.someonesperfectend$dataAccess(),
+        return new InfuserMenu(
+                containerId,
+                inventory,
+                beacon.someonesperfectend$dataAccess(),
                 ContainerLevelAccess.create(level, getBlockPos()));
     }
 

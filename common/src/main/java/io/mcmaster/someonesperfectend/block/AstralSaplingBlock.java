@@ -20,8 +20,11 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class AstralSaplingBlock extends SaplingBlock {
     public static final MapCodec<AstralSaplingBlock> CODEC = simpleCodec(AstralSaplingBlock::new);
-    public static final TreeGrower TREE_GROWER = new TreeGrower(SomeonesPerfectEnd.id("astral").toString(),
-            Optional.empty(), Optional.of(ModFeatures.ASTRAL_TREE_CONFIGURED), Optional.empty());
+    public static final TreeGrower TREE_GROWER = new TreeGrower(
+            SomeonesPerfectEnd.id("astral").toString(),
+            Optional.empty(),
+            Optional.of(ModFeatures.ASTRAL_TREE_CONFIGURED),
+            Optional.empty());
     /** Free (air or replaceable) blocks needed directly above the sapling for it to grow. */
     public static final int CLEARANCE = 2;
 

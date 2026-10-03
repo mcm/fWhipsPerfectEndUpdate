@@ -33,16 +33,19 @@ public final class EndCityGameTests {
     private static final long SEED = 20260928L;
     private static final LevelHeightAccessor END_HEIGHT = LevelHeightAccessor.create(0, 256);
 
-    private EndCityGameTests() {
-    }
+    private EndCityGameTests() {}
 
     /** A fixed-seed 4096×4096 outer area has End City starts in at least 2 bands, each at its band's height. */
     @GameTest(timeoutTicks = 400)
     public static void endCitiesInSeveralBands(GameTestHelper helper) {
         MinecraftServer server = helper.getLevel().getServer();
-        Cities ours = Cities.create(server, server.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS)
-                .getOrThrow(NoiseGeneratorSettings.END));
-        ElevationBandsFunction bands = ElevationBandsFunction.find(ours.randomState()).orElseThrow();
+        Cities ours = Cities.create(
+                server,
+                server.registryAccess()
+                        .registryOrThrow(Registries.NOISE_SETTINGS)
+                        .getOrThrow(NoiseGeneratorSettings.END));
+        ElevationBandsFunction bands =
+                ElevationBandsFunction.find(ours.randomState()).orElseThrow();
         int[] counts = new int[3];
         long[] sums = new long[3];
         for (BlockPos start : ours.starts(2048, -2048, 4096)) {
@@ -70,14 +73,18 @@ public final class EndCityGameTests {
     @GameTest(timeoutTicks = 400)
     public static void endCityFrequencyMatchesVanilla(GameTestHelper helper) {
         MinecraftServer server = helper.getLevel().getServer();
-        Cities ours = Cities.create(server, server.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS)
-                .getOrThrow(NoiseGeneratorSettings.END));
+        Cities ours = Cities.create(
+                server,
+                server.registryAccess()
+                        .registryOrThrow(Registries.NOISE_SETTINGS)
+                        .getOrThrow(NoiseGeneratorSettings.END));
         Cities vanilla = Cities.create(server, ElevationBandGameTests.vanillaEndSettings(server));
         int ourCount = ours.starts(2048, -4096, 8192).size();
         int vanillaCount = vanilla.starts(2048, -4096, 8192).size();
         LOGGER.info("End City starts over 8192x8192: {} (vanilla terrain {})", ourCount, vanillaCount);
         helper.assertTrue(vanillaCount >= 20, "Too few vanilla End Cities to compare: " + vanillaCount);
-        helper.assertTrue(Math.abs(ourCount - vanillaCount) <= 0.2 * vanillaCount,
+        helper.assertTrue(
+                Math.abs(ourCount - vanillaCount) <= 0.2 * vanillaCount,
                 "End City count " + ourCount + " is not within 20% of vanilla " + vanillaCount);
         helper.succeed();
     }
@@ -87,17 +94,27 @@ public final class EndCityGameTests {
     }
 
     /** The vanilla End City structure and structure set, run on a standalone fixed-seed End generator. */
-    private record Cities(RegistryAccess access, NoiseBasedChunkGenerator generator, RandomState randomState,
-            Structure structure, RandomSpreadStructurePlacement placement, MinecraftServer server) {
+    private record Cities(
+            RegistryAccess access,
+            NoiseBasedChunkGenerator generator,
+            RandomState randomState,
+            Structure structure,
+            RandomSpreadStructurePlacement placement,
+            MinecraftServer server) {
         static Cities create(MinecraftServer server, NoiseGeneratorSettings settings) {
             RegistryAccess access = server.registryAccess();
-            TheEndBiomeSource biomes = TheEndBiomeSource.create(access.registryOrThrow(Registries.BIOME).asLookup());
+            TheEndBiomeSource biomes = TheEndBiomeSource.create(
+                    access.registryOrThrow(Registries.BIOME).asLookup());
             ((IExtendedTheEndBiomeSource) biomes).initializeForTerraBlender(access, SEED);
-            StructureSet set = access.registryOrThrow(Registries.STRUCTURE_SET).getOrThrow(BuiltinStructureSets.END_CITIES);
-            return new Cities(access, new NoiseBasedChunkGenerator(biomes, Holder.direct(settings)),
+            StructureSet set =
+                    access.registryOrThrow(Registries.STRUCTURE_SET).getOrThrow(BuiltinStructureSets.END_CITIES);
+            return new Cities(
+                    access,
+                    new NoiseBasedChunkGenerator(biomes, Holder.direct(settings)),
                     RandomState.create(settings, access.lookupOrThrow(Registries.NOISE), SEED),
                     access.registryOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.END_CITY),
-                    (RandomSpreadStructurePlacement) set.placement(), server);
+                    (RandomSpreadStructurePlacement) set.placement(),
+                    server);
         }
 
         /** Start positions of End Cities whose candidate chunk lies in the square [x, x + size) × [z, z + size). */
@@ -111,13 +128,22 @@ public final class EndCityGameTests {
             for (int rx = minRegionX; rx <= maxRegionX; rx++) {
                 for (int rz = minRegionZ; rz <= maxRegionZ; rz++) {
                     ChunkPos chunk = placement.getPotentialStructureChunk(SEED, rx * spacing, rz * spacing);
-                    if (chunk.getMinBlockX() < minX || chunk.getMinBlockX() >= minX + size
-                            || chunk.getMinBlockZ() < minZ || chunk.getMinBlockZ() >= minZ + size) {
+                    if (chunk.getMinBlockX() < minX
+                            || chunk.getMinBlockX() >= minX + size
+                            || chunk.getMinBlockZ() < minZ
+                            || chunk.getMinBlockZ() >= minZ + size) {
                         continue;
                     }
-                    Structure.GenerationContext context = new Structure.GenerationContext(access, generator,
-                            generator.getBiomeSource(), randomState, server.getStructureManager(), SEED, chunk,
-                            END_HEIGHT, structure.biomes()::contains);
+                    Structure.GenerationContext context = new Structure.GenerationContext(
+                            access,
+                            generator,
+                            generator.getBiomeSource(),
+                            randomState,
+                            server.getStructureManager(),
+                            SEED,
+                            chunk,
+                            END_HEIGHT,
+                            structure.biomes()::contains);
                     Optional<Structure.GenerationStub> stub = structure.findValidGenerationPoint(context);
                     stub.ifPresent(s -> starts.add(s.position()));
                 }

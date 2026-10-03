@@ -21,8 +21,12 @@ public final class EffectTotems {
 
     /** Present on a totem once it has been activated with netherite at a tier-4 Infuser in the End. */
     public static final RegistrySupplier<DataComponentType<Unit>> TOTEM_ACTIVATED =
-            ModRegistries.DATA_COMPONENT_TYPES.register("totem_activated", () -> DataComponentType.<Unit>builder()
-                    .persistent(Unit.CODEC).networkSynchronized(StreamCodec.unit(Unit.INSTANCE)).build());
+            ModRegistries.DATA_COMPONENT_TYPES.register(
+                    "totem_activated",
+                    () -> DataComponentType.<Unit>builder()
+                            .persistent(Unit.CODEC)
+                            .networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
+                            .build());
 
     public static final RegistrySupplier<EffectTotemItem> TOTEM_OF_SPEED = totem("speed", InfusionEffect.SPEED);
     public static final RegistrySupplier<EffectTotemItem> TOTEM_OF_HASTE = totem("haste", InfusionEffect.HASTE);
@@ -33,15 +37,16 @@ public final class EffectTotems {
     public static final RegistrySupplier<EffectTotemItem> TOTEM_OF_STRENGTH =
             totem("strength", InfusionEffect.STRENGTH);
 
-    public static final List<RegistrySupplier<EffectTotemItem>> ALL = List.of(TOTEM_OF_SPEED, TOTEM_OF_HASTE,
-            TOTEM_OF_RESISTANCE, TOTEM_OF_JUMP_BOOST, TOTEM_OF_STRENGTH);
+    public static final List<RegistrySupplier<EffectTotemItem>> ALL =
+            List.of(TOTEM_OF_SPEED, TOTEM_OF_HASTE, TOTEM_OF_RESISTANCE, TOTEM_OF_JUMP_BOOST, TOTEM_OF_STRENGTH);
 
-    private EffectTotems() {
-    }
+    private EffectTotems() {}
 
     private static RegistrySupplier<EffectTotemItem> totem(String name, InfusionEffect effect) {
-        return ModRegistries.item("totem_of_" + name, () -> new EffectTotemItem(effect,
-                ModRegistries.itemProperties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+        return ModRegistries.item(
+                "totem_of_" + name,
+                () -> new EffectTotemItem(
+                        effect, ModRegistries.itemProperties().stacksTo(1).rarity(Rarity.UNCOMMON)));
     }
 
     public static boolean isActive(ItemStack stack) {

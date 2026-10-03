@@ -39,8 +39,10 @@ public final class RecolorPackResources implements PackResources {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private final PackLocationInfo location = new PackLocationInfo(PACK_ID,
-            Component.literal("Someone's Perfect End Update: generated textures"), PackSource.BUILT_IN,
+    private final PackLocationInfo location = new PackLocationInfo(
+            PACK_ID,
+            Component.literal("Someone's Perfect End Update: generated textures"),
+            PackSource.BUILT_IN,
             Optional.empty());
     private final Map<ResourceLocation, byte[]> files;
 
@@ -53,7 +55,8 @@ public final class RecolorPackResources implements PackResources {
      * {@code packs} unchanged when there is nothing to generate.
      */
     public static List<PackResources> prependTo(List<PackResources> packs) {
-        List<PackResources> others = packs.stream().filter(p -> !(p instanceof RecolorPackResources)).toList();
+        List<PackResources> others =
+                packs.stream().filter(p -> !(p instanceof RecolorPackResources)).toList();
         RecolorPackResources generated;
         try {
             generated = generate(others);
@@ -74,15 +77,20 @@ public final class RecolorPackResources implements PackResources {
     public static RecolorPackResources generate(List<PackResources> packs) {
         long start = System.nanoTime();
         List<RecolorRecipe> recipes = loadRecipes(packs);
-        RecolorGenerator.Result result = RecolorGenerator.generate(recipes,
+        RecolorGenerator.Result result = RecolorGenerator.generate(
+                recipes,
                 id -> findSource(packs, id),
                 id -> packs.stream().anyMatch(p -> hasFile(p, id.namespace(), id.pngPath())));
         result.errors().forEach(LOGGER::warn);
         Map<ResourceLocation, byte[]> files = new TreeMap<>();
-        result.files().forEach((file, bytes) ->
-                files.put(ResourceLocation.fromNamespaceAndPath(file.namespace(), file.path()), bytes));
-        LOGGER.info("Recolor: generated {} textures ({} replaced by real PNGs, {} errors) in {} ms",
-                result.generated().size(), result.overridden().size(), result.errors().size(),
+        result.files()
+                .forEach((file, bytes) ->
+                        files.put(ResourceLocation.fromNamespaceAndPath(file.namespace(), file.path()), bytes));
+        LOGGER.info(
+                "Recolor: generated {} textures ({} replaced by real PNGs, {} errors) in {} ms",
+                result.generated().size(),
+                result.overridden().size(),
+                result.errors().size(),
                 (System.nanoTime() - start) / 1_000_000);
         return new RecolorPackResources(files);
     }
@@ -91,8 +99,8 @@ public final class RecolorPackResources implements PackResources {
     private static List<RecolorRecipe> loadRecipes(List<PackResources> packs) {
         Map<ResourceLocation, IoSupplier<InputStream>> recipeFiles = new TreeMap<>();
         for (PackResources pack : packs) {
-            pack.listResources(PackType.CLIENT_RESOURCES, SomeonesPerfectEnd.MOD_ID, RECIPE_DIRECTORY,
-                    (id, supplier) -> {
+            pack.listResources(
+                    PackType.CLIENT_RESOURCES, SomeonesPerfectEnd.MOD_ID, RECIPE_DIRECTORY, (id, supplier) -> {
                         if (id.getPath().endsWith(".json")) {
                             recipeFiles.put(id, supplier);
                         }
@@ -118,8 +126,8 @@ public final class RecolorPackResources implements PackResources {
             IoSupplier<InputStream> supplier = pack.getResource(PackType.CLIENT_RESOURCES, png);
             if (supplier != null) {
                 IoSupplier<InputStream> meta = pack.getResource(PackType.CLIENT_RESOURCES, mcmeta);
-                return Optional.of(new RecolorGenerator.SourceTexture(readAll(supplier),
-                        meta == null ? Optional.empty() : Optional.of(readAll(meta))));
+                return Optional.of(new RecolorGenerator.SourceTexture(
+                        readAll(supplier), meta == null ? Optional.empty() : Optional.of(readAll(meta))));
             }
         }
         return Optional.empty();
@@ -186,6 +194,5 @@ public final class RecolorPackResources implements PackResources {
     }
 
     @Override
-    public void close() {
-    }
+    public void close() {}
 }

@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class PlayerMixin implements BeaconEffectTracker.Tracking, EnderBedLocations.Holder {
     @Unique
     private final Map<Holder<MobEffect>, Map<Integer, Long>> someonesperfectend$beaconEffects = new HashMap<>();
+
     @Unique
     private final EnderBedLocations someonesperfectend$enderBeds = new EnderBedLocations();
 

@@ -11,8 +11,10 @@ public final class SomeonesPerfectEndFabricClient implements ClientModInitialize
     public void onInitializeClient() {
         SomeonesPerfectEndClient.init();
         // Fixed textures and no tint: Oasis Water looks the same in every biome.
-        FluidRenderHandlerRegistry.INSTANCE.register(ModFluids.OASIS_WATER.get(), ModFluids.FLOWING_OASIS_WATER.get(),
-                new SimpleFluidRenderHandler(ModFluids.STILL_TEXTURE, ModFluids.FLOWING_TEXTURE,
-                        ModFluids.OVERLAY_TEXTURE));
+        FluidRenderHandlerRegistry.INSTANCE.register(
+                ModFluids.OASIS_WATER.get(),
+                ModFluids.FLOWING_OASIS_WATER.get(),
+                new SimpleFluidRenderHandler(
+                        ModFluids.STILL_TEXTURE, ModFluids.FLOWING_TEXTURE, ModFluids.OVERLAY_TEXTURE));
     }
 }

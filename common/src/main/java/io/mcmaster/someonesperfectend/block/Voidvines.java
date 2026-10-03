@@ -34,12 +34,12 @@ public final class Voidvines {
     public static final float FRUIT_CHANCE = 0.1F;
     /** Chance that a newly grown segment already carries fruit. */
     public static final float NEW_SEGMENT_FRUIT_CHANCE = 0.11F;
+
     public static final int FRUIT_LIGHT = 8;
     /** Vines never grow lower than this many blocks above the bottom of the world (Y=5 in the End). */
     public static final int MIN_HEIGHT_ABOVE_BOTTOM = 5;
 
-    private Voidvines() {
-    }
+    private Voidvines() {}
 
     public static boolean isVine(BlockState state) {
         return state.is(ModBlocks.VOIDVINE_HEAD.get()) || state.is(ModBlocks.VOIDVINE_BODY.get());

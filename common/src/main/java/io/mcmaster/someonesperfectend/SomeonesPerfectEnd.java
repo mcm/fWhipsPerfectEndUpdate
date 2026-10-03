@@ -20,8 +20,7 @@ public final class SomeonesPerfectEnd {
     public static final String MOD_ID = "someonesperfectend";
     public static final String MOD_NAME = "Someone's Perfect End Update";
 
-    private SomeonesPerfectEnd() {
-    }
+    private SomeonesPerfectEnd() {}
 
     /** Common init; called from each loader's entrypoint during mod construction. */
     public static void init() {

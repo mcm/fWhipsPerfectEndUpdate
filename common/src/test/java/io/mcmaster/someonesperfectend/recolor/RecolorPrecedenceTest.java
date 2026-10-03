@@ -32,21 +32,28 @@ class RecolorPrecedenceTest {
     void everythingIsGeneratedWithoutRealPngs() {
         RecolorRecipe a = recipe("someonesperfectend:block/a", PALETTE);
         RecolorRecipe b = recipe("someonesperfectend:block/b", PALETTE);
-        assertEquals(List.of(a, b), RecolorPrecedence.plan(List.of(a, b), id -> false).generate());
+        assertEquals(
+                List.of(a, b),
+                RecolorPrecedence.plan(List.of(a, b), id -> false).generate());
     }
 
     @Test
     void laterRecipeForTheSameTargetWins() {
         RecolorRecipe first = recipe("someonesperfectend:block/a", PALETTE);
         RecolorRecipe second = recipe("someonesperfectend:block/a", OTHER);
-        assertEquals(List.of(second), RecolorPrecedence.plan(List.of(first, second), id -> false).generate());
+        assertEquals(
+                List.of(second),
+                RecolorPrecedence.plan(List.of(first, second), id -> false).generate());
     }
 
     @Test
     void generatorSkipsTargetsWithRealPngs() {
         RecolorRecipe handDrawn = recipe("someonesperfectend:block/hand_drawn", PALETTE);
-        RecolorGenerator.Result result = RecolorGenerator.generate(List.of(handDrawn),
-                id -> { throw new AssertionError("source must not be read for an overridden target"); },
+        RecolorGenerator.Result result = RecolorGenerator.generate(
+                List.of(handDrawn),
+                id -> {
+                    throw new AssertionError("source must not be read for an overridden target");
+                },
                 id -> true);
         assertEquals(Map.of(), result.files());
         assertEquals(List.of(handDrawn.target()), result.overridden());

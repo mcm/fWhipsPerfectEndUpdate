@@ -54,7 +54,8 @@ public final class ModGameTests {
             EndForestGameTests.class,
             EndOasisGameTests.class,
             UnderIslandFoliageGameTests.class,
-            DriftjellyGameTests.class, DriftjellyHusbandryGameTests.class,
+            DriftjellyGameTests.class,
+            DriftjellyHusbandryGameTests.class,
             EndlingGameTests.class,
             EndlingBarterGameTests.class,
             EndlingSpecialBarterGameTests.class,
@@ -64,8 +65,7 @@ public final class ModGameTests {
             EndlingVillageGameTests.class,
             EndCityGameTests.class);
 
-    public ModGameTests() {
-    }
+    public ModGameTests() {}
 
     @GameTestGenerator
     public Collection<TestFunction> generate() {

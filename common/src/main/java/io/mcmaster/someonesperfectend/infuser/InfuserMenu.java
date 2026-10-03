@@ -7,6 +7,7 @@ import io.mcmaster.someonesperfectend.totem.TotemRules;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Holder;
+import net.minecraft.util.Unit;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
@@ -18,7 +19,6 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -35,6 +35,7 @@ public class InfuserMenu extends BeaconMenu {
     public static final int INFUSION_SLOT = 37;
     /** Infusion slot position: inside the secondary-power panel, below its buttons. */
     public static final int INFUSION_SLOT_X = 161;
+
     public static final int INFUSION_SLOT_Y = 76;
 
     private final ContainerLevelAccess access;
@@ -97,8 +98,9 @@ public class InfuserMenu extends BeaconMenu {
     /** Whether the screen offers this effect: valid for the item, the current tier, and any existing infusion. */
     public boolean canSelectInfusion(InfusionEffect effect) {
         ItemStack stack = infusionSlot.getItem();
-        return infusionEnabled && !stack.isEmpty() && InfusionRules.canSelect(Infusion.kindsOf(stack),
-                Infusion.currentOf(stack), effect, getLevels());
+        return infusionEnabled
+                && !stack.isEmpty()
+                && InfusionRules.canSelect(Infusion.kindsOf(stack), Infusion.currentOf(stack), effect, getLevels());
     }
 
     /** What confirming would write to the infusion item, ignoring the payment; empty if it can't be charged. */
@@ -142,9 +144,12 @@ public class InfuserMenu extends BeaconMenu {
      * netherite ingot as payment, and only if the totem isn't already active.
      */
     public boolean canActivateTotem() {
-        return infusionTotem() != null && TotemRules.canActivate(infusionEnabled, getLevels(),
-                slots.get(PAYMENT_SLOT).getItem().is(Items.NETHERITE_INGOT),
-                EffectTotems.isActive(infusionSlot.getItem()));
+        return infusionTotem() != null
+                && TotemRules.canActivate(
+                        infusionEnabled,
+                        getLevels(),
+                        slots.get(PAYMENT_SLOT).getItem().is(Items.NETHERITE_INGOT),
+                        EffectTotems.isActive(infusionSlot.getItem()));
     }
 
     /**
@@ -214,7 +219,8 @@ public class InfuserMenu extends BeaconMenu {
             if (!moveItemStackTo(stack, INFUSION_SLOT, INFUSION_SLOT + 1, false)) {
                 return ItemStack.EMPTY;
             }
-        } else if (!slots.get(PAYMENT_SLOT).hasItem() && slots.get(PAYMENT_SLOT).mayPlace(stack)
+        } else if (!slots.get(PAYMENT_SLOT).hasItem()
+                && slots.get(PAYMENT_SLOT).mayPlace(stack)
                 && stack.getCount() == 1) {
             if (!moveItemStackTo(stack, PAYMENT_SLOT, PAYMENT_SLOT + 1, false)) {
                 return ItemStack.EMPTY;

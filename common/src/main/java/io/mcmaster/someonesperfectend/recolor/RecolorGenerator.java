@@ -17,8 +17,7 @@ import javax.imageio.ImageIO;
  * pack and the {@code exportRecoloredTextures} Gradle task, so it only uses plain Java.
  */
 public final class RecolorGenerator {
-    private RecolorGenerator() {
-    }
+    private RecolorGenerator() {}
 
     /** Where source textures are read from. */
     @FunctionalInterface
@@ -30,19 +29,19 @@ public final class RecolorGenerator {
         Optional<SourceTexture> find(TextureId id) throws IOException;
     }
 
-    public record SourceTexture(byte[] png, Optional<byte[]> mcmeta) {
-    }
+    public record SourceTexture(byte[] png, Optional<byte[]> mcmeta) {}
 
     /** A generated file, e.g. namespace {@code someonesperfectend}, path {@code textures/block/x.png}. */
-    public record GeneratedFile(String namespace, String path) {
-    }
+    public record GeneratedFile(String namespace, String path) {}
 
-    public record Result(Map<GeneratedFile, byte[]> files, List<TextureId> generated, List<TextureId> overridden,
-            List<String> errors) {
-    }
+    public record Result(
+            Map<GeneratedFile, byte[]> files,
+            List<TextureId> generated,
+            List<TextureId> overridden,
+            List<String> errors) {}
 
-    public static Result generate(List<RecolorRecipe> recipes, TextureSource sources,
-            Predicate<TextureId> realTextureExists) {
+    public static Result generate(
+            List<RecolorRecipe> recipes, TextureSource sources, Predicate<TextureId> realTextureExists) {
         RecolorPrecedence.Plan plan = RecolorPrecedence.plan(recipes, realTextureExists);
         Map<GeneratedFile, byte[]> files = new LinkedHashMap<>();
         List<TextureId> generated = new ArrayList<>();
@@ -55,16 +54,20 @@ public final class RecolorGenerator {
                     continue;
                 }
                 TextureId target = recipe.target();
-                files.put(new GeneratedFile(target.namespace(), target.pngPath()),
+                files.put(
+                        new GeneratedFile(target.namespace(), target.pngPath()),
                         recolorPng(source.get().png(), recipe.palette()));
-                source.get().mcmeta().ifPresent(mcmeta ->
-                        files.put(new GeneratedFile(target.namespace(), target.mcmetaPath()), mcmeta));
+                source.get()
+                        .mcmeta()
+                        .ifPresent(mcmeta ->
+                                files.put(new GeneratedFile(target.namespace(), target.mcmetaPath()), mcmeta));
                 generated.add(target);
             } catch (IOException | RuntimeException e) {
                 errors.add("Failed to recolor " + recipe.source() + " into " + recipe.target() + ": " + e);
             }
         }
-        List<TextureId> overridden = plan.overridden().stream().map(RecolorRecipe::target).toList();
+        List<TextureId> overridden =
+                plan.overridden().stream().map(RecolorRecipe::target).toList();
         return new Result(files, List.copyOf(generated), overridden, List.copyOf(errors));
     }
 

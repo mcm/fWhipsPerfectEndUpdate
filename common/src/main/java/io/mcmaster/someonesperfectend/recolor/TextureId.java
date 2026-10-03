@@ -25,7 +25,8 @@ public record TextureId(String namespace, String path) {
     /** Parses {@code namespace:path}; the namespace defaults to {@code minecraft}. */
     public static TextureId parse(String id) {
         int colon = id.indexOf(':');
-        return colon < 0 ? new TextureId("minecraft", id)
+        return colon < 0
+                ? new TextureId("minecraft", id)
                 : new TextureId(id.substring(0, colon), id.substring(colon + 1));
     }
 

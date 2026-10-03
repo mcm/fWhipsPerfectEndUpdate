@@ -12,10 +12,9 @@ import net.minecraft.resources.ResourceLocation;
 
 /** Translucent bell plus an emissive glow layer (off while dormant); both textures are recolored from the glow squid. */
 public class DriftjellyRenderer extends MobRenderer<Driftjelly, DriftjellyModel> {
-    private static final ResourceLocation TEXTURE =
-            SomeonesPerfectEnd.id("textures/entity/driftjelly/driftjelly.png");
-    private static final RenderType GLOW = RenderType.eyes(
-            SomeonesPerfectEnd.id("textures/entity/driftjelly/driftjelly_glow.png"));
+    private static final ResourceLocation TEXTURE = SomeonesPerfectEnd.id("textures/entity/driftjelly/driftjelly.png");
+    private static final RenderType GLOW =
+            RenderType.eyes(SomeonesPerfectEnd.id("textures/entity/driftjelly/driftjelly_glow.png"));
 
     public DriftjellyRenderer(EntityRendererProvider.Context context) {
         super(context, new DriftjellyModel(context.bakeLayer(DriftjellyModel.LAYER)), 0.3F);
@@ -26,13 +25,30 @@ public class DriftjellyRenderer extends MobRenderer<Driftjelly, DriftjellyModel>
             }
 
             @Override
-            public void render(PoseStack poseStack, MultiBufferSource buffers, int packedLight, Driftjelly entity,
-                    float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw,
+            public void render(
+                    PoseStack poseStack,
+                    MultiBufferSource buffers,
+                    int packedLight,
+                    Driftjelly entity,
+                    float limbSwing,
+                    float limbSwingAmount,
+                    float partialTick,
+                    float ageInTicks,
+                    float netHeadYaw,
                     float headPitch) {
                 // Dormant driftjellies (outside the End) lose their glow.
                 if (!entity.isDormant()) {
-                    super.render(poseStack, buffers, packedLight, entity, limbSwing, limbSwingAmount, partialTick,
-                            ageInTicks, netHeadYaw, headPitch);
+                    super.render(
+                            poseStack,
+                            buffers,
+                            packedLight,
+                            entity,
+                            limbSwing,
+                            limbSwingAmount,
+                            partialTick,
+                            ageInTicks,
+                            netHeadYaw,
+                            headPitch);
                 }
             }
         });

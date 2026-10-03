@@ -39,8 +39,7 @@ public final class ElevationBandGameTests {
     private static final ResourceLocation END_SETTINGS_FILE =
             ResourceLocation.withDefaultNamespace("worldgen/noise_settings/end.json");
 
-    private ElevationBandGameTests() {
-    }
+    private ElevationBandGameTests() {}
 
     /** Within 1024 blocks of the origin, the columns match the vanilla End noise settings block for block. */
     @GameTest
@@ -61,8 +60,8 @@ public final class ElevationBandGameTests {
             NoiseColumn actual = ours.column(x, z);
             for (int y = 0; y < 128; y++) {
                 if (expected.getBlock(y) != actual.getBlock(y)) {
-                    helper.fail("Column " + x + "," + z + " differs from vanilla at y=" + y + ": "
-                            + actual.getBlock(y) + " (vanilla " + expected.getBlock(y) + ")");
+                    helper.fail("Column " + x + "," + z + " differs from vanilla at y=" + y + ": " + actual.getBlock(y)
+                            + " (vanilla " + expected.getBlock(y) + ")");
                     return;
                 }
             }
@@ -119,7 +118,9 @@ public final class ElevationBandGameTests {
         for (int x = 3000; x < 7000 && checked < 30; x += 24) {
             int z = 1500;
             int offset = bands.offsetAt(x, z);
-            if (offset == ElevationBands.GAP || offset == 0 || reference.surface(x, z) <= 0
+            if (offset == ElevationBands.GAP
+                    || offset == 0
+                    || reference.surface(x, z) <= 0
                     || !sameOffsetAtCellCorners(bands, x, z, offset)) {
                 continue;
             }
@@ -148,12 +149,15 @@ public final class ElevationBandGameTests {
     public static void gatewayExitIsSafe(GameTestHelper helper) {
         ServerLevel end = helper.getLevel().getServer().getLevel(Level.END);
         helper.assertTrue(end != null, "No End level");
-        BlockPos exit = TheEndGatewayBlockEntityInvoker.someonesperfectend$findOrCreateValidTeleportPos(end,
-                new BlockPos(96, 75, 0));
-        helper.assertTrue(Math.sqrt(exit.getX() * (double) exit.getX() + exit.getZ() * (double) exit.getZ()) > 700,
+        BlockPos exit = TheEndGatewayBlockEntityInvoker.someonesperfectend$findOrCreateValidTeleportPos(
+                end, new BlockPos(96, 75, 0));
+        helper.assertTrue(
+                Math.sqrt(exit.getX() * (double) exit.getX() + exit.getZ() * (double) exit.getZ()) > 700,
                 "Exit is not on the outer islands: " + exit);
         helper.assertTrue(end.getBlockState(exit).isCollisionShapeFullBlock(end, exit), "Exit is not solid: " + exit);
-        helper.assertTrue(end.getBlockState(exit.above()).isAir() && end.getBlockState(exit.above(2)).isAir(),
+        helper.assertTrue(
+                end.getBlockState(exit.above()).isAir()
+                        && end.getBlockState(exit.above(2)).isAir(),
                 "No room to stand above " + exit);
         helper.succeed();
     }
@@ -177,16 +181,19 @@ public final class ElevationBandGameTests {
     }
 
     private static Holder<NoiseGeneratorSettings> modEndSettings(MinecraftServer server) {
-        return server.registryAccess().registryOrThrow(Registries.NOISE_SETTINGS)
+        return server.registryAccess()
+                .registryOrThrow(Registries.NOISE_SETTINGS)
                 .getHolderOrThrow(NoiseGeneratorSettings.END);
     }
 
     /** {@code minecraft:end} as shipped in the vanilla data pack (our override replaces it in the registry). */
     static NoiseGeneratorSettings vanillaEndSettings(MinecraftServer server) {
         List<Resource> stack = server.getResourceManager().getResourceStack(END_SETTINGS_FILE);
-        Resource vanilla = stack.stream().filter(r -> r.sourcePackId().equals("vanilla")).findFirst()
-                .orElseThrow(() -> new IllegalStateException("No vanilla end.json in " + stack.stream()
-                        .map(Resource::sourcePackId).toList()));
+        Resource vanilla = stack.stream()
+                .filter(r -> r.sourcePackId().equals("vanilla"))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No vanilla end.json in "
+                        + stack.stream().map(Resource::sourcePackId).toList()));
         try (Reader reader = vanilla.openAsReader()) {
             JsonElement json = JsonParser.parseReader(reader);
             RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, server.registryAccess());
@@ -199,12 +206,15 @@ public final class ElevationBandGameTests {
     /** A standalone End generator with a fixed seed. */
     private record Generator(NoiseBasedChunkGenerator generator, RandomState randomState) {
         Generator(MinecraftServer server, NoiseGeneratorSettings settings) {
-            this(server.registryAccess(), settings, server.getLevel(Level.END).getChunkSource().getGenerator()
-                    .getBiomeSource());
+            this(
+                    server.registryAccess(),
+                    settings,
+                    server.getLevel(Level.END).getChunkSource().getGenerator().getBiomeSource());
         }
 
         Generator(RegistryAccess access, NoiseGeneratorSettings settings, BiomeSource biomes) {
-            this(new NoiseBasedChunkGenerator(biomes, Holder.direct(settings)),
+            this(
+                    new NoiseBasedChunkGenerator(biomes, Holder.direct(settings)),
                     RandomState.create(settings, access.lookupOrThrow(Registries.NOISE), SEED));
         }
 
@@ -218,8 +228,9 @@ public final class ElevationBandGameTests {
         }
 
         ElevationBandsFunction bands() {
-            return ElevationBandsFunction.find(randomState).orElseThrow(
-                    () -> new IllegalStateException("The End noise settings have no elevation_bands function"));
+            return ElevationBandsFunction.find(randomState)
+                    .orElseThrow(
+                            () -> new IllegalStateException("The End noise settings have no elevation_bands function"));
         }
     }
 }

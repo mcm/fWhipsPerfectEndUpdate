@@ -33,8 +33,7 @@ public abstract class OasisWaterFluid extends WaterFluid {
 
     @Override
     public BlockState createLegacyBlock(FluidState state) {
-        return ModFluids.OASIS_WATER_BLOCK.get().defaultBlockState()
-                .setValue(LiquidBlock.LEVEL, getLegacyLevel(state));
+        return ModFluids.OASIS_WATER_BLOCK.get().defaultBlockState().setValue(LiquidBlock.LEVEL, getLegacyLevel(state));
     }
 
     @Override

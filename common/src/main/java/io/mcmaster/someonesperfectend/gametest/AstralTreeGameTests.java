@@ -28,22 +28,29 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 public final class AstralTreeGameTests {
     /** A 17x24x17 air structure, tall and wide enough for a full Astral tree grown from its center. */
     private static final String TALL = SomeonesPerfectEnd.MOD_ID + ":gametest/empty_tall";
+
     private static final BlockPos CENTER = new BlockPos(8, 2, 8);
 
-    private AstralTreeGameTests() {
-    }
+    private AstralTreeGameTests() {}
 
     @GameTest
     public static void saplingPlacementRules(GameTestHelper helper) {
         Block sapling = ModBlocks.ASTRAL_SAPLING.get();
         BlockPos pos = new BlockPos(1, 2, 1);
-        for (Block soil : List.of(ModBlocks.END_TURF.get(), Blocks.END_STONE, ModBlocks.VOIDSOIL.get(), Blocks.DIRT,
-                Blocks.GRASS_BLOCK, Blocks.STONE, Blocks.SAND)) {
+        for (Block soil : List.of(
+                ModBlocks.END_TURF.get(),
+                Blocks.END_STONE,
+                ModBlocks.VOIDSOIL.get(),
+                Blocks.DIRT,
+                Blocks.GRASS_BLOCK,
+                Blocks.STONE,
+                Blocks.SAND)) {
             helper.setBlock(pos.below(), soil);
-            boolean expected = soil == ModBlocks.END_TURF.get() || soil == Blocks.END_STONE
-                    || soil == ModBlocks.VOIDSOIL.get();
-            helper.assertTrue(sapling.defaultBlockState().canSurvive(helper.getLevel(), helper.absolutePos(pos))
-                    == expected, "astral sapling on " + soil + " should survive: " + expected);
+            boolean expected =
+                    soil == ModBlocks.END_TURF.get() || soil == Blocks.END_STONE || soil == ModBlocks.VOIDSOIL.get();
+            helper.assertTrue(
+                    sapling.defaultBlockState().canSurvive(helper.getLevel(), helper.absolutePos(pos)) == expected,
+                    "astral sapling on " + soil + " should survive: " + expected);
         }
         helper.succeed();
     }
@@ -85,7 +92,8 @@ public final class AstralTreeGameTests {
         helper.setBlock(pos.above(2), Blocks.STONE);
         ServerLevel level = helper.getLevel();
         BlockPos abs = helper.absolutePos(pos);
-        helper.assertFalse(BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), level, abs),
+        helper.assertFalse(
+                BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), level, abs),
                 "bone meal should not apply without clearance");
         for (int i = 0; i < 200; i++) {
             level.getBlockState(abs).randomTick(level, abs, level.random);
@@ -101,14 +109,16 @@ public final class AstralTreeGameTests {
     @GameTest(template = TALL)
     public static void configuredFeatureShape(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ConfiguredFeature<?, ?> tree = level.registryAccess().registryOrThrow(Registries.CONFIGURED_FEATURE)
+        ConfiguredFeature<?, ?> tree = level.registryAccess()
+                .registryOrThrow(Registries.CONFIGURED_FEATURE)
                 .getOrThrow(ModFeatures.ASTRAL_TREE_CONFIGURED);
         int leaves = 0;
         int flowering = 0;
         for (int i = 0; i < 6; i++) {
             helper.setBlock(CENTER.below(), ModBlocks.END_TURF.get());
-            helper.assertTrue(tree.place(level, level.getChunkSource().getGenerator(), level.random,
-                    helper.absolutePos(CENTER)), "astral_tree failed to place");
+            helper.assertTrue(
+                    tree.place(level, level.getChunkSource().getGenerator(), level.random, helper.absolutePos(CENTER)),
+                    "astral_tree failed to place");
             int[] counts = assertTreeShape(helper, CENTER);
             leaves += counts[0];
             flowering += counts[1];
@@ -119,8 +129,9 @@ public final class AstralTreeGameTests {
 
         // Needs End soil.
         helper.setBlock(CENTER.below(), Blocks.DIRT);
-        helper.assertFalse(tree.place(level, level.getChunkSource().getGenerator(), level.random,
-                helper.absolutePos(CENTER)), "astral_tree placed on dirt");
+        helper.assertFalse(
+                tree.place(level, level.getChunkSource().getGenerator(), level.random, helper.absolutePos(CENTER)),
+                "astral_tree placed on dirt");
         helper.succeed();
     }
 
@@ -152,7 +163,8 @@ public final class AstralTreeGameTests {
                     ends++;
                 }
             } else if (state.getBlock() instanceof LeavesBlock) {
-                helper.assertTrue(state.getValue(LeavesBlock.DISTANCE) < LeavesBlock.DECAY_DISTANCE,
+                helper.assertTrue(
+                        state.getValue(LeavesBlock.DISTANCE) < LeavesBlock.DECAY_DISTANCE,
                         "decaying leaves at " + pos.immutable());
                 if (state.is(ModBlocks.FLOWERING_ASTRAL_LEAVES.get())) {
                     flowering++;
@@ -171,13 +183,16 @@ public final class AstralTreeGameTests {
     private static void clear(GameTestHelper helper) {
         for (BlockPos pos : BlockPos.betweenClosed(0, 1, 0, 16, 23, 16)) {
             if (!helper.getBlockState(pos).isAir()) {
-                helper.getLevel().setBlock(helper.absolutePos(pos), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                helper.getLevel()
+                        .setBlock(helper.absolutePos(pos), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
             }
         }
     }
 
     private static BlockState naturalLeaves(Block leaves) {
-        return leaves.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, 1);
+        return leaves.defaultBlockState()
+                .setValue(LeavesBlock.PERSISTENT, false)
+                .setValue(LeavesBlock.DISTANCE, 1);
     }
 
     @GameTest
@@ -234,12 +249,17 @@ public final class AstralTreeGameTests {
         BlockPos abs = helper.absolutePos(new BlockPos(1, 1, 1));
         for (Block leaves : List.of(ModBlocks.ASTRAL_LEAVES.get(), ModBlocks.FLOWERING_ASTRAL_LEAVES.get())) {
             BlockState state = naturalLeaves(leaves);
-            helper.assertTrue(dropsOnly(Block.getDrops(state, level, abs, null, null, new ItemStack(Items.SHEARS)),
-                    leaves), leaves + " should drop itself with shears");
+            helper.assertTrue(
+                    dropsOnly(Block.getDrops(state, level, abs, null, null, new ItemStack(Items.SHEARS)), leaves),
+                    leaves + " should drop itself with shears");
             ItemStack silk = new ItemStack(Items.DIAMOND_HOE);
-            silk.enchant(level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
-                    .getHolderOrThrow(Enchantments.SILK_TOUCH), 1);
-            helper.assertTrue(dropsOnly(Block.getDrops(state, level, abs, null, null, silk), leaves),
+            silk.enchant(
+                    level.registryAccess()
+                            .registryOrThrow(Registries.ENCHANTMENT)
+                            .getHolderOrThrow(Enchantments.SILK_TOUCH),
+                    1);
+            helper.assertTrue(
+                    dropsOnly(Block.getDrops(state, level, abs, null, null, silk), leaves),
                     leaves + " should drop itself with Silk Touch");
 
             int rolls = 4000;
@@ -267,7 +287,9 @@ public final class AstralTreeGameTests {
     }
 
     private static boolean dropsOnly(List<ItemStack> drops, Block block) {
-        return drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1;
+        return drops.size() == 1
+                && drops.get(0).is(block.asItem())
+                && drops.get(0).getCount() == 1;
     }
 
     @GameTest

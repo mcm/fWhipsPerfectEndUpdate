@@ -1,10 +1,10 @@
 package io.mcmaster.someonesperfectend.client;
 
+import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
+import io.mcmaster.someonesperfectend.infuser.Infusers;
 import io.mcmaster.someonesperfectend.infuser.Infusion;
 import io.mcmaster.someonesperfectend.infuser.InfusionEffect;
 import io.mcmaster.someonesperfectend.infuser.InfusionRules;
-import io.mcmaster.someonesperfectend.infuser.InfuserMenu;
-import io.mcmaster.someonesperfectend.infuser.Infusers;
 import io.mcmaster.someonesperfectend.totem.EffectTotemItem;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,17 +36,24 @@ import org.jetbrains.annotations.Nullable;
 public class InfuserScreen extends BeaconScreen {
     private static final Component LOCKED_TOOLTIP = Component.translatable(Infusers.LOCKED_TOOLTIP_KEY);
     private static final Component INFUSION_LABEL = Component.translatable(Infusers.INFUSION_LABEL_KEY);
-    private static final ResourceLocation BUTTON_DISABLED_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/button_disabled");
-    private static final ResourceLocation BUTTON_SELECTED_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/button_selected");
-    private static final ResourceLocation BUTTON_HIGHLIGHTED_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/button_highlighted");
-    private static final ResourceLocation BUTTON_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/button");
-    private static final ResourceLocation CONFIRM_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/confirm");
-    private static final ResourceLocation CANCEL_SPRITE = ResourceLocation.withDefaultNamespace("container/beacon/cancel");
+    private static final ResourceLocation BUTTON_DISABLED_SPRITE =
+            ResourceLocation.withDefaultNamespace("container/beacon/button_disabled");
+    private static final ResourceLocation BUTTON_SELECTED_SPRITE =
+            ResourceLocation.withDefaultNamespace("container/beacon/button_selected");
+    private static final ResourceLocation BUTTON_HIGHLIGHTED_SPRITE =
+            ResourceLocation.withDefaultNamespace("container/beacon/button_highlighted");
+    private static final ResourceLocation BUTTON_SPRITE =
+            ResourceLocation.withDefaultNamespace("container/beacon/button");
+    private static final ResourceLocation CONFIRM_SPRITE =
+            ResourceLocation.withDefaultNamespace("container/beacon/confirm");
+    private static final ResourceLocation CANCEL_SPRITE =
+            ResourceLocation.withDefaultNamespace("container/beacon/cancel");
 
     private final InfuserMenu infuserMenu;
     private final List<AbstractWidget> beaconWidgets = new ArrayList<>();
     private final List<InfusionEffectButton> effectButtons = new ArrayList<>();
     private final List<AbstractWidget> infusionWidgets = new ArrayList<>();
+
     @Nullable
     private InfusionEffect selected;
 
@@ -77,14 +84,16 @@ public class InfuserScreen extends BeaconScreen {
             @Override
             public void onPress() {
                 if (selected != null) {
-                    minecraft.getConnection().send(new ServerboundSetBeaconPacket(
-                            Optional.of(selected.holder()), Optional.empty()));
+                    minecraft
+                            .getConnection()
+                            .send(new ServerboundSetBeaconPacket(Optional.of(selected.holder()), Optional.empty()));
                 }
             }
 
             @Override
             void update() {
-                active = infuserMenu.infusionTotem() != null ? infuserMenu.canActivateTotem()
+                active = infuserMenu.infusionTotem() != null
+                        ? infuserMenu.canActivateTotem()
                         : infuserMenu.canInfuse(selected);
             }
         });
@@ -147,7 +156,8 @@ public class InfuserScreen extends BeaconScreen {
         }
         if (selected == null) {
             List<InfusionEffect> selectable = infuserMenu.infusionEffects().stream()
-                    .filter(infuserMenu::canSelectInfusion).toList();
+                    .filter(infuserMenu::canSelectInfusion)
+                    .toList();
             if (selectable.size() == 1) {
                 selected = selectable.get(0);
             }
@@ -242,8 +252,7 @@ public class InfuserScreen extends BeaconScreen {
             graphics.blitSprite(sprite, getX() + 2, getY() + 2, 18, 18);
         }
 
-        void update() {
-        }
+        void update() {}
     }
 
     private class InfusionEffectButton extends InfuserButton {
@@ -270,14 +279,20 @@ public class InfuserScreen extends BeaconScreen {
 
         void update(boolean offered) {
             visible = offered;
-            active = infuserMenu.infusionTotem() != null ? infuserMenu.canActivateTotem()
+            active = infuserMenu.infusionTotem() != null
+                    ? infuserMenu.canActivateTotem()
                     : infuserMenu.canSelectInfusion(effect);
             chosen = effect == selected;
-            int amplifier = infuserMenu.previewInfusion(effect).map(InfusionRules.Charge::amplifier).orElse(0);
+            int amplifier = infuserMenu
+                    .previewInfusion(effect)
+                    .map(InfusionRules.Charge::amplifier)
+                    .orElse(0);
             if (amplifier != shownAmplifier) {
                 shownAmplifier = amplifier;
                 Component name = amplifier > 0
-                        ? Component.translatable("potion.withAmplifier", getMessage(),
+                        ? Component.translatable(
+                                "potion.withAmplifier",
+                                getMessage(),
                                 Component.translatable("enchantment.level." + (amplifier + 1)))
                         : getMessage();
                 setTooltip(Tooltip.create(name));

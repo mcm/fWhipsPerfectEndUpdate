@@ -18,6 +18,7 @@ public record EndlingVillageLayout(List<Site> glowcaps, List<Hut> huts) {
     public static final int HUT_SIZE = 5;
     /** Distance of extra glowcaps from the center (a lone glowcap stands at the center). */
     public static final int GLOWCAP_RING = 4;
+
     public static final int MIN_HUT_RING = 14;
     public static final int MAX_HUT_RING = 16;
     /** Horizontal radius (from the center) that the whole village, huts included, fits in. */
@@ -27,15 +28,13 @@ public record EndlingVillageLayout(List<Site> glowcaps, List<Hut> huts) {
     public static final int MIN_DISTANCE = 1024;
 
     /** A column offset from the village center. */
-    public record Site(int dx, int dz) {
-    }
+    public record Site(int dx, int dz) {}
 
     /**
      * A hut centered on (dx, dz). {@code door} is the side facing the village center: 0 north (−z), 1 east
      * (+x), 2 south (+z), 3 west (−x). {@code astral} picks Astral walls (else Voidvine).
      */
-    public record Hut(int dx, int dz, int door, boolean astral) {
-    }
+    public record Hut(int dx, int dz, int door, boolean astral) {}
 
     public static EndlingVillageLayout create(RandomSource random) {
         int glowcapCount = MIN_GLOWCAPS + random.nextInt(MAX_GLOWCAPS - MIN_GLOWCAPS + 1);
@@ -46,8 +45,8 @@ public record EndlingVillageLayout(List<Site> glowcaps, List<Hut> huts) {
             double base = random.nextDouble() * Math.PI * 2;
             for (int i = 0; i < glowcapCount; i++) {
                 double angle = base + i * Math.PI * 2 / glowcapCount;
-                glowcaps.add(new Site((int) Math.round(Math.cos(angle) * GLOWCAP_RING),
-                        (int) Math.round(Math.sin(angle) * GLOWCAP_RING)));
+                glowcaps.add(new Site((int) Math.round(Math.cos(angle) * GLOWCAP_RING), (int)
+                        Math.round(Math.sin(angle) * GLOWCAP_RING)));
             }
         }
         int hutCount = MIN_HUTS + random.nextInt(MAX_HUTS - MIN_HUTS + 1);

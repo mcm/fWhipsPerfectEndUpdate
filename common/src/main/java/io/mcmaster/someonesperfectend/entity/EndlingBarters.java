@@ -29,16 +29,16 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class EndlingBarters {
     /** Overworld life blocks endlings accept for the default barter. */
-    public static final TagKey<Item> INPUTS = TagKey.create(Registries.ITEM,
-            SomeonesPerfectEnd.id("endling_barter_inputs"));
-    public static final ResourceKey<LootTable> DEFAULT_LOOT_TABLE = ResourceKey.create(Registries.LOOT_TABLE,
-            SomeonesPerfectEnd.id("gameplay/endling_bartering"));
+    public static final TagKey<Item> INPUTS =
+            TagKey.create(Registries.ITEM, SomeonesPerfectEnd.id("endling_barter_inputs"));
+
+    public static final ResourceKey<LootTable> DEFAULT_LOOT_TABLE =
+            ResourceKey.create(Registries.LOOT_TABLE, SomeonesPerfectEnd.id("gameplay/endling_bartering"));
 
     /** The advancement a player needs before endlings barter with them (US-039). */
     public static final ResourceLocation UNLOCK_ADVANCEMENT = ResourceLocation.withDefaultNamespace("end/kill_dragon");
 
-    private EndlingBarters() {
-    }
+    private EndlingBarters() {}
 
     /**
      * Whether endlings barter with {@code offerer}: the player handing an item over, or the thrower of a dropped item.
@@ -50,7 +50,8 @@ public final class EndlingBarters {
             return false;
         }
         AdvancementHolder advancement = player.server.getAdvancements().get(UNLOCK_ADVANCEMENT);
-        return advancement != null && player.getAdvancements().getOrStartProgress(advancement).isDone();
+        return advancement != null
+                && player.getAdvancements().getOrStartProgress(advancement).isDone();
     }
 
     /** The loot table bartering {@code stack} rolls, or null if endlings don't take it. */

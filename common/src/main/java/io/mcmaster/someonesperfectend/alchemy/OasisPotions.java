@@ -27,20 +27,43 @@ public final class OasisPotions {
     /** Vanilla potions that get a variant: {@code awkward} (the brewing base) plus every potion with a timed effect. */
     static final List<String> VANILLA_BASES = List.of(
             "awkward",
-            "night_vision", "long_night_vision",
-            "invisibility", "long_invisibility",
-            "leaping", "long_leaping", "strong_leaping",
-            "fire_resistance", "long_fire_resistance",
-            "swiftness", "long_swiftness", "strong_swiftness",
-            "slowness", "long_slowness", "strong_slowness",
-            "turtle_master", "long_turtle_master", "strong_turtle_master",
-            "water_breathing", "long_water_breathing",
-            "poison", "long_poison", "strong_poison",
-            "regeneration", "long_regeneration", "strong_regeneration",
-            "strength", "long_strength", "strong_strength",
-            "weakness", "long_weakness",
-            "slow_falling", "long_slow_falling",
-            "wind_charged", "weaving", "oozing", "infested");
+            "night_vision",
+            "long_night_vision",
+            "invisibility",
+            "long_invisibility",
+            "leaping",
+            "long_leaping",
+            "strong_leaping",
+            "fire_resistance",
+            "long_fire_resistance",
+            "swiftness",
+            "long_swiftness",
+            "strong_swiftness",
+            "slowness",
+            "long_slowness",
+            "strong_slowness",
+            "turtle_master",
+            "long_turtle_master",
+            "strong_turtle_master",
+            "water_breathing",
+            "long_water_breathing",
+            "poison",
+            "long_poison",
+            "strong_poison",
+            "regeneration",
+            "long_regeneration",
+            "strong_regeneration",
+            "strength",
+            "long_strength",
+            "strong_strength",
+            "weakness",
+            "long_weakness",
+            "slow_falling",
+            "long_slow_falling",
+            "wind_charged",
+            "weaving",
+            "oozing",
+            "infested");
 
     /** Vanilla potion id → its Oasis variant. */
     private static final Map<ResourceLocation, RegistrySupplier<Potion>> VARIANTS = new LinkedHashMap<>();
@@ -52,19 +75,16 @@ public final class OasisPotions {
         }
     }
 
-    private OasisPotions() {
-    }
+    private OasisPotions() {}
 
     /** Loads this class so its entries are added to the deferred registers. */
-    public static void init() {
-    }
+    public static void init() {}
 
     private static Potion createVariant(String base) {
-        Potion vanilla = BuiltInRegistries.POTION.getOrThrow(ResourceKey.create(Registries.POTION,
-                ResourceLocation.withDefaultNamespace(base)));
-        MobEffectInstance[] effects = vanilla.getEffects().stream()
-                .map(OasisPotions::extend)
-                .toArray(MobEffectInstance[]::new);
+        Potion vanilla = BuiltInRegistries.POTION.getOrThrow(
+                ResourceKey.create(Registries.POTION, ResourceLocation.withDefaultNamespace(base)));
+        MobEffectInstance[] effects =
+                vanilla.getEffects().stream().map(OasisPotions::extend).toArray(MobEffectInstance[]::new);
         // The name picks the lang key (item.minecraft.potion.effect.<name>); variants share vanilla's names.
         return new Potion(nameOf(base), effects);
     }
@@ -85,8 +105,13 @@ public final class OasisPotions {
         if (effect.getEffect().value().isInstantenous() || effect.isInfiniteDuration()) {
             return new MobEffectInstance(effect);
         }
-        return new MobEffectInstance(effect.getEffect(), extendDuration(effect.getDuration()), effect.getAmplifier(),
-                effect.isAmbient(), effect.isVisible(), effect.showIcon());
+        return new MobEffectInstance(
+                effect.getEffect(),
+                extendDuration(effect.getDuration()),
+                effect.getAmplifier(),
+                effect.isAmbient(),
+                effect.isVisible(),
+                effect.showIcon());
     }
 
     public static int extendDuration(int ticks) {

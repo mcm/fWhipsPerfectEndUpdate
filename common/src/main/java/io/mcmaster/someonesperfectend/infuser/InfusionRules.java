@@ -20,8 +20,7 @@ public final class InfusionRules {
     /** Duration of the effect active infused gear applies, refreshed every {@link #GEAR_INTERVAL} ticks. */
     public static final int GEAR_EFFECT_TICKS = 80;
 
-    private InfusionRules() {
-    }
+    private InfusionRules() {}
 
     /** Which infusion slots an item counts as, from its item tags. */
     public enum Kind {
@@ -36,12 +35,10 @@ public final class InfusionRules {
     }
 
     /** An item's existing infusion. {@code effect} is null if it holds an effect gear can't normally take. */
-    public record Current(@Nullable InfusionEffect effect, int amplifier, int remainingTicks) {
-    }
+    public record Current(@Nullable InfusionEffect effect, int amplifier, int remainingTicks) {}
 
     /** The infusion an item gets from a charge. */
-    public record Charge(InfusionEffect effect, int amplifier, int remainingTicks) {
-    }
+    public record Charge(InfusionEffect effect, int amplifier, int remainingTicks) {}
 
     /** Effects an item may be infused with, ignoring tier; an item in both tool tags may take either. */
     public static List<InfusionEffect> allowedEffects(Set<Kind> kinds) {
@@ -98,8 +95,7 @@ public final class InfusionRules {
      * already at the cap. A first infusion sets the level from the tier; a top-up keeps the existing level. The
      * new time is clamped to the cap and is never less than the existing time.
      */
-    public static Optional<Charge> charge(Set<Kind> kinds, @Nullable Current current, InfusionEffect effect,
-            int tier) {
+    public static Optional<Charge> charge(Set<Kind> kinds, @Nullable Current current, InfusionEffect effect, int tier) {
         if (!canSelect(kinds, current, effect, tier)) {
             return Optional.empty();
         }

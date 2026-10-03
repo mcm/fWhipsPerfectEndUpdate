@@ -28,14 +28,13 @@ public abstract class InventoryMenuMixin extends RecipeBookMenu<CraftingInput, C
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void someonesperfectend$addTrinketSlot(Inventory inventory, boolean active, Player owner,
-            CallbackInfo ci) {
+    private void someonesperfectend$addTrinketSlot(Inventory inventory, boolean active, Player owner, CallbackInfo ci) {
         this.addSlot(new TrinketSlot(owner, TrinketSlot.X, TrinketSlot.Y));
     }
 
     @Inject(method = "quickMoveStack", at = @At("HEAD"), cancellable = true)
-    private void someonesperfectend$quickMoveToTrinket(Player player, int index,
-            CallbackInfoReturnable<ItemStack> cir) {
+    private void someonesperfectend$quickMoveToTrinket(
+            Player player, int index, CallbackInfoReturnable<ItemStack> cir) {
         if (index < InventoryMenu.INV_SLOT_START || index > InventoryMenu.SHIELD_SLOT) {
             return;
         }

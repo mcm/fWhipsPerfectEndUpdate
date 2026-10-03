@@ -16,8 +16,7 @@ public final class BeaconEffectTracker {
     /** No live beacon effect. */
     public static final int NONE = -1;
 
-    private BeaconEffectTracker() {
-    }
+    private BeaconEffectTracker() {}
 
     /** Implemented by {@link Player} (through a mixin) to hold the tracked effects. */
     public interface Tracking {
@@ -28,7 +27,8 @@ public final class BeaconEffectTracker {
     /** Records a beacon or Infuser applying {@code effect} to the player now. */
     public static void record(Player player, MobEffectInstance effect) {
         long expiry = player.level().getGameTime() + effect.getDuration();
-        effects(player).computeIfAbsent(effect.getEffect(), key -> new HashMap<>())
+        effects(player)
+                .computeIfAbsent(effect.getEffect(), key -> new HashMap<>())
                 .merge(effect.getAmplifier(), expiry, Math::max);
     }
 

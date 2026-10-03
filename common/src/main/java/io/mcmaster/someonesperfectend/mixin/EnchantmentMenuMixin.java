@@ -13,9 +13,9 @@ import net.minecraft.core.IdMap;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.Container;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -49,28 +49,50 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(EnchantmentMenu.class)
 public abstract class EnchantmentMenuMixin {
-    @Shadow @Final private Container enchantSlots;
-    @Shadow @Final private ContainerLevelAccess access;
-    @Shadow @Final public int[] costs;
-    @Shadow @Final public int[] enchantClue;
-    @Shadow @Final public int[] levelClue;
-    @Shadow @Final private DataSlot enchantmentSeed;
-
-    /** The repair cost of the item being re-enchanted by the current click, or -1. */
-    @Unique private int someonesperfectend$reEnchantRepairCost = -1;
-    @Unique private ItemEnchantments someonesperfectend$enchantmentsBefore;
+    @Shadow
+    @Final
+    private Container enchantSlots;
 
     @Shadow
-    private List<EnchantmentInstance> getEnchantmentList(RegistryAccess registries, ItemStack stack, int slot,
-            int cost) {
+    @Final
+    private ContainerLevelAccess access;
+
+    @Shadow
+    @Final
+    public int[] costs;
+
+    @Shadow
+    @Final
+    public int[] enchantClue;
+
+    @Shadow
+    @Final
+    public int[] levelClue;
+
+    @Shadow
+    @Final
+    private DataSlot enchantmentSeed;
+
+    /** The repair cost of the item being re-enchanted by the current click, or -1. */
+    @Unique
+    private int someonesperfectend$reEnchantRepairCost = -1;
+
+    @Unique
+    private ItemEnchantments someonesperfectend$enchantmentsBefore;
+
+    @Shadow
+    private List<EnchantmentInstance> getEnchantmentList(
+            RegistryAccess registries, ItemStack stack, int slot, int cost) {
         throw new AssertionError();
     }
 
     /** Replaces the lapis slot with one that also takes dragon's breath while the End-chanter is active. */
-    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;"
-            + "Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("TAIL"))
-    private void someonesperfectend$voidCleansingFuelSlot(int containerId, Inventory inventory,
-            ContainerLevelAccess access, CallbackInfo ci) {
+    @Inject(
+            method = "<init>(ILnet/minecraft/world/entity/player/Inventory;"
+                    + "Lnet/minecraft/world/inventory/ContainerLevelAccess;)V",
+            at = @At("TAIL"))
+    private void someonesperfectend$voidCleansingFuelSlot(
+            int containerId, Inventory inventory, ContainerLevelAccess access, CallbackInfo ci) {
         AbstractContainerMenu menu = (AbstractContainerMenu) (Object) this;
         Slot lapis = menu.slots.get(1);
         menu.slots.set(1, new EndChanterFuelSlot(lapis, () -> this.access.evaluate(EndChanter::isActive, true)));
@@ -88,7 +110,8 @@ public abstract class EnchantmentMenuMixin {
         ci.cancel();
         ItemStack stack = container.getItem(0);
         this.access.execute((level, pos) -> {
-            boolean offered = !stack.isEmpty() && EndChanter.isActive(level, pos)
+            boolean offered = !stack.isEmpty()
+                    && EndChanter.isActive(level, pos)
                     && VoidCleansingRules.offered(EndChanter.repairCost(stack), EndChanter.bookshelfPower(level, pos));
             for (int slot = 0; slot < this.costs.length; slot++) {
                 boolean cleansing = offered && slot == VoidCleansingRules.OFFER_SLOT;
@@ -109,8 +132,11 @@ public abstract class EnchantmentMenuMixin {
         }
         ItemStack stack = this.enchantSlots.getItem(0);
         int repairCost = EndChanter.repairCost(stack);
-        if (id != VoidCleansingRules.OFFER_SLOT || this.costs[id] <= 0 || this.enchantClue[id] != VoidCleansingRules.CLUE
-                || repairCost <= 0 || fuel.getCount() < VoidCleansingRules.BREATH_COST
+        if (id != VoidCleansingRules.OFFER_SLOT
+                || this.costs[id] <= 0
+                || this.enchantClue[id] != VoidCleansingRules.CLUE
+                || repairCost <= 0
+                || fuel.getCount() < VoidCleansingRules.BREATH_COST
                 || !VoidCleansingRules.canApply(player.experienceLevel, player.getAbilities().instabuild)) {
             cir.setReturnValue(false);
             return;
@@ -124,7 +150,12 @@ public abstract class EnchantmentMenuMixin {
             }
             this.enchantSlots.setChanged();
             this.enchantmentSeed.set(player.getEnchantmentSeed());
-            level.playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0F,
+            level.playSound(
+                    null,
+                    pos,
+                    SoundEvents.ENCHANTMENT_TABLE_USE,
+                    SoundSource.BLOCKS,
+                    1.0F,
                     level.random.nextFloat() * 0.1F + 0.9F);
         });
         cir.setReturnValue(true);
@@ -169,15 +200,16 @@ public abstract class EnchantmentMenuMixin {
      * Lets an active End-chanter make offers for enchanted items. On the client ({@code NULL} access) accepted items
      * count as enchantable so the client keeps the offers the server syncs instead of clearing them.
      */
-    @WrapOperation(method = "slotsChanged", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/item/ItemStack;isEnchantable()Z"))
+    @WrapOperation(
+            method = "slotsChanged",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEnchantable()Z"))
     private boolean someonesperfectend$acceptEnchanted(ItemStack stack, Operation<Boolean> original) {
         return original.call(stack) || EndChanter.accepts(stack) && this.access.evaluate(EndChanter::isActive, true);
     }
 
     @ModifyReturnValue(method = "getEnchantmentList", at = @At("RETURN"))
-    private List<EnchantmentInstance> someonesperfectend$filterOffer(List<EnchantmentInstance> offered,
-            RegistryAccess registries, ItemStack stack, int slot, int cost) {
+    private List<EnchantmentInstance> someonesperfectend$filterOffer(
+            List<EnchantmentInstance> offered, RegistryAccess registries, ItemStack stack, int slot, int cost) {
         return EndChanter.isReEnchantable(stack) ? EndChanter.filterOffer(stack, offered) : offered;
     }
 
@@ -189,14 +221,15 @@ public abstract class EnchantmentMenuMixin {
             return;
         }
         this.access.execute((level, pos) -> {
-            IdMap<Holder<Enchantment>> ids = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
+            IdMap<Holder<Enchantment>> ids = level.registryAccess()
+                    .registryOrThrow(Registries.ENCHANTMENT)
                     .asHolderIdMap();
             for (int slot = 0; slot < this.costs.length; slot++) {
                 if (this.costs[slot] <= 0) {
                     continue;
                 }
-                List<EnchantmentInstance> offer = this.getEnchantmentList(level.registryAccess(), stack, slot,
-                        this.costs[slot]);
+                List<EnchantmentInstance> offer =
+                        this.getEnchantmentList(level.registryAccess(), stack, slot, this.costs[slot]);
                 if (offer.isEmpty()) {
                     this.costs[slot] = 0;
                     this.enchantClue[slot] = -1;

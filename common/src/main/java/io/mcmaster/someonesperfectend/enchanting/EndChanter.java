@@ -22,8 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * enchanted items. Hooked into {@code EnchantmentMenu} by {@code EnchantmentMenuMixin}.
  */
 public final class EndChanter {
-    private EndChanter() {
-    }
+    private EndChanter() {}
 
     /**
      * Whether a dragon head sits at any bookshelf position of the table at {@code table}, with the block in between in
@@ -62,13 +61,13 @@ public final class EndChanter {
 
     /** Whether the stack is an already-enchanted item (not a book) that the End-chanter would re-enchant. */
     public static boolean isReEnchantable(ItemStack stack) {
-        return !stack.isEmpty() && !stack.is(Items.BOOK) && !stack.is(Items.ENCHANTED_BOOK)
-                && stack.isEnchanted();
+        return !stack.isEmpty() && !stack.is(Items.BOOK) && !stack.is(Items.ENCHANTED_BOOK) && stack.isEnchanted();
     }
 
     /** Whether an active End-chanter accepts the stack: enchanted, enchantable, and repair cost below 40. */
     public static boolean accepts(ItemStack stack) {
-        return isReEnchantable(stack) && stack.getItem().isEnchantable(stack)
+        return isReEnchantable(stack)
+                && stack.getItem().isEnchantable(stack)
                 && EndChanterRules.acceptsRepairCost(repairCost(stack));
     }
 
@@ -79,10 +78,11 @@ public final class EndChanter {
     /** Filters a vanilla offer against the stack's enchantments ({@link EndChanterRules#filterOffer}). */
     public static List<EnchantmentInstance> filterOffer(ItemStack stack, List<EnchantmentInstance> offered) {
         Map<Holder<Enchantment>, Integer> existing = new HashMap<>();
-        for (Object2IntMap.Entry<Holder<Enchantment>> entry : stack.getEnchantments().entrySet()) {
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry :
+                stack.getEnchantments().entrySet()) {
             existing.put(entry.getKey(), entry.getIntValue());
         }
-        return EndChanterRules.filterOffer(offered, offer -> offer.enchantment, offer -> offer.level, existing,
-                Enchantment::areCompatible);
+        return EndChanterRules.filterOffer(
+                offered, offer -> offer.enchantment, offer -> offer.level, existing, Enchantment::areCompatible);
     }
 }

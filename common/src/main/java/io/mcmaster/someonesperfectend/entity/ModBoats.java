@@ -8,7 +8,6 @@ import java.util.Map;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -18,7 +17,8 @@ import net.minecraft.world.level.block.DispenserBlock;
  * {@code astral_chest_boat}, {@code voidvine_raft}, {@code voidvine_chest_raft}).
  */
 public final class ModBoats {
-    private static final Map<ModBoatType, RegistrySupplier<EntityType<ModBoat>>> BOATS = new EnumMap<>(ModBoatType.class);
+    private static final Map<ModBoatType, RegistrySupplier<EntityType<ModBoat>>> BOATS =
+            new EnumMap<>(ModBoatType.class);
     private static final Map<ModBoatType, RegistrySupplier<EntityType<ModChestBoat>>> CHEST_BOATS =
             new EnumMap<>(ModBoatType.class);
     private static final Map<ModBoatType, RegistrySupplier<ModBoatItem>> BOAT_ITEMS = new EnumMap<>(ModBoatType.class);
@@ -30,21 +30,44 @@ public final class ModBoats {
             String boatId = type.id(false);
             String chestId = type.id(true);
             // Same size and tracking range as vanilla boats.
-            BOATS.put(type, ModRegistries.ENTITY_TYPES.register(boatId, () -> EntityType.Builder
-                    .<ModBoat>of((entityType, level) -> new ModBoat(entityType, level, type), MobCategory.MISC)
-                    .sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10).build(boatId)));
-            CHEST_BOATS.put(type, ModRegistries.ENTITY_TYPES.register(chestId, () -> EntityType.Builder
-                    .<ModChestBoat>of((entityType, level) -> new ModChestBoat(entityType, level, type), MobCategory.MISC)
-                    .sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10).build(chestId)));
-            BOAT_ITEMS.put(type, ModRegistries.item(boatId,
-                    () -> new ModBoatItem(type, false, ModRegistries.itemProperties().stacksTo(1))));
-            CHEST_BOAT_ITEMS.put(type, ModRegistries.item(chestId,
-                    () -> new ModBoatItem(type, true, ModRegistries.itemProperties().stacksTo(1))));
+            BOATS.put(
+                    type,
+                    ModRegistries.ENTITY_TYPES.register(
+                            boatId,
+                            () -> EntityType.Builder.<ModBoat>of(
+                                            (entityType, level) -> new ModBoat(entityType, level, type),
+                                            MobCategory.MISC)
+                                    .sized(1.375F, 0.5625F)
+                                    .eyeHeight(0.5625F)
+                                    .clientTrackingRange(10)
+                                    .build(boatId)));
+            CHEST_BOATS.put(
+                    type,
+                    ModRegistries.ENTITY_TYPES.register(
+                            chestId,
+                            () -> EntityType.Builder.<ModChestBoat>of(
+                                            (entityType, level) -> new ModChestBoat(entityType, level, type),
+                                            MobCategory.MISC)
+                                    .sized(1.375F, 0.5625F)
+                                    .eyeHeight(0.5625F)
+                                    .clientTrackingRange(10)
+                                    .build(chestId)));
+            BOAT_ITEMS.put(
+                    type,
+                    ModRegistries.item(
+                            boatId,
+                            () -> new ModBoatItem(
+                                    type, false, ModRegistries.itemProperties().stacksTo(1))));
+            CHEST_BOAT_ITEMS.put(
+                    type,
+                    ModRegistries.item(
+                            chestId,
+                            () -> new ModBoatItem(
+                                    type, true, ModRegistries.itemProperties().stacksTo(1))));
         }
     }
 
-    private ModBoats() {
-    }
+    private ModBoats() {}
 
     public static void init() {
         LifecycleEvent.SETUP.register(() -> {

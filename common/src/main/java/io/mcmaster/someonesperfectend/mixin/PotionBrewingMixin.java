@@ -19,14 +19,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PotionBrewing.class)
 public abstract class PotionBrewingMixin {
     @Inject(method = "mix", at = @At("RETURN"), cancellable = true)
-    private void someonesperfectend$brewOasisWater(ItemStack ingredient, ItemStack potion,
-            CallbackInfoReturnable<ItemStack> cir) {
+    private void someonesperfectend$brewOasisWater(
+            ItemStack ingredient, ItemStack potion, CallbackInfoReturnable<ItemStack> cir) {
         ItemStack result = cir.getReturnValue();
-        if (result == potion || !potion.is(ModFluids.OASIS_WATER_BOTTLE.get())
+        if (result == potion
+                || !potion.is(ModFluids.OASIS_WATER_BOTTLE.get())
                 || !result.is(ModFluids.OASIS_WATER_BOTTLE.get())) {
             return;
         }
-        result.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion().ifPresent(brewed ->
-                cir.setReturnValue(PotionContents.createItemStack(Items.POTION, OasisPotions.variantOrSelf(brewed))));
+        result.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY)
+                .potion()
+                .ifPresent(brewed -> cir.setReturnValue(
+                        PotionContents.createItemStack(Items.POTION, OasisPotions.variantOrSelf(brewed))));
     }
 }

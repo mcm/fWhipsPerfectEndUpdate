@@ -25,19 +25,25 @@ public final class EnderBeds {
 
     static {
         for (DyeColor color : DyeColor.values()) {
-            BEDS.put(color, ModRegistries.block(name(color), () -> new EnderBedBlock(color, BlockBehaviour.Properties.of()
-                            .mapColor(color.getMapColor())
-                            .sound(SoundType.WOOD)
-                            .strength(0.2F)
-                            .noOcclusion()
-                            .ignitedByLava()
-                            .pushReaction(PushReaction.DESTROY)),
-                    block -> new BedItem(block, ModRegistries.itemProperties().stacksTo(1))));
+            BEDS.put(
+                    color,
+                    ModRegistries.block(
+                            name(color),
+                            () -> new EnderBedBlock(
+                                    color,
+                                    BlockBehaviour.Properties.of()
+                                            .mapColor(color.getMapColor())
+                                            .sound(SoundType.WOOD)
+                                            .strength(0.2F)
+                                            .noOcclusion()
+                                            .ignitedByLava()
+                                            .pushReaction(PushReaction.DESTROY)),
+                            block -> new BedItem(
+                                    block, ModRegistries.itemProperties().stacksTo(1))));
         }
     }
 
-    private EnderBeds() {
-    }
+    private EnderBeds() {}
 
     public static String name(DyeColor color) {
         return color.getName() + "_ender_bed";
@@ -48,6 +54,5 @@ public final class EnderBeds {
     }
 
     /** Class-loads the registrations; call before {@code ModRegistries.register()}. */
-    public static void init() {
-    }
+    public static void init() {}
 }

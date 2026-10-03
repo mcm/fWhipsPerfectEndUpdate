@@ -22,8 +22,8 @@ public interface BeaconBlockEntityAccessor {
 
     /** Applies a beacon's powers to the players in range, as its 80-tick update does. */
     @Invoker("applyEffects")
-    static void someonesperfectend$applyEffects(Level level, BlockPos pos, int levels, Holder<MobEffect> primary,
-            Holder<MobEffect> secondary) {
+    static void someonesperfectend$applyEffects(
+            Level level, BlockPos pos, int levels, Holder<MobEffect> primary, Holder<MobEffect> secondary) {
         throw new AssertionError();
     }
 }

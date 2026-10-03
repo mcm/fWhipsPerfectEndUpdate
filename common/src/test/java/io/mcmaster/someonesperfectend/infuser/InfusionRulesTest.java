@@ -63,9 +63,15 @@ class InfusionRulesTest {
         }
         assertEquals(0, InfusionRules.amplifierFor(SPEED, 1));
         assertEquals(0, InfusionRules.amplifierFor(REGENERATION, 4));
-        assertEquals(new Charge(REGENERATION, 0, 340), InfusionRules.charge(CHESTPLATE, null, REGENERATION, 4).orElseThrow());
-        assertEquals(new Charge(HASTE, 1, 340), InfusionRules.charge(PICKAXE, null, HASTE, 4).orElseThrow());
-        assertEquals(new Charge(HASTE, 0, 220), InfusionRules.charge(PICKAXE, null, HASTE, 1).orElseThrow());
+        assertEquals(
+                new Charge(REGENERATION, 0, 340),
+                InfusionRules.charge(CHESTPLATE, null, REGENERATION, 4).orElseThrow());
+        assertEquals(
+                new Charge(HASTE, 1, 340),
+                InfusionRules.charge(PICKAXE, null, HASTE, 4).orElseThrow());
+        assertEquals(
+                new Charge(HASTE, 0, 220),
+                InfusionRules.charge(PICKAXE, null, HASTE, 1).orElseThrow());
     }
 
     @Test
@@ -77,11 +83,16 @@ class InfusionRulesTest {
 
         // Adds one payment's worth.
         Current current = new Current(SPEED, 0, 1000);
-        assertEquals(1220, InfusionRules.charge(BOOTS, current, SPEED, 1).orElseThrow().remainingTicks());
+        assertEquals(
+                1220,
+                InfusionRules.charge(BOOTS, current, SPEED, 1).orElseThrow().remainingTicks());
         // Clamped to the cap.
         int cap = InfusionRules.capTicks(1);
-        assertEquals(cap, InfusionRules.charge(BOOTS, new Current(SPEED, 0, cap - 10), SPEED, 1)
-                .orElseThrow().remainingTicks());
+        assertEquals(
+                cap,
+                InfusionRules.charge(BOOTS, new Current(SPEED, 0, cap - 10), SPEED, 1)
+                        .orElseThrow()
+                        .remainingTicks());
         // At or above the cap: no charge.
         assertEquals(Optional.empty(), InfusionRules.charge(BOOTS, new Current(SPEED, 0, cap), SPEED, 1));
         // Charged at tier 4 above the tier-1 cap: a tier-1 charge can't add (and never reduces).
@@ -103,10 +114,14 @@ class InfusionRulesTest {
         assertFalse(InfusionRules.canSelect(BOOTS, speedTwo, JUMP_BOOST, 4));
         assertEquals(Optional.empty(), InfusionRules.charge(BOOTS, speedTwo, JUMP_BOOST, 4));
         // Topping up at tier 1 keeps level II.
-        assertEquals(new Charge(SPEED, 1, 720), InfusionRules.charge(BOOTS, speedTwo, SPEED, 1).orElseThrow());
+        assertEquals(
+                new Charge(SPEED, 1, 720),
+                InfusionRules.charge(BOOTS, speedTwo, SPEED, 1).orElseThrow());
         // Topping up a level I infusion at tier 4 keeps level I.
         Current hasteOne = new Current(HASTE, 0, 100);
-        assertEquals(new Charge(HASTE, 0, 440), InfusionRules.charge(AXE, hasteOne, HASTE, 4).orElseThrow());
+        assertEquals(
+                new Charge(HASTE, 0, 440),
+                InfusionRules.charge(AXE, hasteOne, HASTE, 4).orElseThrow());
         assertFalse(InfusionRules.canSelect(AXE, hasteOne, STRENGTH, 4));
         // An infusion with an effect gear can't normally take can't be charged at all.
         Current unknown = new Current(null, 0, 100);

@@ -30,10 +30,8 @@ public final class EndlingVillages {
     public static final ResourceKey<StructureSet> STRUCTURE_SET =
             ResourceKey.create(Registries.STRUCTURE_SET, SomeonesPerfectEnd.id("endling_villages"));
 
-    private EndlingVillages() {
-    }
+    private EndlingVillages() {}
 
     /** Loads this class so its entries are added to the deferred registers. */
-    public static void init() {
-    }
+    public static void init() {}
 }

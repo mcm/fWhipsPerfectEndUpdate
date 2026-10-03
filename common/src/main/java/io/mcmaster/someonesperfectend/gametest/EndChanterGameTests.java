@@ -30,8 +30,7 @@ public final class EndChanterGameTests {
     private static final BlockPos BETWEEN = new BlockPos(4, 1, 3);
     private static final BlockPos HEAD = new BlockPos(5, 1, 3);
 
-    private EndChanterGameTests() {
-    }
+    private EndChanterGameTests() {}
 
     private static void table(GameTestHelper helper, boolean head) {
         helper.setBlock(TABLE, Blocks.ENCHANTING_TABLE);
@@ -52,8 +51,8 @@ public final class EndChanterGameTests {
 
     /** Opens a menu on the table with 3 lapis and the given item. */
     private static EnchantmentMenu menu(GameTestHelper helper, Player player, ItemStack item) {
-        EnchantmentMenu menu = new EnchantmentMenu(0, player.getInventory(),
-                ContainerLevelAccess.create(helper.getLevel(), helper.absolutePos(TABLE)));
+        EnchantmentMenu menu = new EnchantmentMenu(
+                0, player.getInventory(), ContainerLevelAccess.create(helper.getLevel(), helper.absolutePos(TABLE)));
         menu.getSlot(1).set(new ItemStack(Items.LAPIS_LAZULI, 3));
         menu.getSlot(0).set(item);
         return menu;
@@ -121,7 +120,8 @@ public final class EndChanterGameTests {
         table(helper, false);
         Player player = player(helper);
         helper.assertFalse(active(helper), "no head, no End-chanter");
-        helper.assertFalse(hasOffer(menu(helper, player, mendingPickaxe(helper, 0))),
+        helper.assertFalse(
+                hasOffer(menu(helper, player, mendingPickaxe(helper, 0))),
                 "vanilla makes no offers for an enchanted item");
         EnchantmentMenu enchantedBook = menu(helper, player, new ItemStack(Items.ENCHANTED_BOOK));
         helper.assertFalse(hasOffer(enchantedBook), "no offers for an enchanted book");
@@ -136,8 +136,10 @@ public final class EndChanterGameTests {
         helper.setBlock(HEAD, Blocks.DRAGON_HEAD);
         helper.setBlock(new BlockPos(1, 1, 5), Blocks.DRAGON_HEAD);
         EnchantmentMenu endChanter = menu(helper, player, new ItemStack(Items.IRON_PICKAXE));
-        helper.assertTrue(Arrays.equals(costs, endChanter.costs) && Arrays.equals(clues, endChanter.enchantClue)
-                && Arrays.equals(levels, endChanter.levelClue),
+        helper.assertTrue(
+                Arrays.equals(costs, endChanter.costs)
+                        && Arrays.equals(clues, endChanter.enchantClue)
+                        && Arrays.equals(levels, endChanter.levelClue),
                 "dragon heads should not change offers for unenchanted items: " + Arrays.toString(costs) + " vs "
                         + Arrays.toString(endChanter.costs));
         EnchantmentMenu book = menu(helper, player, new ItemStack(Items.ENCHANTED_BOOK));
@@ -147,7 +149,8 @@ public final class EndChanterGameTests {
         helper.assertTrue(endChanter.clickMenuButton(player, slot), "enchanting an unenchanted pickaxe should work");
         ItemStack result = endChanter.getSlot(0).getItem();
         helper.assertTrue(result.isEnchanted(), "the pickaxe should be enchanted");
-        helper.assertTrue(result.getOrDefault(DataComponents.REPAIR_COST, 0) == 0,
+        helper.assertTrue(
+                result.getOrDefault(DataComponents.REPAIR_COST, 0) == 0,
                 "enchanting an unenchanted item leaves the repair cost at 0");
         helper.succeed();
     }
@@ -164,14 +167,17 @@ public final class EndChanterGameTests {
 
         helper.assertTrue(menu.clickMenuButton(player, slot), "applying the offer should work");
         ItemStack result = menu.getSlot(0).getItem();
-        helper.assertTrue(result.getOrDefault(DataComponents.REPAIR_COST, 0) == 63,
+        helper.assertTrue(
+                result.getOrDefault(DataComponents.REPAIR_COST, 0) == 63,
                 "repair cost should be 31 * 2 + 1 = 63, was " + result.get(DataComponents.REPAIR_COST));
-        helper.assertTrue(result.getEnchantments().getLevel(enchantment(helper, Enchantments.MENDING)) == 1,
+        helper.assertTrue(
+                result.getEnchantments().getLevel(enchantment(helper, Enchantments.MENDING)) == 1,
                 "Mending should be kept");
         helper.assertTrue(result.getEnchantments().size() > 1, "an enchantment should have been added");
         helper.assertTrue(menu.getSlot(1).getItem().getCount() == 3 - cost, "the vanilla lapis cost should be charged");
-        helper.assertTrue(player.experienceLevel == 30 - cost, "the vanilla XP cost should be charged, level is "
-                + player.experienceLevel);
+        helper.assertTrue(
+                player.experienceLevel == 30 - cost,
+                "the vanilla XP cost should be charged, level is " + player.experienceLevel);
         helper.assertFalse(hasOffer(menu), "at repair cost 63 the item should no longer get offers");
         helper.succeed();
     }
@@ -204,8 +210,9 @@ public final class EndChanterGameTests {
             for (int slot = 0; slot < 3; slot++) {
                 if (menu.costs[slot] > 0) {
                     Holder<Enchantment> clue = ids.byId(menu.enchantClue[slot]);
-                    helper.assertTrue(clue != null && !clue.equals(sharpness) && !clue.equals(smite)
-                            && !clue.equals(bane), "a Sharpness V sword should never be offered " + clue);
+                    helper.assertTrue(
+                            clue != null && !clue.equals(sharpness) && !clue.equals(smite) && !clue.equals(bane),
+                            "a Sharpness V sword should never be offered " + clue);
                 }
             }
             int slot = firstOffer(menu);
@@ -214,8 +221,10 @@ public final class EndChanterGameTests {
                 helper.assertTrue(menu.clickMenuButton(player, slot), "applying the offer should work");
                 ItemStack result = menu.getSlot(0).getItem();
                 helper.assertTrue(result.getEnchantments().getLevel(sharpness) == 5, "Sharpness V should be kept");
-                helper.assertTrue(result.getEnchantments().getLevel(smite) == 0
-                        && result.getEnchantments().getLevel(bane) == 0, "no incompatible enchantment added");
+                helper.assertTrue(
+                        result.getEnchantments().getLevel(smite) == 0
+                                && result.getEnchantments().getLevel(bane) == 0,
+                        "no incompatible enchantment added");
                 helper.assertTrue(result.getEnchantments().size() > 1, "something should have been added");
                 applied = true;
             }

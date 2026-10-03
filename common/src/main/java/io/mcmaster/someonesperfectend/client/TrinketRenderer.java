@@ -21,16 +21,35 @@ public final class TrinketRenderer implements AccessoryRenderer {
     private static final float SCALE = 0.5F;
 
     @Override
-    public <M extends LivingEntity> void render(ItemStack stack, SlotReference reference, PoseStack matrices,
-            EntityModel<M> model, MultiBufferSource buffers, int light, float limbSwing, float limbSwingAmount,
-            float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+    public <M extends LivingEntity> void render(
+            ItemStack stack,
+            SlotReference reference,
+            PoseStack matrices,
+            EntityModel<M> model,
+            MultiBufferSource buffers,
+            int light,
+            float limbSwing,
+            float limbSwingAmount,
+            float partialTicks,
+            float ageInTicks,
+            float netHeadYaw,
+            float headPitch) {
         if (!(model instanceof HumanoidModel<?> humanoid)) {
             return;
         }
         // x: toward one hip, y: belt height near the bottom of the torso, z: front face.
         AccessoryRenderer.transformToModelPart(matrices, humanoid.body, 0.55, -0.75, 1);
         matrices.scale(SCALE, SCALE, SCALE);
-        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.FIXED, light,
-                OverlayTexture.NO_OVERLAY, matrices, buffers, reference.entity().level(), 0);
+        Minecraft.getInstance()
+                .getItemRenderer()
+                .renderStatic(
+                        stack,
+                        ItemDisplayContext.FIXED,
+                        light,
+                        OverlayTexture.NO_OVERLAY,
+                        matrices,
+                        buffers,
+                        reference.entity().level(),
+                        0);
     }
 }

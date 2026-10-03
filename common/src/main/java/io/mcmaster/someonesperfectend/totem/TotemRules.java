@@ -15,8 +15,7 @@ public final class TotemRules {
     /** No live beacon effect (same value as {@code BeaconEffectTracker.NONE}). */
     public static final int NO_BEACON = -1;
 
-    private TotemRules() {
-    }
+    private TotemRules() {}
 
     /**
      * Whether confirming at the Infuser activates a totem: only in the End, only at tier 4, only with a netherite

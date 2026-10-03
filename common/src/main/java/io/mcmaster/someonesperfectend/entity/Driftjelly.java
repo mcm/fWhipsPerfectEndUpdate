@@ -54,6 +54,7 @@ public class Driftjelly extends Animal {
     public static final double MAX_HOVER = 6.0;
     /** How far below its feet a driftjelly looks for ground; with nothing solid within this range it is over the void. */
     public static final int GROUND_SCAN = 12;
+
     public static final double NO_GROUND = -1.0;
     public static final double TEMPTED_MIN_HOVER = 1.0;
     public static final double TEMPTED_MAX_HOVER = 2.0;
@@ -67,6 +68,7 @@ public class Driftjelly extends Animal {
 
     @Nullable
     private DriftjellyTemptGoal temptGoal;
+
     private int ticksOutsideEnd;
 
     /** Last position (feet) that had ground below it, where a driftjelly drifting over the void heads back to. */
@@ -88,8 +90,12 @@ public class Driftjelly extends Animal {
     }
 
     /** Natural spawns land on End ground (end turf, end stone, voidsoil); the driftjelly then rises to hover. */
-    public static boolean checkDriftjellySpawnRules(EntityType<Driftjelly> type, ServerLevelAccessor level,
-            MobSpawnType spawnType, BlockPos pos, RandomSource random) {
+    public static boolean checkDriftjellySpawnRules(
+            EntityType<Driftjelly> type,
+            ServerLevelAccessor level,
+            MobSpawnType spawnType,
+            BlockPos pos,
+            RandomSource random) {
         return level.getBlockState(pos.below()).is(ModBlockTags.END_PLANT_SOIL);
     }
 
@@ -261,12 +267,10 @@ public class Driftjelly extends Animal {
     }
 
     @Override
-    protected void checkFallDamage(double y, boolean onGround, BlockState state, BlockPos pos) {
-    }
+    protected void checkFallDamage(double y, boolean onGround, BlockState state, BlockPos pos) {}
 
     @Override
-    protected void playStepSound(BlockPos pos, BlockState state) {
-    }
+    protected void playStepSound(BlockPos pos, BlockState state) {}
 
     @Override
     protected SoundEvent getAmbientSound() {

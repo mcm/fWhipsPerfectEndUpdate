@@ -29,8 +29,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class EndFloraGameTests {
-    private EndFloraGameTests() {
-    }
+    private EndFloraGameTests() {}
 
     private static boolean survivesOn(GameTestHelper helper, Block plant, Block soil) {
         BlockPos pos = new BlockPos(1, 2, 1);
@@ -41,8 +40,15 @@ public final class EndFloraGameTests {
     @GameTest
     public static void petalsPlacementRules(GameTestHelper helper) {
         Block petals = ModBlocks.VOID_PETALS.get();
-        for (Block soil : List.of(ModBlocks.END_TURF.get(), ModBlocks.VOIDSOIL.get(), Blocks.END_STONE, Blocks.DIRT,
-                Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.ROOTED_DIRT, Blocks.FARMLAND)) {
+        for (Block soil : List.of(
+                ModBlocks.END_TURF.get(),
+                ModBlocks.VOIDSOIL.get(),
+                Blocks.END_STONE,
+                Blocks.DIRT,
+                Blocks.GRASS_BLOCK,
+                Blocks.PODZOL,
+                Blocks.ROOTED_DIRT,
+                Blocks.FARMLAND)) {
             helper.assertTrue(survivesOn(helper, petals, soil), "void petals should survive on " + soil);
         }
         for (Block soil : List.of(Blocks.STONE, Blocks.SAND, Blocks.OBSIDIAN)) {
@@ -78,8 +84,9 @@ public final class EndFloraGameTests {
         BlockPos pos = new BlockPos(1, 2, 1);
         helper.setBlock(pos.below(), ModBlocks.END_TURF.get());
         helper.setBlock(pos, ModBlocks.VOID_PETALS.get());
-        helper.assertTrue(BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), helper.getLevel(),
-                helper.absolutePos(pos)), "bone meal was not applied");
+        helper.assertTrue(
+                BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), helper.getLevel(), helper.absolutePos(pos)),
+                "bone meal was not applied");
         helper.assertBlockProperty(pos, PinkPetalsBlock.AMOUNT, 2);
         helper.succeed();
     }
@@ -111,11 +118,14 @@ public final class EndFloraGameTests {
         helper.setBlock(pot, ModBlocks.POTTED_GLOWCAP.get());
         ServerLevel level = helper.getLevel();
         helper.succeedWhen(() -> {
-            helper.assertTrue(level.getBrightness(LightLayer.BLOCK, helper.absolutePos(glowcap)) == ModBlocks.GLOWCAP_LIGHT,
+            helper.assertTrue(
+                    level.getBrightness(LightLayer.BLOCK, helper.absolutePos(glowcap)) == ModBlocks.GLOWCAP_LIGHT,
                     "glowcap block light is " + level.getBrightness(LightLayer.BLOCK, helper.absolutePos(glowcap)));
-            helper.assertTrue(level.getBrightness(LightLayer.BLOCK, helper.absolutePos(cap)) == ModBlocks.GLOWCAP_BLOCK_LIGHT,
+            helper.assertTrue(
+                    level.getBrightness(LightLayer.BLOCK, helper.absolutePos(cap)) == ModBlocks.GLOWCAP_BLOCK_LIGHT,
                     "glowcap_block light is " + level.getBrightness(LightLayer.BLOCK, helper.absolutePos(cap)));
-            helper.assertTrue(level.getBrightness(LightLayer.BLOCK, helper.absolutePos(pot)) == ModBlocks.GLOWCAP_LIGHT,
+            helper.assertTrue(
+                    level.getBrightness(LightLayer.BLOCK, helper.absolutePos(pot)) == ModBlocks.GLOWCAP_LIGHT,
                     "potted glowcap light is " + level.getBrightness(LightLayer.BLOCK, helper.absolutePos(pot)));
         });
     }
@@ -135,7 +145,8 @@ public final class EndFloraGameTests {
         while (level.getBlockState(abs.above(stem)).is(ModBlocks.GLOWCAP_STEM.get())) {
             stem++;
         }
-        helper.assertTrue(stem >= HugeGlowcapFeature.MIN_STEM_HEIGHT && stem <= HugeGlowcapFeature.MAX_STEM_HEIGHT,
+        helper.assertTrue(
+                stem >= HugeGlowcapFeature.MIN_STEM_HEIGHT && stem <= HugeGlowcapFeature.MAX_STEM_HEIGHT,
                 "stem height " + stem + " is outside 4-8");
         BlockState top = level.getBlockState(abs.above(stem));
         helper.assertTrue(top.is(ModBlocks.GLOWCAP_BLOCK.get()), "cap missing on top of the stem: " + top);
@@ -159,8 +170,8 @@ public final class EndFloraGameTests {
         BlockPos abs = helper.absolutePos(pos);
         for (int i = 0; i < 50; i++) {
             helper.setBlock(pos, Blocks.COMPOSTER);
-            BlockState result = ComposterBlock.insertItem(null, helper.getBlockState(pos), helper.getLevel(),
-                    new ItemStack(item), abs);
+            BlockState result = ComposterBlock.insertItem(
+                    null, helper.getBlockState(pos), helper.getLevel(), new ItemStack(item), abs);
             if (result.getValue(ComposterBlock.LEVEL) > 0) {
                 return true;
             }
@@ -180,8 +191,8 @@ public final class EndFloraGameTests {
         ServerLevel level = helper.getLevel();
         ItemStack result = level.getRecipeManager()
                 .getRecipeFor(RecipeType.CRAFTING, CraftingInput.of(1, 1, List.of(new ItemStack(input))), level)
-                .map(recipe -> recipe.value().assemble(CraftingInput.of(1, 1, List.of(new ItemStack(input))),
-                        level.registryAccess()))
+                .map(recipe -> recipe.value()
+                        .assemble(CraftingInput.of(1, 1, List.of(new ItemStack(input))), level.registryAccess()))
                 .orElse(ItemStack.EMPTY);
         helper.assertTrue(result.is(output), input + " crafted into " + result + ", expected " + output);
     }

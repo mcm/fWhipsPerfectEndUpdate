@@ -53,11 +53,15 @@ public class DriftjellyModel extends HierarchicalModel<Driftjelly> {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         // Model y grows downward; y = 24 is the entity's feet. The bell spans y 8..15, the tendrils 15..24.
-        root.addOrReplaceChild("bell", CubeListBuilder.create().texOffs(0, 0).addBox(-6.0F, -7.0F, -6.0F, 12, 7, 12),
+        root.addOrReplaceChild(
+                "bell",
+                CubeListBuilder.create().texOffs(0, 0).addBox(-6.0F, -7.0F, -6.0F, 12, 7, 12),
                 PartPose.offset(0.0F, 15.0F, 0.0F));
         CubeListBuilder tendril = CubeListBuilder.create().texOffs(48, 0).addBox(-0.5F, 0.0F, -0.5F, 1, 9, 1);
         for (int i = 0; i < TENDRILS; i++) {
-            root.addOrReplaceChild(tendrilName(i), tendril,
+            root.addOrReplaceChild(
+                    tendrilName(i),
+                    tendril,
                     PartPose.offset(Mth.cos(angle(i)) * 4.0F, 15.0F, Mth.sin(angle(i)) * 4.0F));
         }
         return LayerDefinition.create(mesh, 64, 32);
@@ -69,7 +73,12 @@ public class DriftjellyModel extends HierarchicalModel<Driftjelly> {
     }
 
     @Override
-    public void setupAnim(Driftjelly entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw,
+    public void setupAnim(
+            Driftjelly entity,
+            float limbSwing,
+            float limbSwingAmount,
+            float ageInTicks,
+            float netHeadYaw,
             float headPitch) {
         float pulse = Mth.sin(ageInTicks * 0.15F);
         bell.xScale = 1.0F + pulse * 0.06F;
@@ -84,9 +93,13 @@ public class DriftjellyModel extends HierarchicalModel<Driftjelly> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
-            int color) {
-        super.renderToBuffer(poseStack, buffer, packedLight, packedOverlay,
+    public void renderToBuffer(
+            PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        super.renderToBuffer(
+                poseStack,
+                buffer,
+                packedLight,
+                packedOverlay,
                 FastColor.ARGB32.multiply(color, FastColor.ARGB32.color(ALPHA, 0xFFFFFF)));
     }
 }

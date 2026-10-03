@@ -26,8 +26,7 @@ public final class VoidCleansingGameTests {
     private static final BlockPos TABLE = new BlockPos(3, 1, 3);
     private static final BlockPos HEAD_OFFSET = new BlockPos(2, 0, 0);
 
-    private VoidCleansingGameTests() {
-    }
+    private VoidCleansingGameTests() {}
 
     /** A table with {@code bookshelves} bookshelves and, optionally, a dragon head. */
     private static void table(GameTestHelper helper, int bookshelves, boolean head) {
@@ -51,8 +50,8 @@ public final class VoidCleansingGameTests {
     }
 
     private static EnchantmentMenu menu(GameTestHelper helper, Player player) {
-        return new EnchantmentMenu(0, player.getInventory(),
-                ContainerLevelAccess.create(helper.getLevel(), helper.absolutePos(TABLE)));
+        return new EnchantmentMenu(
+                0, player.getInventory(), ContainerLevelAccess.create(helper.getLevel(), helper.absolutePos(TABLE)));
     }
 
     /** Opens a menu with the given dragon's breath count (placed directly, bypassing the slot check) and item. */
@@ -70,8 +69,12 @@ public final class VoidCleansingGameTests {
 
     private static ItemStack mendingPickaxe(GameTestHelper helper, int repairCost) {
         ItemStack stack = new ItemStack(Items.IRON_PICKAXE);
-        stack.enchant(helper.getLevel().registryAccess().registryOrThrow(Registries.ENCHANTMENT)
-                .getHolderOrThrow(Enchantments.MENDING), 1);
+        stack.enchant(
+                helper.getLevel()
+                        .registryAccess()
+                        .registryOrThrow(Registries.ENCHANTMENT)
+                        .getHolderOrThrow(Enchantments.MENDING),
+                1);
         return withRepairCost(stack, repairCost);
     }
 
@@ -80,8 +83,11 @@ public final class VoidCleansingGameTests {
     }
 
     private static boolean offersVoidCleansing(EnchantmentMenu menu) {
-        return menu.costs[0] == 0 && menu.costs[1] == 0 && menu.costs[2] == VoidCleansingRules.LEVEL_REQUIREMENT
-                && menu.enchantClue[2] == VoidCleansingRules.CLUE && menu.enchantClue[0] == -1
+        return menu.costs[0] == 0
+                && menu.costs[1] == 0
+                && menu.costs[2] == VoidCleansingRules.LEVEL_REQUIREMENT
+                && menu.enchantClue[2] == VoidCleansingRules.CLUE
+                && menu.enchantClue[0] == -1
                 && menu.enchantClue[1] == -1;
     }
 
@@ -94,20 +100,24 @@ public final class VoidCleansingGameTests {
         table(helper, 15, true);
         Player player = player(helper, 30);
         EnchantmentMenu menu = menu(helper, player, 2, mendingPickaxe(helper, 31));
-        helper.assertTrue(offersVoidCleansing(menu), "slot 3 should offer Void Cleansing, costs "
-                + Arrays.toString(menu.costs) + " clues " + Arrays.toString(menu.enchantClue));
+        helper.assertTrue(
+                offersVoidCleansing(menu),
+                "slot 3 should offer Void Cleansing, costs " + Arrays.toString(menu.costs) + " clues "
+                        + Arrays.toString(menu.enchantClue));
         helper.assertFalse(menu.clickMenuButton(player, 0), "slots 1 and 2 have no offer");
         ItemEnchantments before = menu.getSlot(0).getItem().getEnchantments();
 
         helper.assertTrue(menu.clickMenuButton(player, 2), "Void Cleansing should apply");
         ItemStack result = menu.getSlot(0).getItem();
-        helper.assertTrue(repairCost(result) == 15, "repair cost should be (31 - 1) / 2 = 15, was "
-                + repairCost(result));
+        helper.assertTrue(
+                repairCost(result) == 15, "repair cost should be (31 - 1) / 2 = 15, was " + repairCost(result));
         helper.assertTrue(result.getEnchantments().equals(before), "enchantments should be unchanged");
-        helper.assertTrue(menu.getSlot(1).getItem().is(Items.DRAGON_BREATH)
-                && menu.getSlot(1).getItem().getCount() == 1, "1 dragon's breath should be consumed");
-        helper.assertTrue(player.experienceLevel == 27, "3 levels should be consumed, level is "
-                + player.experienceLevel);
+        helper.assertTrue(
+                menu.getSlot(1).getItem().is(Items.DRAGON_BREATH)
+                        && menu.getSlot(1).getItem().getCount() == 1,
+                "1 dragon's breath should be consumed");
+        helper.assertTrue(
+                player.experienceLevel == 27, "3 levels should be consumed, level is " + player.experienceLevel);
         helper.assertTrue(offersVoidCleansing(menu), "repair cost 15 can be cleansed again");
 
         player.experienceLevel = 30;
@@ -142,7 +152,8 @@ public final class VoidCleansingGameTests {
         table(helper, 15, true);
         Player player = player(helper, 30);
         EnchantmentMenu menu = menu(helper, player, 3, mendingPickaxe(helper, 0));
-        helper.assertTrue(noOffers(menu), "repair cost 0: no Void Cleansing and no vanilla offers with dragon's breath");
+        helper.assertTrue(
+                noOffers(menu), "repair cost 0: no Void Cleansing and no vanilla offers with dragon's breath");
         helper.assertFalse(menu.clickMenuButton(player, 2), "nothing to apply");
         EnchantmentMenu plain = menu(helper, player, 3, new ItemStack(Items.IRON_PICKAXE));
         helper.assertTrue(noOffers(plain), "dragon's breath is never spent on vanilla enchanting");
@@ -205,8 +216,10 @@ public final class VoidCleansingGameTests {
         helper.assertTrue(active.getSlot(1).mayPlace(breath), "an active End-chanter accepts dragon's breath");
         player.getInventory().setItem(0, breath.copyWithCount(4));
         active.quickMoveStack(player, 29);
-        helper.assertTrue(active.getSlot(1).getItem().is(Items.DRAGON_BREATH)
-                && active.getSlot(1).getItem().getCount() == 4, "shift-click moves dragon's breath to the lapis slot");
+        helper.assertTrue(
+                active.getSlot(1).getItem().is(Items.DRAGON_BREATH)
+                        && active.getSlot(1).getItem().getCount() == 4,
+                "shift-click moves dragon's breath to the lapis slot");
         helper.assertTrue(active.getSlot(0).getItem().isEmpty(), "not into the item slot");
         helper.succeed();
     }

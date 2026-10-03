@@ -21,10 +21,17 @@ public abstract class ServerGamePacketListenerImplMixin {
     @Shadow
     public ServerPlayer player;
 
-    @Inject(method = "handleSetCreativeModeSlot", cancellable = true, at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-            target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/server/level/ServerLevel;)V"))
-    private void someonesperfectend$setCreativeTrinketSlot(ServerboundSetCreativeModeSlotPacket packet,
-            CallbackInfo ci) {
+    @Inject(
+            method = "handleSetCreativeModeSlot",
+            cancellable = true,
+            at =
+                    @At(
+                            value = "INVOKE",
+                            shift = At.Shift.AFTER,
+                            target =
+                                    "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/server/level/ServerLevel;)V"))
+    private void someonesperfectend$setCreativeTrinketSlot(
+            ServerboundSetCreativeModeSlotPacket packet, CallbackInfo ci) {
         int trinketIndex = TrinketSlot.indexIn(this.player.inventoryMenu);
         if (trinketIndex < 0 || packet.slotNum() != trinketIndex) {
             return;

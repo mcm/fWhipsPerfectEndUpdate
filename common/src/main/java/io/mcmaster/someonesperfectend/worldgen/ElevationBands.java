@@ -19,7 +19,9 @@ public record ElevationBands(int lowerOffset, int upperOffset, int regionSize, i
     public static final ElevationBands DEFAULT = new ElevationBands(-20, 40, 320, 24, 1024);
 
     public enum Band {
-        LOWER, MIDDLE, UPPER
+        LOWER,
+        MIDDLE,
+        UPPER
     }
 
     /** Seeded random numbers in [0, 1) per region cell; {@code channel} 0 and 1 jitter the point, 2 picks the band. */
@@ -86,7 +88,9 @@ public record ElevationBands(int lowerOffset, int upperOffset, int regionSize, i
 
     /** Maps any double to a well-mixed value in [0, 1) (SplitMix64 finalizer). */
     public static double mix(double value, int cellX, int cellZ, int channel) {
-        long h = Double.doubleToLongBits(value) ^ (cellX * 0x9E3779B97F4A7C15L) ^ (cellZ * 0xC2B2AE3D27D4EB4FL)
+        long h = Double.doubleToLongBits(value)
+                ^ (cellX * 0x9E3779B97F4A7C15L)
+                ^ (cellZ * 0xC2B2AE3D27D4EB4FL)
                 ^ ((long) channel << 56);
         h = (h ^ (h >>> 30)) * 0xBF58476D1CE4E5B9L;
         h = (h ^ (h >>> 27)) * 0x94D049BB133111EBL;

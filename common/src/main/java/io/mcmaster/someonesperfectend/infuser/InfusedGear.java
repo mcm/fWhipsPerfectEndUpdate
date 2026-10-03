@@ -22,8 +22,7 @@ import net.minecraft.world.item.ItemStack;
  * active effect totem, all infused gear is paused (US-033).
  */
 public final class InfusedGear {
-    private InfusedGear() {
-    }
+    private InfusedGear() {}
 
     public static void init() {
         TickEvent.PLAYER_POST.register(player -> {
@@ -46,8 +45,8 @@ public final class InfusedGear {
     }
 
     @SafeVarargs
-    private static void update(Player player, ItemStack stack, Set<Holder<MobEffect>> claimed,
-            TagKey<Item>... validTags) {
+    private static void update(
+            Player player, ItemStack stack, Set<Holder<MobEffect>> claimed, TagKey<Item>... validTags) {
         Infusion infusion = Infusion.get(stack);
         if (infusion == null || !isAny(stack, validTags) || !claimed.add(infusion.effect())) {
             return;
@@ -56,8 +55,8 @@ public final class InfusedGear {
         if (InfusionRules.pausedByBeacon(infusion.amplifier(), beacon)) {
             return;
         }
-        player.addEffect(new MobEffectInstance(infusion.effect(), InfusionRules.GEAR_EFFECT_TICKS,
-                infusion.amplifier(), true, false, true));
+        player.addEffect(new MobEffectInstance(
+                infusion.effect(), InfusionRules.GEAR_EFFECT_TICKS, infusion.amplifier(), true, false, true));
         int remaining = InfusionRules.deplete(infusion.remainingTicks());
         if (remaining > 0) {
             stack.set(Infusers.INFUSION.get(), new Infusion(infusion.effect(), infusion.amplifier(), remaining));
