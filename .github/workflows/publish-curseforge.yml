@@ -1,0 +1,220 @@
+name: Publish to CurseForge
+
+on:
+  push:
+    tags:
+      # Release tags are v<mod_version>-mc<minecraft_version>, e.g. v1.0.0-mc1.21.1.
+      # Each Minecraft version has its own branch (main = newest, older ones on
+      # branches named after the version, e.g. 1.20.1), so the same mod_version
+      # can be released for several Minecraft versions under distinct tags.
+      - 'v*'
+
+# Never run two publishes for the same tag at once, and never cancel one mid-upload.
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Parse tag
+        id: get_version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          # v1.0.0-mc1.21.1 -> version 1.0.0, minecraft_version 1.21.1
+          if [[ ! "${TAG}" =~ ^v(.+)-mc([0-9][^-]*)$ ]]; then
+            echo "::error::Tag '${TAG}' is not in the form v<mod_version>-mc<minecraft_version> (e.g. v1.0.0-mc1.21.1)"
+            exit 1
+          fi
+          VERSION="${BASH_REMATCH[1]}"
+          MINECRAFT_VERSION="${BASH_REMATCH[2]}"
+          {
+            echo "version=${VERSION}"
+            echo "minecraft_version=${MINECRAFT_VERSION}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Mod version: ${VERSION}"
+          echo "Minecraft version: ${MINECRAFT_VERSION}"
+
+      - name: Read gradle.properties
+        id: gradle_props
+        run: |
+          prop() { grep -E "^$1[[:space:]]*=" gradle.properties | cut -d'=' -f2- | tr -d '[:space:]'; }
+          ARCHIVES_NAME=$(prop archives_name)
+          MOD_ID=$(prop mod_id)
+          MOD_VERSION=$(prop mod_version)
+          MINECRAFT_VERSION=$(prop minecraft_version)
+          NEO_VERSION=$(prop neoforge_version)
+          FABRIC_LOADER_VERSION=$(prop fabric_loader_version)
+          # CurseForge groups game versions by major.minor, e.g. "Minecraft 1.21"
+          MINECRAFT_VERSION_GROUP=$(echo "${MINECRAFT_VERSION}" | cut -d'.' -f1,2)
+
+          {
+            echo "mod_id=${MOD_ID}"
+            echo "mod_version=${MOD_VERSION}"
+            echo "minecraft_version=${MINECRAFT_VERSION}"
+            echo "minecraft_version_group=${MINECRAFT_VERSION_GROUP}"
+            echo "fabric_jar=fabric/build/libs/${ARCHIVES_NAME}-fabric-${MOD_VERSION}.jar"
+            echo "fabric_display_name=${ARCHIVES_NAME}-fabric-${MINECRAFT_VERSION}-${MOD_VERSION}"
+            echo "neoforge_jar=neoforge/build/libs/${ARCHIVES_NAME}-neoforge-${MOD_VERSION}.jar"
+            echo "neoforge_display_name=${ARCHIVES_NAME}-neoforge-${MINECRAFT_VERSION}-${MOD_VERSION}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Mod version from gradle.properties: ${MOD_VERSION}"
+          echo "Minecraft version: ${MINECRAFT_VERSION} (group ${MINECRAFT_VERSION_GROUP})"
+          echo "NeoForge version: ${NEO_VERSION}"
+          echo "Fabric Loader version: ${FABRIC_LOADER_VERSION}"
+
+      # Fail fast, before spending time on the build.
+      - name: Verify version consistency
+        env:
+          TAG_VERSION: ${{ steps.get_version.outputs.version }}
+          TAG_MINECRAFT_VERSION: ${{ steps.get_version.outputs.minecraft_version }}
+          GRADLE_VERSION: ${{ steps.gradle_props.outputs.mod_version }}
+          GRADLE_MINECRAFT_VERSION: ${{ steps.gradle_props.outputs.minecraft_version }}
+        run: |
+          echo "Tag: mod ${TAG_VERSION}, Minecraft ${TAG_MINECRAFT_VERSION}"
+          echo "gradle.properties: mod ${GRADLE_VERSION}, Minecraft ${GRADLE_MINECRAFT_VERSION}"
+
+          FAILED=0
+          if [ "${TAG_VERSION}" != "${GRADLE_VERSION}" ]; then
+            echo "::error::Tag mod version (${TAG_VERSION}) does not match mod_version in gradle.properties (${GRADLE_VERSION})"
+            FAILED=1
+          fi
+          if [ "${TAG_MINECRAFT_VERSION}" != "${GRADLE_MINECRAFT_VERSION}" ]; then
+            echo "::error::Tag Minecraft version (${TAG_MINECRAFT_VERSION}) does not match minecraft_version in gradle.properties (${GRADLE_MINECRAFT_VERSION}). Was the tag created on the wrong branch?"
+            FAILED=1
+          fi
+          if [ "${FAILED}" -ne 0 ]; then
+            exit 1
+          fi
+          echo "✅ Version verification passed: ${TAG_VERSION} for Minecraft ${TAG_MINECRAFT_VERSION}"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # Also validates the checksum of gradle/wrapper/gradle-wrapper.jar.
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
+
+      - name: Verify jars exist
+        env:
+          FABRIC_JAR: ${{ steps.gradle_props.outputs.fabric_jar }}
+          NEOFORGE_JAR: ${{ steps.gradle_props.outputs.neoforge_jar }}
+        run: |
+          FAILED=0
+          for JAR in "${FABRIC_JAR}" "${NEOFORGE_JAR}"; do
+            if [ ! -f "${JAR}" ]; then
+              echo "::error::Expected jar not found: ${JAR}"
+              ls -la "$(dirname "${JAR}")"
+              FAILED=1
+            else
+              echo "✅ Found ${JAR}"
+            fi
+          done
+          if [ "${FAILED}" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Upload jars as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.gradle_props.outputs.mod_id }}-jars
+          path: |
+            fabric/build/libs/*.jar
+            neoforge/build/libs/*.jar
+            !**/*-dev-shadow.jar
+          retention-days: 30
+
+      - name: Extract changelog for version
+        id: changelog
+        env:
+          VERSION: ${{ steps.get_version.outputs.version }}
+          RELEASE_URL: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+        run: |
+          # Extract changelog for the specific version from CHANGELOG.md
+          # Look for version header like "## [0.3.1]" and extract content until next version header
+          awk -v version="$VERSION" '
+          BEGIN { found = 0; printing = 0 }
+          /^## \[/ {
+            if (found && printing) exit
+            if (index($0, "[" version "]")) {
+              found = 1
+              printing = 1
+              next
+            }
+          }
+          found && printing { print }
+          ' CHANGELOG.md > version_changelog.txt
+
+          # Check if we found a changelog for this version
+          if [ ! -s version_changelog.txt ]; then
+            echo "⚠️ Warning: No changelog found for version ${VERSION}"
+            echo "Using fallback changelog"
+            cat > version_changelog.txt << EOF
+          ## Changes in ${VERSION}
+
+          See the full changelog at: ${RELEASE_URL}
+          EOF
+          else
+            echo "✅ Found changelog for version ${VERSION}"
+          fi
+
+          # Output the changelog content for debugging
+          echo "Changelog content:"
+          cat version_changelog.txt
+
+          # Set the changelog as output (multiline)
+          {
+            echo 'changelog<<EOF'
+            cat version_changelog.txt
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      # One file per loader, uploaded to the same CurseForge project.
+      # CurseForge rejects uploads without an environment version
+      # ("You must select at least one version from the environment group", errorCode 1021),
+      # so Client and Server are always listed.
+      - name: Upload NeoForge jar to CurseForge
+        uses: itsmeow/curseforge-upload@13f278adc4cc7b881555f87e6ea528387dd6492b # v3.1.0
+        with:
+          token: ${{ secrets.CF_API_TOKEN }}
+          project_id: ${{ vars.CF_PROJECT_ID }}
+          game_endpoint: minecraft
+          file_path: ${{ steps.gradle_props.outputs.neoforge_jar }}
+          display_name: ${{ steps.gradle_props.outputs.neoforge_display_name }}
+          game_versions: "Minecraft ${{ steps.gradle_props.outputs.minecraft_version_group }}:${{ steps.gradle_props.outputs.minecraft_version }},NeoForge,Java 21,environment:Client,environment:Server"
+          release_type: release
+          changelog_type: markdown
+          changelog: ${{ steps.changelog.outputs.changelog }}
+          relations: ""
+
+      - name: Upload Fabric jar to CurseForge
+        uses: itsmeow/curseforge-upload@13f278adc4cc7b881555f87e6ea528387dd6492b # v3.1.0
+        with:
+          token: ${{ secrets.CF_API_TOKEN }}
+          project_id: ${{ vars.CF_PROJECT_ID }}
+          game_endpoint: minecraft
+          file_path: ${{ steps.gradle_props.outputs.fabric_jar }}
+          display_name: ${{ steps.gradle_props.outputs.fabric_display_name }}
+          game_versions: "Minecraft ${{ steps.gradle_props.outputs.minecraft_version_group }}:${{ steps.gradle_props.outputs.minecraft_version }},Fabric,Java 21,environment:Client,environment:Server"
+          release_type: release
+          changelog_type: markdown
+          changelog: ${{ steps.changelog.outputs.changelog }}
+          relations: ""
