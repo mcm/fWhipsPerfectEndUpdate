@@ -66,7 +66,8 @@ public final class ModGameTests {
             EndCityGameTests.class,
             EnderblossomGameTests.class,
             EnderblossomSwitchingGameTests.class,
-            EnderblossomStewGameTests.class);
+            EnderblossomStewGameTests.class,
+            EnderblossomShakingGameTests.class);
 
     public ModGameTests() {}
 
