@@ -1,0 +1,6 @@
+{
+  "parent": "someonesperfectend:block/template_wall_enderblossom",
+  "textures": {
+    "cross": "someonesperfectend:block/open_enderblossom"
+  }
+}

@@ -392,7 +392,35 @@ public final class ModBlocks {
                     ASTRAL_SAPLING.get(),
                     BlockBehaviour.Properties.of().instabreak().noOcclusion().pushReaction(PushReaction.DESTROY)));
 
+    // Enderblossoms (MOD-58): flowers on the sides of Astral logs. Properties follow vanilla flowers.
+    public static final RegistrySupplier<EnderblossomBlock> OPEN_ENDERBLOSSOM = ModRegistries.block(
+            "open_enderblossom",
+            () -> new EnderblossomBlock(EnderblossomBlock.Type.OPEN, enderblossomProperties(MapColor.COLOR_MAGENTA)));
+    public static final RegistrySupplier<EnderblossomBlock> CLOSED_ENDERBLOSSOM = ModRegistries.block(
+            "closed_enderblossom",
+            () -> new EnderblossomBlock(
+                    EnderblossomBlock.Type.CLOSED, enderblossomProperties(MapColor.COLOR_LIGHT_BLUE)));
+    public static final RegistrySupplier<FlowerPotBlock> POTTED_OPEN_ENDERBLOSSOM = ModRegistries.blockOnly(
+            "potted_open_enderblossom",
+            () -> new FlowerPotBlock(
+                    OPEN_ENDERBLOSSOM.get(),
+                    BlockBehaviour.Properties.of().instabreak().noOcclusion().pushReaction(PushReaction.DESTROY)));
+    public static final RegistrySupplier<FlowerPotBlock> POTTED_CLOSED_ENDERBLOSSOM = ModRegistries.blockOnly(
+            "potted_closed_enderblossom",
+            () -> new FlowerPotBlock(
+                    CLOSED_ENDERBLOSSOM.get(),
+                    BlockBehaviour.Properties.of().instabreak().noOcclusion().pushReaction(PushReaction.DESTROY)));
+
     private ModBlocks() {}
+
+    private static BlockBehaviour.Properties enderblossomProperties(MapColor color) {
+        return BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .noCollission()
+                .instabreak()
+                .sound(SoundType.GRASS)
+                .pushReaction(PushReaction.DESTROY);
+    }
 
     private static BlockBehaviour.Properties logProperties(MapColor topColor, MapColor sideColor, WoodType type) {
         return BlockBehaviour.Properties.of()
