@@ -7,6 +7,7 @@ import dev.architectury.registry.client.level.entity.EntityRendererRegistry;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.registry.client.rendering.RenderTypeRegistry;
 import dev.architectury.registry.menu.MenuRegistry;
+import io.mcmaster.someonesperfectend.block.EnderblossomShaking;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.block.ModWoodTypes;
 import io.mcmaster.someonesperfectend.entity.Driftjellies;
@@ -56,6 +57,7 @@ public final class SomeonesPerfectEndClient {
             registerTrinketRenderers();
             BlockEntityRendererProvider<BeaconBlockEntity> beaconRenderer = BeaconRenderer::new;
             BlockEntityRendererRegistry.register(Infusers.BLOCK_ENTITY.get(), beaconRenderer);
+            BlockEntityRendererRegistry.register(EnderblossomShaking.BLOCK_ENTITY.get(), EnderblossomRenderer::new);
         });
     }
 

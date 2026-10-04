@@ -21,10 +21,13 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SuspiciousEffectHolder;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -36,9 +39,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * A flower that grows out of the side of an Astral Log ({@link ModBlockTags#ASTRAL_LOGS}), backported and twisted
  * from 1.21.4's Eyeblossom. Like the Eyeblossom it comes as two blocks, one per {@link Type}. {@link #FACING} points
  * away from the supporting log; the blossom pops off when that log is gone. It opens while an Enderman is near
- * ({@link Enderblossoms}). In suspicious stew either type gives {@code displacement}.
+ * ({@link Enderblossoms}) and shakes when looked at or when an Enderman teleports nearby ({@link EnderblossomShaking}).
+ * A block entity renderer draws it, so it can shake and the open blossom's eye can glow. In suspicious stew either
+ * type gives {@code displacement}.
  */
-public class EnderblossomBlock extends Block implements Enderblossoms.Blossom, SuspiciousEffectHolder {
+public class EnderblossomBlock extends Block implements Enderblossoms.Blossom, SuspiciousEffectHolder, EntityBlock {
     public static final MapCodec<EnderblossomBlock> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(Type.CODEC.fieldOf("type").forGetter(EnderblossomBlock::type), propertiesCodec())
                     .apply(instance, EnderblossomBlock::new));
@@ -99,7 +104,26 @@ public class EnderblossomBlock extends Block implements Enderblossoms.Blossom, S
 
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        EnderblossomShaking.checkLookers(level, pos, state, level.players());
         Enderblossoms.regularCheck(state, level, pos, random);
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new EnderblossomBlockEntity(pos, state);
+    }
+
+    /** The block entity renderer draws the model, so it can shake. */
+    @Override
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    protected boolean triggerEvent(BlockState state, Level level, BlockPos pos, int id, int param) {
+        super.triggerEvent(state, level, pos, id, param);
+        BlockEntity entity = level.getBlockEntity(pos);
+        return entity != null && entity.triggerEvent(id, param);
     }
 
     @Override

@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -36,6 +37,7 @@ public final class ModRegistries {
     public static final DeferredRegister<Block> BLOCKS = create(Registries.BLOCK);
     public static final DeferredRegister<Item> ITEMS = create(Registries.ITEM);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = create(Registries.BLOCK_ENTITY_TYPE);
+    public static final DeferredRegister<PoiType> POI_TYPES = create(Registries.POINT_OF_INTEREST_TYPE);
     public static final DeferredRegister<MenuType<?>> MENUS = create(Registries.MENU);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = create(Registries.ENTITY_TYPE);
     public static final DeferredRegister<Fluid> FLUIDS = create(Registries.FLUID);
@@ -110,6 +112,7 @@ public final class ModRegistries {
         BLOCKS.register();
         ITEMS.register();
         BLOCK_ENTITY_TYPES.register();
+        POI_TYPES.register();
         MENUS.register();
         POTIONS.register();
         ENTITY_TYPES.register();

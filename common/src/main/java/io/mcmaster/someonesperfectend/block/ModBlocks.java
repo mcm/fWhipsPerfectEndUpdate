@@ -487,6 +487,7 @@ public final class ModBlocks {
     public static void init() {
         ModWoodTypes.init();
         Enderblossoms.init();
+        EnderblossomShaking.init();
         // Fabric reads the vanilla map; NeoForge reads data/neoforge/data_maps/item/compostables.json instead.
         LifecycleEvent.SETUP.register(() -> {
             ComposterBlock.COMPOSTABLES.put(VOID_PETALS.get().asItem(), 0.3F);
