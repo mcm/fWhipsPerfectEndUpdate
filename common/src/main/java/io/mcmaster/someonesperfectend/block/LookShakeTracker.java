@@ -10,7 +10,7 @@ import java.util.UUID;
  * every {@link #REPEAT_INTERVAL} ticks while they keep looking. Kept in memory only.
  */
 public final class LookShakeTracker {
-    public static final int REPEAT_INTERVAL = 40;
+    public static final int REPEAT_INTERVAL = 20;
 
     /** Game time of the last shake each looking player caused. */
     private final Map<UUID, Long> lastShake = new HashMap<>();
