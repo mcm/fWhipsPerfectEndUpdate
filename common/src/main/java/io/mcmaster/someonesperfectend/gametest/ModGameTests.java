@@ -64,7 +64,8 @@ public final class ModGameTests {
             EnderBedTravelGameTests.class,
             EndlingVillageGameTests.class,
             EndCityGameTests.class,
-            EnderblossomGameTests.class);
+            EnderblossomGameTests.class,
+            EnderblossomSwitchingGameTests.class);
 
     public ModGameTests() {}
 
