@@ -58,6 +58,7 @@ public final class ModGameTests {
             UnderIslandFoliageGameTests.class,
             DriftjellyGameTests.class,
             DriftjellyHusbandryGameTests.class,
+            DriftjellyContainmentGameTests.class,
             EndlingGameTests.class,
             EndlingBarterGameTests.class,
             EndlingSpecialBarterGameTests.class,

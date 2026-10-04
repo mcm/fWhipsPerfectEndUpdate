@@ -48,6 +48,10 @@ import org.jetbrains.annotations.Nullable;
  * feeding Voidfruit breeds it (vanilla {@link Animal} love, cooldowns, and baby growth). Like a Hoglin outside the
  * Nether, it only thrives in the End: after {@link #DORMANCY_DELAY} ticks elsewhere it turns dormant, sinks to the
  * ground, can't breed or be tempted, and drops nothing. Returning to the End wakes it.
+ *
+ * <p>A planted Glowcap contains driftjellies for farms: one that comes within {@link #CONTAINMENT_RADIUS} blocks of
+ * it (on every axis) latches onto it and from then on stays in the 15x15x15 box centered on it. It doesn't head for
+ * the Glowcap, it keeps floating freely inside the box; breaking the Glowcap or leashing the driftjelly frees it.
  */
 public class Driftjelly extends Animal {
     public static final double MIN_HOVER = 2.0;
@@ -60,11 +64,20 @@ public class Driftjelly extends Animal {
     public static final double TEMPTED_MAX_HOVER = 2.0;
     /** Ticks outside the End before a driftjelly turns dormant (15 seconds). */
     public static final int DORMANCY_DELAY = 300;
+    /** A planted Glowcap keeps a driftjelly within this many blocks of it on each axis (a 15x15x15 box). */
+    public static final int CONTAINMENT_RADIUS = 7;
+    /** How far inside the containment box's faces a driftjelly's position is held. */
+    public static final double CONTAINMENT_MARGIN = 0.5;
+    /** A driftjelly moved (teleported, carried) further than this from its Glowcap forgets it. */
+    private static final int CONTAINMENT_FORGET_DISTANCE = 16;
+    /** Ticks between scans for a Glowcap to latch onto while uncontained. */
+    private static final int CONTAINMENT_SCAN_INTERVAL = 20;
 
     private static final EntityDataAccessor<Boolean> DATA_DORMANT =
             SynchedEntityData.defineId(Driftjelly.class, EntityDataSerializers.BOOLEAN);
     private static final String TAG_DORMANT = "Dormant";
     private static final String TAG_TICKS_OUTSIDE_END = "TicksOutsideEnd";
+    private static final String TAG_CONTAINMENT = "Containment";
 
     @Nullable
     private DriftjellyTemptGoal temptGoal;
@@ -74,6 +87,12 @@ public class Driftjelly extends Animal {
     /** Last position (feet) that had ground below it, where a driftjelly drifting over the void heads back to. */
     @Nullable
     private Vec3 lastGroundPos;
+
+    /** The planted Glowcap this driftjelly is contained by, if any. */
+    @Nullable
+    private BlockPos containment;
+
+    private int containmentScanCooldown;
 
     public Driftjelly(EntityType<? extends Driftjelly> type, Level level) {
         super(type, level);
@@ -193,6 +212,9 @@ public class Driftjelly extends Animal {
         super.addAdditionalSaveData(tag);
         tag.putBoolean(TAG_DORMANT, isDormant());
         tag.putInt(TAG_TICKS_OUTSIDE_END, ticksOutsideEnd);
+        if (containment != null) {
+            tag.putLong(TAG_CONTAINMENT, containment.asLong());
+        }
     }
 
     @Override
@@ -200,6 +222,7 @@ public class Driftjelly extends Animal {
         super.readAdditionalSaveData(tag);
         setDormant(tag.getBoolean(TAG_DORMANT));
         ticksOutsideEnd = tag.getInt(TAG_TICKS_OUTSIDE_END);
+        containment = tag.contains(TAG_CONTAINMENT) ? BlockPos.of(tag.getLong(TAG_CONTAINMENT)) : null;
     }
 
     @Override
@@ -208,6 +231,7 @@ public class Driftjelly extends Animal {
         if (isDormant()) {
             return;
         }
+        updateContainment();
         double height = heightAboveGround(level(), getX(), getY(), getZ());
         Vec3 motion = getDeltaMovement();
         double dy = Mth.sin(tickCount * 0.1F) * 0.003;
@@ -230,7 +254,92 @@ public class Driftjelly extends Animal {
                 dy -= 0.02;
             }
         }
-        setDeltaMovement(motion.x, Mth.clamp(motion.y + dy, -0.15, 0.15), motion.z);
+        motion = new Vec3(motion.x, Mth.clamp(motion.y + dy, -0.15, 0.15), motion.z);
+        if (containment != null) {
+            motion = new Vec3(
+                    containAxis(getX(), containment.getX(), motion.x),
+                    containAxis(getY(), containment.getY(), motion.y),
+                    containAxis(getZ(), containment.getZ(), motion.z));
+        }
+        setDeltaMovement(motion);
+    }
+
+    /** The planted Glowcap containing this driftjelly, or {@code null} if it is free. */
+    @Nullable
+    public BlockPos containment() {
+        return containment;
+    }
+
+    /**
+     * Drops the Glowcap once it is gone, out of reach or the driftjelly is leashed; while free, looks for one to
+     * latch onto every {@link #CONTAINMENT_SCAN_INTERVAL} ticks.
+     */
+    private void updateContainment() {
+        if (isLeashed()) {
+            containment = null;
+            return;
+        }
+        if (containment != null && level().isLoaded(containment)) {
+            BlockPos at = blockPosition();
+            int distance = Math.max(
+                    Math.abs(at.getX() - containment.getX()),
+                    Math.max(Math.abs(at.getY() - containment.getY()), Math.abs(at.getZ() - containment.getZ())));
+            if (!isContainer(level().getBlockState(containment)) || distance > CONTAINMENT_FORGET_DISTANCE) {
+                containment = null;
+            }
+        }
+        if (containment == null && --containmentScanCooldown <= 0) {
+            containmentScanCooldown = CONTAINMENT_SCAN_INTERVAL;
+            containment = findContainment(level(), blockPosition());
+        }
+    }
+
+    public static boolean isContainer(BlockState state) {
+        return state.is(ModBlocks.GLOWCAP.get());
+    }
+
+    /** The nearest planted Glowcap whose containment box holds {@code at}, or {@code null} if there is none. */
+    @Nullable
+    public static BlockPos findContainment(BlockGetter level, BlockPos at) {
+        BlockPos nearest = null;
+        double nearestDistance = Double.MAX_VALUE;
+        for (BlockPos pos : BlockPos.betweenClosed(
+                at.offset(-CONTAINMENT_RADIUS, -CONTAINMENT_RADIUS, -CONTAINMENT_RADIUS),
+                at.offset(CONTAINMENT_RADIUS, CONTAINMENT_RADIUS, CONTAINMENT_RADIUS))) {
+            if (isContainer(level.getBlockState(pos))) {
+                double distance = pos.distSqr(at);
+                if (distance < nearestDistance) {
+                    nearest = pos.immutable();
+                    nearestDistance = distance;
+                }
+            }
+        }
+        return nearest;
+    }
+
+    /**
+     * Whether {@code pos} lies in the box of blocks within {@link #CONTAINMENT_RADIUS} of {@code glowcap}, at least
+     * {@code margin} inside its faces.
+     */
+    public static boolean insideContainment(BlockPos glowcap, Vec3 pos, double margin) {
+        return insideAxis(pos.x, glowcap.getX(), margin)
+                && insideAxis(pos.y, glowcap.getY(), margin)
+                && insideAxis(pos.z, glowcap.getZ(), margin);
+    }
+
+    private static boolean insideAxis(double pos, int center, double margin) {
+        return pos >= center - CONTAINMENT_RADIUS + margin && pos <= center + CONTAINMENT_RADIUS + 1 - margin;
+    }
+
+    /** One axis of the containment wall: past the margin, outward motion stops and the driftjelly is pushed back. */
+    private static double containAxis(double pos, int center, double motion) {
+        if (pos < center - CONTAINMENT_RADIUS + CONTAINMENT_MARGIN) {
+            return Math.max(motion, 0.0) + 0.02;
+        }
+        if (pos > center + CONTAINMENT_RADIUS + 1 - CONTAINMENT_MARGIN) {
+            return Math.min(motion, 0.0) - 0.02;
+        }
+        return motion;
     }
 
     /**

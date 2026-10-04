@@ -1,6 +1,7 @@
 package io.mcmaster.fwhipsperfectendupdate.entity;
 
 import java.util.EnumSet;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
@@ -9,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Wanders to a nearby spot at hover height, but only to spots over solid ground reached by a straight line that stays
- * over ground the whole way, so a driftjelly never deliberately drifts out over the void.
+ * over ground the whole way, so a driftjelly never deliberately drifts out over the void. A driftjelly contained by a
+ * Glowcap only picks spots inside its containment box (which is convex, so the straight line stays inside too).
  */
 public class DriftjellyDriftGoal extends Goal {
     public static final int RANGE = 8;
@@ -69,6 +71,11 @@ public class DriftjellyDriftGoal extends Goal {
             double ground = probe - height;
             double hover = jelly.minHover() + 1.0 + random.nextDouble() * (jelly.maxHover() - jelly.minHover() - 2.0);
             Vec3 target = new Vec3(x, ground + hover, z);
+            BlockPos containment = jelly.containment();
+            if (containment != null
+                    && !Driftjelly.insideContainment(containment, target, Driftjelly.CONTAINMENT_MARGIN)) {
+                continue;
+            }
             if (overGroundAllTheWay(jelly, from, target)
                     && level.noCollision(
                             jelly, jelly.getDimensions(jelly.getPose()).makeBoundingBox(target))) {
