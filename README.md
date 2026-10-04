@@ -81,6 +81,19 @@ resource reload by recoloring the player's own vanilla textures:
    recipe's target, that recipe is not generated. To replace a placeholder, add
    `assets/someonesperfectend/textures/<path>.png`; no code or recipe change is needed.
 
+Original hand-drawn textures (the Enderblossoms so far) are authored with the
+[mc-asset](https://www.npmjs.com/package/mc-asset) CLI. Their editable sources live in `art/textures/<path>.grid`
+(plus the `.mcpx` that `mc-asset render` writes) and mirror the PNG paths under
+`assets/someonesperfectend/textures/`. To change one, edit the `.grid` and re-render it:
+
+```
+mc-asset render art/textures/block/open_enderblossom.grid --force \
+    --output common/src/main/resources/assets/someonesperfectend/textures/block/open_enderblossom.png \
+    --source art/textures/block/open_enderblossom.mcpx
+mc-asset validate common/src/main/resources/assets/someonesperfectend/textures/block/open_enderblossom.png \
+    --profile minecraft:block
+```
+
 A recipe file holds one recipe or a list sharing a palette:
 
 ```json

@@ -106,6 +106,10 @@ public final class SomeonesPerfectEndClient {
                 ModBlocks.VOIDVINE_TRAPDOOR.get(),
                 ModBlocks.ASTRAL_SAPLING.get(),
                 ModBlocks.POTTED_ASTRAL_SAPLING.get(),
+                ModBlocks.OPEN_ENDERBLOSSOM.get(),
+                ModBlocks.CLOSED_ENDERBLOSSOM.get(),
+                ModBlocks.POTTED_OPEN_ENDERBLOSSOM.get(),
+                ModBlocks.POTTED_CLOSED_ENDERBLOSSOM.get(),
                 ModBlocks.VOIDVINE_HEAD.get(),
                 ModBlocks.VOIDVINE_BODY.get());
         RenderTypeRegistry.register(
