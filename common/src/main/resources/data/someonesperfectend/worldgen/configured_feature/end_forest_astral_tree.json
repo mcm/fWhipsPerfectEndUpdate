@@ -48,6 +48,11 @@
       "max_inclusive": 4
     },
     "flowering_log_chance": 0.1,
-    "max_overhang": 3
+    "max_overhang": 3,
+    "enderblossoms": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 4
+    }
   }
 }

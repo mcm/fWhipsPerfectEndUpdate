@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -72,6 +73,18 @@ public final class Enderblossoms {
         if (!level.isClientSide) {
             level.scheduleTick(pos, block, nextCheckDelay(level, pos));
         }
+    }
+
+    /**
+     * Schedules the first regular check of a blossom placed without {@code onPlace}, e.g. by worldgen through a
+     * {@link net.minecraft.world.level.WorldGenLevel}; scheduled ticks are saved with the chunk.
+     */
+    public static void scheduleFirstCheck(LevelAccessor level, BlockPos pos, Block block) {
+        level.scheduleTick(
+                pos,
+                block,
+                EnderblossomTiming.nextCheckDelay(
+                        level.getLevelData().getGameTime(), EnderblossomTiming.phase(pos.hashCode())));
     }
 
     private static int nextCheckDelay(Level level, BlockPos pos) {
