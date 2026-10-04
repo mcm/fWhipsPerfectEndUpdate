@@ -400,18 +400,26 @@ public final class ModBlocks {
             "closed_enderblossom",
             () -> new EnderblossomBlock(
                     EnderblossomBlock.Type.CLOSED, enderblossomProperties(MapColor.COLOR_LIGHT_BLUE)));
-    public static final RegistrySupplier<FlowerPotBlock> POTTED_OPEN_ENDERBLOSSOM = ModRegistries.blockOnly(
+    public static final RegistrySupplier<PottedEnderblossomBlock> POTTED_OPEN_ENDERBLOSSOM = ModRegistries.blockOnly(
             "potted_open_enderblossom",
-            () -> new FlowerPotBlock(
+            () -> new PottedEnderblossomBlock(
                     OPEN_ENDERBLOSSOM.get(),
                     BlockBehaviour.Properties.of().instabreak().noOcclusion().pushReaction(PushReaction.DESTROY)));
-    public static final RegistrySupplier<FlowerPotBlock> POTTED_CLOSED_ENDERBLOSSOM = ModRegistries.blockOnly(
+    public static final RegistrySupplier<PottedEnderblossomBlock> POTTED_CLOSED_ENDERBLOSSOM = ModRegistries.blockOnly(
             "potted_closed_enderblossom",
-            () -> new FlowerPotBlock(
+            () -> new PottedEnderblossomBlock(
                     CLOSED_ENDERBLOSSOM.get(),
                     BlockBehaviour.Properties.of().instabreak().noOcclusion().pushReaction(PushReaction.DESTROY)));
 
     private ModBlocks() {}
+
+    public static EnderblossomBlock enderblossom(EnderblossomBlock.Type type) {
+        return (type.open() ? OPEN_ENDERBLOSSOM : CLOSED_ENDERBLOSSOM).get();
+    }
+
+    public static PottedEnderblossomBlock pottedEnderblossom(EnderblossomBlock.Type type) {
+        return (type.open() ? POTTED_OPEN_ENDERBLOSSOM : POTTED_CLOSED_ENDERBLOSSOM).get();
+    }
 
     private static BlockBehaviour.Properties enderblossomProperties(MapColor color) {
         return BlockBehaviour.Properties.of()
@@ -478,6 +486,7 @@ public final class ModBlocks {
     /** Loads this class so its entries are added to the deferred registers. */
     public static void init() {
         ModWoodTypes.init();
+        Enderblossoms.init();
         // Fabric reads the vanilla map; NeoForge reads data/neoforge/data_maps/item/compostables.json instead.
         LifecycleEvent.SETUP.register(() -> {
             ComposterBlock.COMPOSTABLES.put(VOID_PETALS.get().asItem(), 0.3F);

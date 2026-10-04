@@ -3,12 +3,17 @@ package io.mcmaster.someonesperfectend.block;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.mcmaster.someonesperfectend.sound.ModSounds;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -19,15 +24,17 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * A flower that grows out of the side of an Astral Log ({@link ModBlockTags#ASTRAL_LOGS}), backported and twisted
  * from 1.21.4's Eyeblossom. Like the Eyeblossom it comes as two blocks, one per {@link Type}. {@link #FACING} points
- * away from the supporting log; the blossom pops off when that log is gone.
+ * away from the supporting log; the blossom pops off when that log is gone. It opens while an Enderman is near
+ * ({@link Enderblossoms}).
  */
-public class EnderblossomBlock extends Block {
+public class EnderblossomBlock extends Block implements Enderblossoms.Blossom {
     public static final MapCodec<EnderblossomBlock> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(Type.CODEC.fieldOf("type").forGetter(EnderblossomBlock::type), propertiesCodec())
                     .apply(instance, EnderblossomBlock::new));
@@ -39,6 +46,9 @@ public class EnderblossomBlock extends Block {
             Direction.SOUTH, Block.box(3, 1, 0, 13, 15, 12),
             Direction.WEST, Block.box(4, 1, 3, 16, 15, 13),
             Direction.EAST, Block.box(0, 1, 3, 12, 15, 13));
+
+    /** Like vanilla's Eyeblossom. */
+    public static final int IDLE_SOUND_CHANCE = 700;
 
     private final Type type;
 
@@ -53,8 +63,42 @@ public class EnderblossomBlock extends Block {
         return CODEC;
     }
 
+    @Override
     public Type type() {
         return type;
+    }
+
+    @Override
+    public BlockState withType(BlockState state, Type type) {
+        return ModBlocks.enderblossom(type).defaultBlockState().setValue(FACING, state.getValue(FACING));
+    }
+
+    @Override
+    public Vec3 headPosition(BlockState state, BlockPos pos) {
+        return Enderblossoms.wallHead(state.getValue(FACING), pos);
+    }
+
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        Enderblossoms.scheduleFirstCheck(level, pos, this);
+    }
+
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        Enderblossoms.regularCheck(state, level, pos, random);
+    }
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        playIdleSound(type, level, pos, random);
+    }
+
+    /** Client side: an open blossom has a 1 in {@value #IDLE_SOUND_CHANCE} chance per animate tick to play idle. */
+    static void playIdleSound(Type type, Level level, BlockPos pos, RandomSource random) {
+        if (type.open() && random.nextInt(IDLE_SOUND_CHANCE) == 0) {
+            level.playLocalSound(pos, ModSounds.ENDERBLOSSOM_IDLE.get(), SoundSource.BLOCKS, 1.0F, 1.0F, false);
+        }
     }
 
     @Override

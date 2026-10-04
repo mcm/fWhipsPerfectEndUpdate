@@ -10,6 +10,7 @@ import io.mcmaster.someonesperfectend.fluid.ModFluids;
 import io.mcmaster.someonesperfectend.infuser.InfusedGear;
 import io.mcmaster.someonesperfectend.infuser.Infusers;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
+import io.mcmaster.someonesperfectend.sound.ModSounds;
 import io.mcmaster.someonesperfectend.totem.EffectTotems;
 import io.mcmaster.someonesperfectend.trinket.Trinkets;
 import io.mcmaster.someonesperfectend.worldgen.EndlingVillages;
@@ -24,6 +25,7 @@ public final class SomeonesPerfectEnd {
 
     /** Common init; called from each loader's entrypoint during mod construction. */
     public static void init() {
+        ModSounds.init();
         ModBlocks.init();
         EnderBeds.init();
         ModBoats.init();
