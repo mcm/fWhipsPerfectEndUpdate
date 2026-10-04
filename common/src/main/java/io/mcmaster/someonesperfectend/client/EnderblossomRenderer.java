@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class EnderblossomRenderer implements BlockEntityRenderer<EnderblossomBlockEntity> {
     public static final ResourceLocation EMISSIVE_TEXTURE = SomeonesPerfectEnd.id("block/open_enderblossom_emissive");
     /** How far the stem base sits from the block center toward the log: model z 19 for facing north. */
-    private static final float STEM_BASE_OFFSET = 19.0F / 16.0F - 0.5F;
+    private static final float STEM_BASE_OFFSET = 0.5F + EnderblossomBlock.STEM_DEPTH;
 
     private static final float STEM_BASE_Y = 2.0F / 16.0F;
 
@@ -53,9 +53,15 @@ public class EnderblossomRenderer implements BlockEntityRenderer<EnderblossomBlo
             return;
         }
         poseStack.pushPose();
+        Direction facing = state.getValue(EnderblossomBlock.FACING);
+        if (blossom.getLevel() != null) {
+            BlockState support =
+                    blossom.getLevel().getBlockState(EnderblossomBlock.supportPos(state, blossom.getBlockPos()));
+            float offset = EnderblossomBlock.stemOffset(support);
+            poseStack.translate(facing.getStepX() * offset, 0.0F, facing.getStepZ() * offset);
+        }
         float angle = blossom.shakeAngle(partialTick);
         if (angle != 0.0F) {
-            Direction facing = state.getValue(EnderblossomBlock.FACING);
             float pivotX = 0.5F - facing.getStepX() * STEM_BASE_OFFSET;
             float pivotZ = 0.5F - facing.getStepZ() * STEM_BASE_OFFSET;
             // Swings side to side about the axis sticking out of the log face.

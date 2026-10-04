@@ -58,6 +58,9 @@ public class EnderblossomBlock extends Block implements Enderblossoms.Blossom, S
             Direction.WEST, Block.box(4, 1, 3, 16, 15, 13),
             Direction.EAST, Block.box(0, 1, 3, 12, 15, 13));
 
+    /** How deep the model's stem base sits into the log's block: model z 19 for facing north. */
+    public static final float STEM_DEPTH = 3.0F / 16.0F;
+
     /** Stew duration in ticks; Displacement is instant, so it only needs one tick. */
     public static final int STEW_EFFECT_DURATION = 1;
 
@@ -178,6 +181,15 @@ public class EnderblossomBlock extends Block implements Enderblossoms.Blossom, S
 
     public static boolean isSupport(BlockState state) {
         return state.is(ModBlockTags.ASTRAL_LOGS);
+    }
+
+    /**
+     * How far, in blocks, to push the drawn blossom out of the log's block. The model sets the stem base on a chorus
+     * plant-shaped {@link AstralLogBlock}'s core, 3 pixels into the log's block; a support with a face at the block
+     * edge (the Flowering Astral Log, wood and stripped logs) would swallow the stem, so there it moves out to the face.
+     */
+    public static float stemOffset(BlockState support) {
+        return support.getBlock() instanceof AstralLogBlock ? 0.0F : STEM_DEPTH;
     }
 
     /** The position of the log this blossom grows from. */
