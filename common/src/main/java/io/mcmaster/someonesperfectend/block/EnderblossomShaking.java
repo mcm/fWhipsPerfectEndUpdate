@@ -5,11 +5,9 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.mixin.PoiTypesInvoker;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,9 +30,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Wall Enderblossoms shake when a player looks at them, like an Enderman notices a stare, and when an Enderman
- * teleports within {@link Enderblossoms#RANGE} blocks. A shake is a block event ({@link #shake}) that the client
- * renderer plays as a {@link ShakeCurve}. Potted blossoms never shake.
+ * Wall Enderblossoms tremble for as long as a player looks at them, like an Enderman reacts to a stare, and shake once
+ * when an Enderman teleports within {@link Enderblossoms#RANGE} blocks. Both reach clients as block events that the
+ * renderer plays with {@link ShakeCurve}. Potted blossoms never shake.
  */
 public final class EnderblossomShaking {
     /** Players this close to the flower head can make it shake by looking at it. */
@@ -107,8 +105,9 @@ public final class EnderblossomShaking {
     }
 
     /**
-     * Run from the blossom's regular check: shakes it when a player within {@link #LOOK_RANGE} blocks starts looking
-     * at it, and again every {@link LookShakeTracker#REPEAT_INTERVAL} ticks while they keep looking.
+     * Run every tick by the blossom's block entity, like an Enderman checks for a stare: the blossom trembles while
+     * any player within {@link #LOOK_RANGE} blocks is looking at it, and stops as soon as nobody is. Clients hear about
+     * a change through a {@link EnderblossomBlockEntity#STARE_EVENT_ID} block event.
      */
     public static void checkLookers(
             ServerLevel level, BlockPos pos, BlockState state, Iterable<? extends Player> players) {
@@ -117,14 +116,19 @@ public final class EnderblossomShaking {
             return;
         }
         AABB flower = lookBox(pos);
-        Set<UUID> looking = new HashSet<>();
+        Vec3 center = flower.getCenter();
+        double rangeSqr = (LOOK_RANGE + 1.0) * (LOOK_RANGE + 1.0);
+        boolean looking = false;
         for (Player player : players) {
-            if (player.level() == level && isLookingAt(player, flower)) {
-                looking.add(player.getUUID());
+            if (player.level() == level
+                    && player.getEyePosition().distanceToSqr(center) <= rangeSqr
+                    && isLookingAt(player, flower)) {
+                looking = true;
+                break;
             }
         }
-        if (entity.lookers().update(looking, level.getGameTime())) {
-            shake(level, pos);
+        if (entity.setStaredAt(looking)) {
+            level.blockEvent(pos, state.getBlock(), EnderblossomBlockEntity.STARE_EVENT_ID, looking ? 1 : 0);
         }
     }
 

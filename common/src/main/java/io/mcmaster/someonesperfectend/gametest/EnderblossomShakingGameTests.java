@@ -29,11 +29,11 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * MOD-62: wall Enderblossoms shake (a block event counted by their block entity) when an Enderman teleports within
- * 8 blocks or a player looks at them; potted ones never do.
+ * 8 blocks, and tremble for as long as a player looks at them; potted ones never do.
  *
  * <p>Tests with an Enderman run in their own batch, like the switching tests. Looking tests pass a mock player to
- * {@link EnderblossomShaking#checkLookers} directly: a mock server player in the level breaks Accessories' networking
- * on NeoForge.
+ * {@link EnderblossomShaking#checkLookers} directly and check the result right away, before the blossom's own ticker
+ * (which only sees real players) runs: a mock server player in the level breaks Accessories' networking on NeoForge.
  */
 public final class EnderblossomShakingGameTests {
     /** Grows on the west side of its log, so its center is (0.5, 2.5, 0.5). */
@@ -155,53 +155,87 @@ public final class EnderblossomShakingGameTests {
 
     /** A player 5 blocks west of the blossom, looking straight at its flower head. */
     private static Player playerLookingAt(GameTestHelper helper, BlockPos pos) {
-        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         Vec3 head = head(helper, pos);
-        player.moveTo(head.x - 5.0, head.y - player.getEyeHeight(), head.z, 0.0F, 0.0F);
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, head);
+        return playerAt(helper, head.add(-5.0, 0.0, 0.0), head);
+    }
+
+    /** A player whose eyes are at {@code eye}, looking at {@code target}. */
+    private static Player playerAt(GameTestHelper helper, Vec3 eye, Vec3 target) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.moveTo(eye.x, eye.y - player.getEyeHeight(), eye.z, 0.0F, 0.0F);
+        player.lookAt(EntityAnchorArgument.Anchor.EYES, target);
         return player;
     }
 
-    @GameTest
-    public static void playerLookingAtBlossomShakesIt(GameTestHelper helper) {
-        placeBlossom(helper, LOOKED_AT, ModBlocks.CLOSED_ENDERBLOSSOM.get());
-        Player player = playerLookingAt(helper, LOOKED_AT);
-        BlockPos abs = helper.absolutePos(LOOKED_AT);
-        helper.assertTrue(
-                EnderblossomShaking.isLookingAt(player, EnderblossomShaking.lookBox(abs)),
-                "the player isn't looking at the blossom");
-        EnderblossomShaking.checkLookers(helper.getLevel(), abs, helper.getBlockState(LOOKED_AT), List.of(player));
-        helper.runAfterDelay(1, () -> {
-            helper.assertTrue(blossomEntity(helper, LOOKED_AT).shakes() == 1, "looking didn't shake the blossom");
-            // Still looking a tick later: no new shake yet.
-            EnderblossomShaking.checkLookers(helper.getLevel(), abs, helper.getBlockState(LOOKED_AT), List.of(player));
-            helper.runAfterDelay(1, () -> {
-                helper.assertTrue(blossomEntity(helper, LOOKED_AT).shakes() == 1, "it shook again right away");
-                helper.succeed();
-            });
-        });
+    private static void checkLookers(GameTestHelper helper, BlockPos pos, List<Player> players) {
+        EnderblossomShaking.checkLookers(
+                helper.getLevel(), helper.absolutePos(pos), helper.getBlockState(pos), players);
     }
 
     private static AABB lookBox(GameTestHelper helper, BlockPos pos) {
         return EnderblossomShaking.lookBox(helper.absolutePos(pos));
     }
 
-    /** The owner's playtest found that only the top few pixels counted; the stem and lower petals must count too. */
+    /** Like a stared-at Enderman, the blossom keeps trembling for as long as the look lasts, and stops right after. */
     @GameTest
-    public static void playerLookingAtLowerPetalsShakesIt(GameTestHelper helper) {
+    public static void playerLookingAtBlossomKeepsItTrembling(GameTestHelper helper) {
         placeBlossom(helper, LOOKED_AT, ModBlocks.CLOSED_ENDERBLOSSOM.get());
         Player player = playerLookingAt(helper, LOOKED_AT);
-        Vec3 lowerPetals = Vec3.atCenterOf(helper.absolutePos(LOOKED_AT)).add(0.0, -0.3, 0.3);
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, lowerPetals);
-        BlockPos abs = helper.absolutePos(LOOKED_AT);
         helper.assertTrue(
-                EnderblossomShaking.isLookingAt(player, EnderblossomShaking.lookBox(abs)),
-                "looking at the lower petals didn't count");
-        EnderblossomShaking.checkLookers(helper.getLevel(), abs, helper.getBlockState(LOOKED_AT), List.of(player));
-        helper.runAfterDelay(1, () -> {
-            helper.assertTrue(blossomEntity(helper, LOOKED_AT).shakes() == 1, "looking didn't shake the blossom");
-            helper.succeed();
-        });
+                EnderblossomShaking.isLookingAt(player, lookBox(helper, LOOKED_AT)),
+                "the player isn't looking at the blossom");
+        EnderblossomBlockEntity entity = blossomEntity(helper, LOOKED_AT);
+        for (int tick = 0; tick < 60; tick++) {
+            checkLookers(helper, LOOKED_AT, List.of(player));
+            helper.assertTrue(entity.staredAt(), "the blossom stopped trembling while looked at");
+        }
+        helper.assertTrue(entity.stares() == 1, "one long look started " + entity.stares() + " stares");
+        checkLookers(helper, LOOKED_AT, List.of());
+        helper.assertFalse(entity.staredAt(), "the blossom kept trembling after the player looked away");
+        helper.succeed();
+    }
+
+    /** The stare is checked every tick, not only in the 10-tick switching check. */
+    @GameTest
+    public static void blossomChecksForStaresEveryTick(GameTestHelper helper) {
+        placeBlossom(helper, LOOKED_AT, ModBlocks.CLOSED_ENDERBLOSSOM.get());
+        BlockState state = helper.getBlockState(LOOKED_AT);
+        helper.assertTrue(
+                state.getTicker(helper.getLevel(), EnderblossomShaking.BLOCK_ENTITY.get()) != null,
+                "the wall blossom has no server ticker");
+        helper.succeed();
+    }
+
+    /** The owner's playtest found that only part of the blossom counted; every open face of its block must count. */
+    @GameTest
+    public static void playerLookingAtAnyFaceMakesItTremble(GameTestHelper helper) {
+        placeBlossom(helper, LOOKED_AT, ModBlocks.CLOSED_ENDERBLOSSOM.get());
+        Vec3 center = Vec3.atCenterOf(helper.absolutePos(LOOKED_AT));
+        AABB flower = lookBox(helper, LOOKED_AT);
+        // The blossom faces west; its east side is the log.
+        for (Direction side :
+                new Direction[] {Direction.WEST, Direction.NORTH, Direction.SOUTH, Direction.UP, Direction.DOWN}) {
+            Vec3 face = center.relative(side, 0.5);
+            Vec3 eye = center.relative(side, 1.2);
+            // Aim at the middle of the face and at points near each of its edges.
+            for (Direction offset : Direction.values()) {
+                if (offset.getAxis() == side.getAxis()) {
+                    continue;
+                }
+                for (Vec3 target : new Vec3[] {face, face.relative(offset, 0.4)}) {
+                    Player player = playerAt(helper, eye, target);
+                    helper.assertTrue(
+                            EnderblossomShaking.isLookingAt(player, flower),
+                            "looking at the " + side + " face (" + target + ") didn't count");
+                    checkLookers(helper, LOOKED_AT, List.of(player));
+                    helper.assertTrue(
+                            blossomEntity(helper, LOOKED_AT).staredAt(),
+                            "looking at the " + side + " face (" + target + ") didn't make it tremble");
+                    checkLookers(helper, LOOKED_AT, List.of());
+                }
+            }
+        }
+        helper.succeed();
     }
 
     @GameTest
@@ -212,12 +246,9 @@ public final class EnderblossomShakingGameTests {
         helper.assertFalse(
                 EnderblossomShaking.isLookingAt(player, lookBox(helper, LOOKED_AT)),
                 "the pumpkin didn't hide the stare");
-        EnderblossomShaking.checkLookers(
-                helper.getLevel(), helper.absolutePos(LOOKED_AT), helper.getBlockState(LOOKED_AT), List.of(player));
-        helper.runAfterDelay(2, () -> {
-            helper.assertTrue(blossomEntity(helper, LOOKED_AT).shakes() == 0, "the blossom shook");
-            helper.succeed();
-        });
+        checkLookers(helper, LOOKED_AT, List.of(player));
+        helper.assertTrue(blossomEntity(helper, LOOKED_AT).stares() == 0, "the blossom trembled");
+        helper.succeed();
     }
 
     @GameTest
@@ -231,14 +262,8 @@ public final class EnderblossomShakingGameTests {
         Player blocked = playerLookingAt(helper, LOOKED_AT);
         helper.setBlock(LOOKED_AT.west(2), Blocks.STONE);
         helper.assertFalse(EnderblossomShaking.isLookingAt(blocked, flower), "looking through stone counted");
-        EnderblossomShaking.checkLookers(
-                helper.getLevel(),
-                helper.absolutePos(LOOKED_AT),
-                helper.getBlockState(LOOKED_AT),
-                List.of(away, blocked));
-        helper.runAfterDelay(2, () -> {
-            helper.assertTrue(blossomEntity(helper, LOOKED_AT).shakes() == 0, "the blossom shook");
-            helper.succeed();
-        });
+        checkLookers(helper, LOOKED_AT, List.of(away, blocked));
+        helper.assertTrue(blossomEntity(helper, LOOKED_AT).stares() == 0, "the blossom trembled");
+        helper.succeed();
     }
 }

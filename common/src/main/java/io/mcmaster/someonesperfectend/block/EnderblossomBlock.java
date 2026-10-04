@@ -28,6 +28,8 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SuspiciousEffectHolder;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -104,13 +106,23 @@ public class EnderblossomBlock extends Block implements Enderblossoms.Blossom, S
 
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        EnderblossomShaking.checkLookers(level, pos, state, level.players());
         Enderblossoms.regularCheck(state, level, pos, random);
     }
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new EnderblossomBlockEntity(pos, state);
+    }
+
+    /** On the server the block entity checks for staring players every tick. */
+    @Override
+    @SuppressWarnings("unchecked") // the type is checked against the blossom's block entity type
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type) {
+        return !level.isClientSide() && type == EnderblossomShaking.BLOCK_ENTITY.get()
+                ? (BlockEntityTicker<T>)
+                        (BlockEntityTicker<EnderblossomBlockEntity>) EnderblossomBlockEntity::serverTick
+                : null;
     }
 
     /** The block entity renderer draws the model, so it can shake. */
