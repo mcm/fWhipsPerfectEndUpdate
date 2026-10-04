@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.List;
 import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
@@ -100,6 +101,48 @@ class EnderblossomWallModelTest {
                 }
             }
             assertTrue(deepest >= 1.0, name + "_side stem reaches only " + deepest + " pixels into the log");
+        }
+    }
+
+    /**
+     * Below the log's side bump (which only covers model y 4..12) there is nothing but the core face for the stem to
+     * meet, so every stem or leaf pixel down there must be joined, edge to edge, to one that touches the core face. A
+     * pixel's center is {@code (u - v + 8) / sqrt(2)} pixels above the stem base (model y 2), so it is below the bump
+     * when {@code v - u >= 6}; it touches the core face when a corner reaches it, {@code u + v >= 22}.
+     */
+    @Test
+    void sideTextureNothingDanglesBelowTheBump() throws IOException, URISyntaxException {
+        for (String type : TYPES) {
+            String name = type + "_enderblossom_side";
+            BufferedImage side = texture(name);
+            boolean[][] attached = new boolean[16][16];
+            ArrayDeque<int[]> queue = new ArrayDeque<>();
+            for (int v = 12; v < 16; v++) {
+                for (int u = 0; u < 16; u++) {
+                    if (opaque(side, u, v) && v - u >= 6 && u + v >= 22) {
+                        attached[v][u] = true;
+                        queue.add(new int[] {u, v});
+                    }
+                }
+            }
+            while (!queue.isEmpty()) {
+                int[] pixel = queue.poll();
+                for (int[] step : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                    int u = pixel[0] + step[0];
+                    int v = pixel[1] + step[1];
+                    if (v >= 12 && v < 16 && u >= 0 && u < 16 && !attached[v][u] && opaque(side, u, v) && v - u >= 6) {
+                        attached[v][u] = true;
+                        queue.add(new int[] {u, v});
+                    }
+                }
+            }
+            for (int v = 12; v < 16; v++) {
+                for (int u = 0; u < 16; u++) {
+                    if (opaque(side, u, v) && v - u >= 6) {
+                        assertTrue(attached[v][u], name + " pixel " + u + "," + v + " hangs in front of the log");
+                    }
+                }
+            }
         }
     }
 
