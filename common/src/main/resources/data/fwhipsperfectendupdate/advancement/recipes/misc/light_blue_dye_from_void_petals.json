@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_void_petals": {
+      "conditions": {
+        "items": [
+          {
+            "items": "fwhipsperfectendupdate:void_petals"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "fwhipsperfectendupdate:light_blue_dye_from_void_petals"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_void_petals"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "fwhipsperfectendupdate:light_blue_dye_from_void_petals"
+    ]
+  }
+}

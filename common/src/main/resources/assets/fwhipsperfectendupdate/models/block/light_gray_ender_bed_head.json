@@ -1,0 +1,7 @@
+{
+  "parent": "fwhipsperfectendupdate:block/template_ender_bed_head",
+  "textures": {
+    "bed": "fwhipsperfectendupdate:block/ender_bed/light_gray",
+    "particle": "minecraft:block/light_gray_wool"
+  }
+}

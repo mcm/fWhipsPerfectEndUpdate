@@ -1,4 +1,4 @@
-# Someone's Perfect End Update
+# fWhip's Perfect End Update
 
 A Minecraft mod that brings to life the End update described by the YouTuber fWhip in his video on the
 "perfect End update". It adds life, terrain variety, and endgame systems to the End while keeping it desolate.

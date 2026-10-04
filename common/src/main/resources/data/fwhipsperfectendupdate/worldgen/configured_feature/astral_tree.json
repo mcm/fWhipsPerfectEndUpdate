@@ -1,0 +1,57 @@
+{
+  "type": "fwhipsperfectendupdate:astral_tree",
+  "config": {
+    "trunk_provider": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "fwhipsperfectendupdate:astral_log",
+        "Properties": {
+          "axis": "y"
+        }
+      }
+    },
+    "foliage_provider": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "weight": 4,
+          "data": {
+            "Name": "fwhipsperfectendupdate:astral_leaves",
+            "Properties": {
+              "distance": "7",
+              "persistent": "false",
+              "waterlogged": "false"
+            }
+          }
+        },
+        {
+          "weight": 1,
+          "data": {
+            "Name": "fwhipsperfectendupdate:flowering_astral_leaves",
+            "Properties": {
+              "distance": "7",
+              "persistent": "false",
+              "waterlogged": "false"
+            }
+          }
+        }
+      ]
+    },
+    "height": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 8,
+      "max_inclusive": 16
+    },
+    "branch_count": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 4
+    },
+    "flowering_log_chance": 0.1,
+    "enderblossoms": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 4
+    }
+  }
+}

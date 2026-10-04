@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "fwhipsperfectendupdate:block/voidvine_planks",
+    "side": "fwhipsperfectendupdate:block/voidvine_planks",
+    "top": "fwhipsperfectendupdate:block/voidvine_planks"
+  }
+}

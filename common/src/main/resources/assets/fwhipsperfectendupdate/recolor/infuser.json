@@ -1,0 +1,26 @@
+{
+  "recipes": [
+    {
+      "source": "minecraft:block/beacon",
+      "target": "fwhipsperfectendupdate:block/infuser",
+      "palette": {
+        "gradient": [
+          "#2b1440",
+          "#8e4fd1",
+          "#e9c9ff",
+          "#fff4ff"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:block/glass",
+      "target": "fwhipsperfectendupdate:block/infuser_glass",
+      "palette": {
+        "gradient": [
+          "#b99ad8",
+          "#f3e6ff"
+        ]
+      }
+    }
+  ]
+}

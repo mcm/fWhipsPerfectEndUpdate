@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "fwhipsperfectendupdate:block/stripped_astral_log_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "fwhipsperfectendupdate:block/stripped_astral_log"
+    },
+    "axis=z": {
+      "model": "fwhipsperfectendupdate:block/stripped_astral_log_horizontal",
+      "x": 90
+    }
+  }
+}

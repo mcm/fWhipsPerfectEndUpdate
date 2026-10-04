@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:barter",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "fwhipsperfectendupdate:totem_of_speed",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "fwhipsperfectendupdate:totem_of_haste",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "fwhipsperfectendupdate:totem_of_resistance",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "fwhipsperfectendupdate:totem_of_jump_boost",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "fwhipsperfectendupdate:totem_of_strength",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

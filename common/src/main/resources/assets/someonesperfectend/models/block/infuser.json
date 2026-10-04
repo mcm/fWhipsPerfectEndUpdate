@@ -1,9 +1,0 @@
-{
-  "parent": "minecraft:block/beacon",
-  "textures": {
-    "particle": "someonesperfectend:block/infuser_glass",
-    "glass": "someonesperfectend:block/infuser_glass",
-    "obsidian": "minecraft:block/obsidian",
-    "beacon": "someonesperfectend:block/infuser"
-  }
-}

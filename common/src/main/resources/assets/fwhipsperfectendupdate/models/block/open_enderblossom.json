@@ -1,0 +1,8 @@
+{
+  "parent": "fwhipsperfectendupdate:block/template_wall_enderblossom_emissive",
+  "textures": {
+    "cross": "fwhipsperfectendupdate:block/open_enderblossom",
+    "side": "fwhipsperfectendupdate:block/open_enderblossom_side",
+    "emissive": "fwhipsperfectendupdate:block/open_enderblossom_emissive"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "fwhipsperfectendupdate:block/astral_planks",
+    "side": "fwhipsperfectendupdate:block/astral_planks",
+    "top": "fwhipsperfectendupdate:block/astral_planks"
+  }
+}

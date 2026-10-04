@@ -1,0 +1,7 @@
+{
+  "parent": "fwhipsperfectendupdate:block/voidvine_lit_template",
+  "textures": {
+    "cross": "fwhipsperfectendupdate:block/voidvine",
+    "berries": "fwhipsperfectendupdate:block/voidvine_berries"
+  }
+}

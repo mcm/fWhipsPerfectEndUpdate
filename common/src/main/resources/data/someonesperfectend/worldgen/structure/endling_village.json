@@ -1,7 +1,0 @@
-{
-  "type": "someonesperfectend:endling_village",
-  "biomes": "#someonesperfectend:has_structure/endling_village",
-  "spawn_overrides": {},
-  "step": "surface_structures",
-  "terrain_adaptation": "none"
-}

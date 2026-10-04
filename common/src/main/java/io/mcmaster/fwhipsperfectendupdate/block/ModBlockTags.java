@@ -1,0 +1,22 @@
+package io.mcmaster.fwhipsperfectendupdate.block;
+
+import io.mcmaster.fwhipsperfectendupdate.FwhipsPerfectEndUpdate;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
+
+public final class ModBlockTags {
+    /** Blocks that hanging End plants (Voidvine) can grow from the underside of. */
+    public static final TagKey<Block> SUPPORTS_HANGING_PLANTS = create("supports_hanging_plants");
+    /** End ground that End plants (Glowcap, Void Petals, ...) can be placed on: end turf, end stone, voidsoil. */
+    public static final TagKey<Block> END_PLANT_SOIL = create("end_plant_soil");
+
+    /** Logs that keep Astral leaves from decaying. */
+    public static final TagKey<Block> ASTRAL_LOGS = create("astral_logs");
+
+    private ModBlockTags() {}
+
+    private static TagKey<Block> create(String name) {
+        return TagKey.create(Registries.BLOCK, FwhipsPerfectEndUpdate.id(name));
+    }
+}

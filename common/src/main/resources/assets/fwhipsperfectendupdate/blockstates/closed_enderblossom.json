@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": {"model": "fwhipsperfectendupdate:block/closed_enderblossom"},
+    "facing=east": {"model": "fwhipsperfectendupdate:block/closed_enderblossom", "y": 90},
+    "facing=south": {"model": "fwhipsperfectendupdate:block/closed_enderblossom", "y": 180},
+    "facing=west": {"model": "fwhipsperfectendupdate:block/closed_enderblossom", "y": 270}
+  }
+}

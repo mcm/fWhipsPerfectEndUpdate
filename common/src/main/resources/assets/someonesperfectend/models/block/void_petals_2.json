@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/flowerbed_2",
-  "textures": {
-    "flowerbed": "someonesperfectend:block/void_petals",
-    "stem": "someonesperfectend:block/void_petals_stem"
-  }
-}

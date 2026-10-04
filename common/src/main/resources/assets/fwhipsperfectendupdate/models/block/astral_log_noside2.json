@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/chorus_plant_noside2",
+  "textures": {
+    "texture": "fwhipsperfectendupdate:block/astral_log",
+    "inside": "fwhipsperfectendupdate:block/astral_log",
+    "particle": "fwhipsperfectendupdate:block/astral_log"
+  }
+}

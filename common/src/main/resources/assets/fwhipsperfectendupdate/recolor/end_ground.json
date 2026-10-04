@@ -1,0 +1,13 @@
+{
+  "palette": {"gradient": ["#2f5f86", "#6fb4dc", "#b8e6fa"]},
+  "recipes": [
+    {"source": "minecraft:block/grass_block_top", "target": "fwhipsperfectendupdate:block/end_turf_top"},
+    {"source": "minecraft:block/grass_block_side_overlay", "target": "fwhipsperfectendupdate:block/end_turf_side_overlay"},
+    {"source": "minecraft:block/short_grass", "target": "fwhipsperfectendupdate:block/short_void_grass"},
+    {
+      "source": "minecraft:block/rooted_dirt",
+      "target": "fwhipsperfectendupdate:block/voidsoil",
+      "palette": {"gradient": ["#2a2233", "#5a4d66", "#8f8299"]}
+    }
+  ]
+}

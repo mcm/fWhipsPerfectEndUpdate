@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'someonesperfectend'
+rootProject.name = 'fwhipsperfectendupdate'
 
 include 'common'
 include 'fabric'
