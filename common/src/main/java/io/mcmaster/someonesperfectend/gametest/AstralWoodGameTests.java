@@ -1,6 +1,7 @@
 package io.mcmaster.someonesperfectend.gametest;
 
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
+import io.mcmaster.someonesperfectend.block.AstralLogBlock;
 import io.mcmaster.someonesperfectend.block.ModBlockTags;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.block.ModWoodTypes;
@@ -40,6 +41,7 @@ import net.minecraft.world.level.block.entity.HangingSignBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -63,6 +65,67 @@ public final class AstralWoodGameTests {
         helper.assertTrue(stripped.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.X, "stripping lost the axis");
         helper.assertBlockPresent(ModBlocks.STRIPPED_ASTRAL_WOOD.get(), wood);
         helper.succeed();
+    }
+
+    /**
+     * The Astral Log is shaped like a chorus plant: a placed log reaches down into End Turf and towards Astral Logs
+     * and Flowering Astral Logs next to it, and lets go when they are removed. The Flowering Astral Log keeps a full
+     * collision box like a chorus flower, and neither block hides its neighbors' faces.
+     */
+    @GameTest
+    public static void astralLogConnectsLikeChorusPlant(GameTestHelper helper) {
+        BlockPos soil = new BlockPos(2, 1, 2);
+        BlockPos lower = soil.above();
+        BlockPos upper = lower.above();
+        helper.setBlock(soil, ModBlocks.END_TURF.get());
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModBlocks.ASTRAL_LOG.get(), 8));
+        useOnTop(helper, player, soil);
+        assertConnections(helper, lower, Direction.DOWN);
+        useOnTop(helper, player, lower);
+        assertConnections(helper, lower, Direction.DOWN, Direction.UP);
+        assertConnections(helper, upper, Direction.DOWN);
+
+        BlockPos flowering = upper.east();
+        helper.setBlock(flowering, ModBlocks.FLOWERING_ASTRAL_LOG.get());
+        assertConnections(helper, upper, Direction.DOWN, Direction.EAST);
+        // Other logs, wood and leaves are not part of the plant.
+        helper.setBlock(upper.west(), ModBlocks.ASTRAL_WOOD.get());
+        helper.setBlock(upper.north(), ModBlocks.STRIPPED_ASTRAL_LOG.get());
+        helper.setBlock(upper.south(), ModBlocks.ASTRAL_LEAVES.get());
+        helper.setBlock(upper.above(), Blocks.END_STONE);
+        assertConnections(helper, upper, Direction.DOWN, Direction.EAST);
+
+        helper.setBlock(upper, Blocks.AIR);
+        assertConnections(helper, lower, Direction.DOWN);
+        helper.setBlock(soil, Blocks.AIR);
+        assertConnections(helper, lower);
+
+        ServerLevel level = helper.getLevel();
+        BlockState log = helper.getBlockState(lower);
+        AABB box = log.getShape(level, helper.absolutePos(lower)).bounds();
+        helper.assertTrue(
+                box.equals(new AABB(3 / 16.0, 3 / 16.0, 3 / 16.0, 13 / 16.0, 13 / 16.0, 13 / 16.0)),
+                "a lone Astral Log should be a chorus plant core, not " + box);
+        helper.assertTrue(
+                !log.canOcclude() && !helper.getBlockState(flowering).canOcclude(),
+                "Astral Logs should not hide their neighbors' faces");
+        helper.assertTrue(
+                Block.isShapeFullBlock(helper.getBlockState(flowering).getShape(level, helper.absolutePos(flowering))),
+                "the Flowering Astral Log should keep a full block shape like a chorus flower");
+        helper.succeed();
+    }
+
+    /** Asserts the Astral Log at {@code pos} connects in exactly the given directions. */
+    static void assertConnections(GameTestHelper helper, BlockPos pos, Direction... directions) {
+        BlockState state = helper.getBlockState(pos);
+        helper.assertTrue(state.is(ModBlocks.ASTRAL_LOG.get()), "no Astral Log at " + pos + ": " + state);
+        List<Direction> expected = List.of(directions);
+        for (Direction direction : Direction.values()) {
+            helper.assertTrue(
+                    state.getValue(AstralLogBlock.CONNECTIONS.get(direction)) == expected.contains(direction),
+                    "Astral Log at " + pos + " should connect only " + expected + ": " + state);
+        }
     }
 
     @GameTest

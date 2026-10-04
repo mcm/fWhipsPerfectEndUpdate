@@ -1,7 +1,8 @@
 {
-  "parent": "minecraft:block/cube_column",
+  "parent": "minecraft:block/chorus_plant",
   "textures": {
-    "end": "someonesperfectend:block/astral_log_top",
-    "side": "someonesperfectend:block/astral_log"
+    "texture": "someonesperfectend:block/astral_log",
+    "inside": "someonesperfectend:block/astral_log",
+    "particle": "someonesperfectend:block/astral_log"
   }
 }
