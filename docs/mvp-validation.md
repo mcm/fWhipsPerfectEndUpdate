@@ -13,7 +13,7 @@ tick it.
 | Gate | Result |
 | -- | -- |
 | `./gradlew clean build` (clean tree) | Passed (compile of common/fabric/neoforge + JUnit) |
-| `./gradlew gameTestAll` from a clean `build/` | Passed: Fabric **227/227**, NeoForge **227/227** required GameTests; 347 s wall, 10.2 GB peak RSS (see README "Measured cost") |
+| `./gradlew gameTestAll` from a clean `build/` | Passed: Fabric **227/227**, NeoForge **227/227** required GameTests; 347 s wall, 10.2 GB peak RSS (see CONTRIBUTING.md "Measured cost") |
 | `checkNoMojangTextures` (part of `check`) | Passed |
 
 Fixed during validation:
