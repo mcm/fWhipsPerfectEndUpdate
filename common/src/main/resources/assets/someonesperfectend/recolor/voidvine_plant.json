@@ -1,10 +1,10 @@
 {
   "palette": {
     "gradient": [
-      "#0f2616",
-      "#24522e",
-      "#3d7d45",
-      "#76b371"
+      "#3b3272",
+      "#7f78c9",
+      "#b9b3ef",
+      "#e4e0ff"
     ],
     "colors": {
       "#a46422": "#157a86",
@@ -45,10 +45,10 @@
       "target": "someonesperfectend:item/voidfruit",
       "palette": {
         "gradient": [
-          "#0f2616",
-          "#24522e",
-          "#3d7d45",
-          "#76b371"
+          "#3b3272",
+          "#7f78c9",
+          "#b9b3ef",
+          "#e4e0ff"
         ],
         "colors": {
           "#92441a": "#0d5560",

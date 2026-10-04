@@ -140,8 +140,8 @@ public final class ModBlocks {
             block -> new BlockItem(block, ModRegistries.itemProperties().rarity(Rarity.RARE)));
 
     // Astral wood set (US-004). Properties follow vanilla's cherry set; sounds come from ModWoodTypes.ASTRAL.
-    private static final MapColor ASTRAL_WOOD_COLOR = MapColor.COLOR_LIGHT_BLUE;
-    private static final MapColor ASTRAL_BARK_COLOR = MapColor.COLOR_PURPLE;
+    private static final MapColor ASTRAL_WOOD_COLOR = MapColor.COLOR_GREEN;
+    private static final MapColor ASTRAL_BARK_COLOR = MapColor.TERRACOTTA_GREEN;
 
     /** Chorus Plant-shaped log that connects to its Astral Log neighbors (see {@link AstralLogBlock}). */
     public static final RegistrySupplier<AstralLogBlock> ASTRAL_LOG = ModRegistries.block(
@@ -253,8 +253,8 @@ public final class ModBlocks {
                     ModRegistries.itemProperties().stacksTo(16)));
 
     // Voidvine wood set (US-006). Mirrors vanilla's bamboo set; sounds come from ModWoodTypes.VOIDVINE.
-    private static final MapColor VOIDVINE_WOOD_COLOR = MapColor.COLOR_GREEN;
-    private static final MapColor VOIDVINE_BARK_COLOR = MapColor.TERRACOTTA_GREEN;
+    private static final MapColor VOIDVINE_WOOD_COLOR = MapColor.COLOR_LIGHT_BLUE;
+    private static final MapColor VOIDVINE_BARK_COLOR = MapColor.COLOR_PURPLE;
 
     // Voidvine plant (US-008). Properties follow vanilla's cave vines; the stalk item plants the head block.
     /** The growing, lowest segment of a hanging Voidvine (block id {@code voidvine}). */
@@ -441,7 +441,7 @@ public final class ModBlocks {
 
     private static BlockBehaviour.Properties voidvineProperties() {
         return BlockBehaviour.Properties.of()
-                .mapColor(MapColor.PLANT)
+                .mapColor(MapColor.COLOR_PURPLE)
                 .randomTicks()
                 .noCollission()
                 .lightLevel(state -> state.getValue(Voidvines.FRUIT) ? Voidvines.FRUIT_LIGHT : 0)
