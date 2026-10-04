@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class EnderblossomRenderer implements BlockEntityRenderer<EnderblossomBlockEntity> {
     public static final ResourceLocation EMISSIVE_TEXTURE = SomeonesPerfectEnd.id("block/open_enderblossom_emissive");
-    /** How far the stem base sits from the block center toward the log: model z 19 for facing north. */
+    /** How far the stem base sits from the block center toward the log: model z 20 for facing north. */
     private static final float STEM_BASE_OFFSET = 0.5F + EnderblossomBlock.STEM_DEPTH;
 
     private static final float STEM_BASE_Y = 2.0F / 16.0F;

@@ -5,25 +5,25 @@
   },
   "elements": [
     {
-      "__comment": "Face-parallel plane. Drawn for facing=north: the log is to the south and the stem base sits on its core, 3 pixels into the log's block; the plane leans out (north) and up.",
-      "from": [0, 2, 19],
-      "to": [16, 18, 19],
+      "__comment": "Face-parallel plane. Drawn for facing=north: the log is to the south and the stem base sits on the face of its 8-pixel (chorus-sized) core, 4 pixels into the log's block; the plane leans out (north) and up.",
+      "from": [0, 2, 20],
+      "to": [16, 18, 20],
       "shade": false,
-      "rotation": {"origin": [8, 2, 19], "axis": "x", "angle": -45},
+      "rotation": {"origin": [8, 2, 20], "axis": "x", "angle": -45},
       "faces": {
         "north": {"uv": [0, 0, 16, 16], "texture": "#cross"},
         "south": {"uv": [16, 0, 0, 16], "texture": "#cross"}
       }
     },
     {
-      "__comment": "Perpendicular plane through the stem, tilted the same way.",
-      "from": [8, 2, 11],
-      "to": [8, 18, 27],
+      "__comment": "Perpendicular plane through the stem, tilted the same way. The tilt is in this plane, so a flat stem base would show as a slant; #side has the stem bent so it runs straight into the log.",
+      "from": [8, 2, 12],
+      "to": [8, 18, 28],
       "shade": false,
-      "rotation": {"origin": [8, 2, 19], "axis": "x", "angle": -45},
+      "rotation": {"origin": [8, 2, 20], "axis": "x", "angle": -45},
       "faces": {
-        "west": {"uv": [0, 0, 16, 16], "texture": "#cross"},
-        "east": {"uv": [16, 0, 0, 16], "texture": "#cross"}
+        "west": {"uv": [0, 0, 16, 16], "texture": "#side"},
+        "east": {"uv": [16, 0, 0, 16], "texture": "#side"}
       }
     }
   ]
