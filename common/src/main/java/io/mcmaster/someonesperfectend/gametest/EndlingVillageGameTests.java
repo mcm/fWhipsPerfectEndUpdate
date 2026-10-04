@@ -7,8 +7,13 @@ import io.mcmaster.someonesperfectend.worldgen.EndlingVillageLayout;
 import io.mcmaster.someonesperfectend.worldgen.EndlingVillagePieces;
 import io.mcmaster.someonesperfectend.worldgen.EndlingVillages;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.LockSupport;
+import java.util.stream.Collectors;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
@@ -17,6 +22,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -43,6 +49,13 @@ public final class EndlingVillageGameTests {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final BlockPos SEARCH_FROM = new BlockPos(2000, 64, 0);
     private static final int SEARCH_DISTANCE = 4096;
+    /**
+     * Seeds the random source the village is placed with, so a failure reproduces on every run. Override it with
+     * {@code -Dsomeonesperfectend.villageSeed=<long>} to try other placements.
+     */
+    private static final long PLACEMENT_SEED = Long.getLong("someonesperfectend.villageSeed", 23L);
+    /** Wall-clock limit for the village chunks to become entity-ticking (see {@link #awaitEntityTicking}). */
+    private static final long ENTITY_TICKING_TIMEOUT_MS = 120_000L;
 
     private EndlingVillageGameTests() {}
 
@@ -184,20 +197,43 @@ public final class EndlingVillageGameTests {
             end.setChunkForced(chunk.x, chunk.z, true);
             end.getChunk(chunk.x, chunk.z);
         }
-        ChunkPos.rangeClosed(min, max)
-                .forEach(chunk -> start.placeInChunk(
-                        end,
-                        end.structureManager(),
-                        end.getChunkSource().getGenerator(),
-                        end.getRandom(),
-                        new BoundingBox(
-                                chunk.getMinBlockX(),
-                                end.getMinBuildHeight(),
-                                chunk.getMinBlockZ(),
-                                chunk.getMaxBlockX(),
-                                end.getMaxBuildHeight(),
-                                chunk.getMaxBlockZ()),
-                        chunk));
+        awaitEntityTicking(helper, end, chunks);
+        RandomSource random = RandomSource.create(PLACEMENT_SEED);
+        Map<Endling, Boolean> spawned = new LinkedHashMap<>();
+        EndlingVillagePieces.endlingSpawnListener = spawned::put;
+        try {
+            ChunkPos.rangeClosed(min, max)
+                    .forEach(chunk -> start.placeInChunk(
+                            end,
+                            end.structureManager(),
+                            end.getChunkSource().getGenerator(),
+                            random,
+                            new BoundingBox(
+                                    chunk.getMinBlockX(),
+                                    end.getMinBuildHeight(),
+                                    chunk.getMinBlockZ(),
+                                    chunk.getMaxBlockX(),
+                                    end.getMaxBuildHeight(),
+                                    chunk.getMaxBlockZ()),
+                            chunk));
+        } finally {
+            EndlingVillagePieces.endlingSpawnListener = null;
+        }
+        for (EndlingVillagePieces.Hut hut : huts) {
+            BlockPos pos = hut.endlingPos();
+            Optional<Map.Entry<Endling, Boolean>> spawn = spawned.entrySet().stream()
+                    .filter(e -> e.getKey().blockPosition().equals(pos))
+                    .findFirst();
+            LOGGER.info(
+                    "Hut endling at {} (placement seed {}): {}",
+                    pos,
+                    PLACEMENT_SEED,
+                    spawn.map(e -> (e.getValue() ? "added " : "NOT added ") + e.getKey() + ", visible "
+                                    + (end.getEntity(e.getKey().getUUID()) != null) + ", entity ticking "
+                                    + end.isPositionEntityTicking(pos) + ", entities loaded "
+                                    + end.areEntitiesLoaded(new ChunkPos(pos).toLong()))
+                            .orElse("NOT spawned"));
+        }
 
         int stems = count(end, box, ModBlocks.GLOWCAP_STEM.get());
         int floors = count(end, box, ModBlocks.VOIDVINE_MOSAIC.get());
@@ -218,7 +254,9 @@ public final class EndlingVillageGameTests {
             List<Endling> endlings = end.getEntitiesOfClass(Endling.class, area);
             helper.assertTrue(endlings.size() >= 3, "Only " + endlings.size() + " endlings in the village");
             helper.assertTrue(
-                    endlings.size() == huts.size(), endlings.size() + " endlings for " + huts.size() + " huts");
+                    endlings.size() == huts.size(),
+                    endlings.size() + " endlings for " + huts.size() + " huts (placement seed " + PLACEMENT_SEED + "; "
+                            + spawned.size() + " spawned; missing: " + missing(end, spawned, endlings) + ")");
             for (Endling endling : endlings) {
                 helper.assertTrue(endling.countsTowardVillage(), "Endling not bound to the village: " + endling);
                 helper.assertTrue(
@@ -290,6 +328,52 @@ public final class EndlingVillageGameTests {
         }
         helper.assertTrue(perArea >= 0.5 && perArea <= 1.5, "Village rarity " + perArea + " per 1500x1500");
         helper.succeed();
+    }
+
+    /**
+     * Runs the level's chunk tasks on this thread (as {@code getChunk} does) until every chunk in {@code chunks} is
+     * entity-ticking. Entities in a chunk are invisible to lookups until its full-status promotion runs, and for a
+     * chunk that got its forced ticket while still loading, that is the entity-ticking promotion, which waits for
+     * every chunk within 2 to generate. The GameTest server never sleeps between ticks, so a test's whole timeout
+     * can pass in a second or two, before that generation is done on a busy machine.
+     */
+    private static void awaitEntityTicking(GameTestHelper helper, ServerLevel level, List<ChunkPos> chunks) {
+        long start = Util.getMillis();
+        List<ChunkPos> waiting = new ArrayList<>(chunks);
+        while (true) {
+            waiting.removeIf(chunk -> level.isPositionEntityTicking(chunk.getWorldPosition()));
+            if (waiting.isEmpty()) {
+                break;
+            }
+            helper.assertTrue(
+                    Util.getMillis() - start < ENTITY_TICKING_TIMEOUT_MS,
+                    "Village chunks not entity-ticking after " + ENTITY_TICKING_TIMEOUT_MS + " ms: " + waiting);
+            if (!level.getChunkSource().pollTask()) {
+                LockSupport.parkNanos(1_000_000L);
+            }
+        }
+        LOGGER.info("Village chunks entity-ticking after {} ms", Util.getMillis() - start);
+    }
+
+    /** The spawned endlings not among {@code found}, with why: refused by the level, removed, or elsewhere. */
+    private static String missing(ServerLevel level, Map<Endling, Boolean> spawned, List<Endling> found) {
+        return spawned.entrySet().stream()
+                .filter(e -> !found.contains(e.getKey()))
+                .map(e -> {
+                    Endling endling = e.getKey();
+                    String state = !e.getValue()
+                            ? "never added"
+                            : endling.isRemoved()
+                                    ? "removed (" + endling.getRemovalReason() + ")"
+                                    : "not removed, health " + endling.getHealth() + ", chunk entities loaded "
+                                            + level.areEntitiesLoaded(
+                                                    endling.chunkPosition().toLong())
+                                            + ", entity ticking "
+                                            + level.isPositionEntityTicking(endling.blockPosition())
+                                            + ", found by id " + (level.getEntity(endling.getId()) != null);
+                    return endling.getUUID() + " at " + endling.blockPosition() + ": " + state;
+                })
+                .collect(Collectors.joining(", ", "[", "]"));
     }
 
     private static int count(ServerLevel level, BoundingBox box, Block block) {
