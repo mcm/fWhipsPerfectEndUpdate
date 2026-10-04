@@ -2,6 +2,8 @@ package io.mcmaster.someonesperfectend.worldgen;
 
 import com.mojang.serialization.Codec;
 import io.mcmaster.someonesperfectend.block.AstralLogBlock;
+import io.mcmaster.someonesperfectend.block.EnderblossomBlock;
+import io.mcmaster.someonesperfectend.block.Enderblossoms;
 import io.mcmaster.someonesperfectend.block.ModBlockTags;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import java.util.ArrayDeque;
@@ -36,10 +38,13 @@ import net.minecraft.world.level.material.Fluids;
  * log or leaf would stick out further than that past the island edge. Each log independently becomes a Flowering
  * Astral Log (same axis) with {@link AstralTreeConfiguration#floweringLogChance()}. Astral Logs are then connected
  * to their neighbors ({@link AstralLogBlock#connect}), since neighbor shape updates are skipped while placing.
+ * Finally {@link AstralTreeConfiguration#enderblossoms()} Closed Enderblossoms go on random free trunk sides.
  */
 public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
     /** Leaves are placed within this distance of a branch tip. */
     public static final int CLUSTER_RADIUS = 2;
+    /** Enderblossoms grow on trunk logs at least this many blocks above the base. */
+    public static final int ENDERBLOSSOM_MIN_HEIGHT = 2;
     /** A column counts as island ground if it has a solid block at most this far below the tree's base. */
     public static final int GROUND_DEPTH = 8;
 
@@ -165,7 +170,41 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
             }
             level.setBlock(pos, state, Block.UPDATE_ALL | Block.UPDATE_KNOWN_SHAPE);
         }
+        placeEnderblossoms(level, random, config.enderblossoms().sample(random), origin, trunk);
         return true;
+    }
+
+    /**
+     * Places up to {@code count} Closed Enderblossoms on random horizontal faces of the trunk logs at least
+     * {@link #ENDERBLOSSOM_MIN_HEIGHT} above the base, facing away from the trunk, only into air, and schedules
+     * each one's first check (worldgen placement doesn't call {@code onPlace}).
+     */
+    private static void placeEnderblossoms(
+            WorldGenLevel level, RandomSource random, int count, BlockPos origin, List<BlockPos> trunk) {
+        List<BlockPos> logs = new ArrayList<>();
+        List<Direction> faces = new ArrayList<>();
+        for (BlockPos log : trunk) {
+            if (log.getY() >= origin.getY() + ENDERBLOSSOM_MIN_HEIGHT) {
+                for (Direction direction : Direction.Plane.HORIZONTAL) {
+                    logs.add(log);
+                    faces.add(direction);
+                }
+            }
+        }
+        Block block = ModBlocks.CLOSED_ENDERBLOSSOM.get();
+        int placed = 0;
+        while (placed < count && !logs.isEmpty()) {
+            int i = random.nextInt(logs.size());
+            BlockPos log = logs.remove(i);
+            Direction face = faces.remove(i);
+            BlockPos pos = log.relative(face);
+            BlockState state = block.defaultBlockState().setValue(EnderblossomBlock.FACING, face);
+            if (level.isEmptyBlock(pos) && state.canSurvive(level, pos)) {
+                level.setBlock(pos, state, Block.UPDATE_ALL);
+                Enderblossoms.scheduleFirstCheck(level, pos, block);
+                placed++;
+            }
+        }
     }
 
     private static boolean isFree(WorldGenLevel level, BlockPos pos) {
