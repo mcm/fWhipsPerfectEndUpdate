@@ -25,6 +25,7 @@
     "LavaFluidMixin",
     "LiquidBlockMixin",
     "LivingEntityMixin",
+    "MushroomCowMixin",
     "PlayerAccessor",
     "PlayerMixin",
     "PotionBrewingBuilderMixin",

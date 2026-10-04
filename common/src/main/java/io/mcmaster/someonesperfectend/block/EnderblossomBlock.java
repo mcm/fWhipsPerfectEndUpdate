@@ -3,7 +3,9 @@ package io.mcmaster.someonesperfectend.block;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.mcmaster.someonesperfectend.effect.ModEffects;
 import io.mcmaster.someonesperfectend.sound.ModSounds;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -21,6 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SuspiciousEffectHolder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -32,9 +36,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * A flower that grows out of the side of an Astral Log ({@link ModBlockTags#ASTRAL_LOGS}), backported and twisted
  * from 1.21.4's Eyeblossom. Like the Eyeblossom it comes as two blocks, one per {@link Type}. {@link #FACING} points
  * away from the supporting log; the blossom pops off when that log is gone. It opens while an Enderman is near
- * ({@link Enderblossoms}).
+ * ({@link Enderblossoms}). In suspicious stew either type gives {@code displacement}.
  */
-public class EnderblossomBlock extends Block implements Enderblossoms.Blossom {
+public class EnderblossomBlock extends Block implements Enderblossoms.Blossom, SuspiciousEffectHolder {
     public static final MapCodec<EnderblossomBlock> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(Type.CODEC.fieldOf("type").forGetter(EnderblossomBlock::type), propertiesCodec())
                     .apply(instance, EnderblossomBlock::new));
@@ -46,6 +50,9 @@ public class EnderblossomBlock extends Block implements Enderblossoms.Blossom {
             Direction.SOUTH, Block.box(3, 1, 0, 13, 15, 12),
             Direction.WEST, Block.box(4, 1, 3, 16, 15, 13),
             Direction.EAST, Block.box(0, 1, 3, 12, 15, 13));
+
+    /** Stew duration in ticks; Displacement is instant, so it only needs one tick. */
+    public static final int STEW_EFFECT_DURATION = 1;
 
     /** Like vanilla's Eyeblossom. */
     public static final int IDLE_SOUND_CHANCE = 700;
@@ -66,6 +73,12 @@ public class EnderblossomBlock extends Block implements Enderblossoms.Blossom {
     @Override
     public Type type() {
         return type;
+    }
+
+    @Override
+    public SuspiciousStewEffects getSuspiciousEffects() {
+        return new SuspiciousStewEffects(
+                List.of(new SuspiciousStewEffects.Entry(ModEffects.displacement(), STEW_EFFECT_DURATION)));
     }
 
     @Override
