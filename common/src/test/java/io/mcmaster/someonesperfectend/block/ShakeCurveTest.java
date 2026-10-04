@@ -44,4 +44,18 @@ class ShakeCurveTest {
         assertEquals(ShakeCurve.angle(2, 0.5F), ShakeCurve.angle(2, 0.5F));
         assertTrue(ShakeCurve.angle(0, 0.5F) > 0.0F && ShakeCurve.angle(0, 0.5F) < at);
     }
+
+    @Test
+    void stareTrembleNeverDampsOut() {
+        assertEquals(0.0F, ShakeCurve.stareAngle(-3, 0.5F));
+        assertEquals(0.0F, ShakeCurve.stareAngle(0, 0.0F));
+        for (long tick : new long[] {0, 2, 100, 10_000}) {
+            assertEquals(ShakeCurve.STARE_DEGREES, ShakeCurve.stareAngle(tick, 0.5F), 1.0E-3F);
+            assertEquals(-ShakeCurve.STARE_DEGREES, ShakeCurve.stareAngle(tick + 1, 0.5F), 1.0E-3F);
+        }
+        for (int step = 0; step <= 400; step++) {
+            float angle = ShakeCurve.stareAngle(step / 20, (step % 20) / 20.0F);
+            assertTrue(Math.abs(angle) <= ShakeCurve.STARE_DEGREES + 1.0E-4F, "angle " + angle + " at step " + step);
+        }
+    }
 }
