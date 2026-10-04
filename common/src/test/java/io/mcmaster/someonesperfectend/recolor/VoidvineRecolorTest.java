@@ -61,13 +61,13 @@ class VoidvineRecolorTest {
     }
 
     @Test
-    void vineIsFlippedWithTheVoidvineGreens() throws IOException {
+    void vineIsFlippedWithTheVoidvinePurples() throws IOException {
         RecolorRecipe vine = byTarget(
                         RecolorRecipeParser.parse("voidvine_plant.json", read("recolor/voidvine_plant.json")))
                 .get("block/voidvine");
         // 1x2: a light tip on top and a dark base below must come out base-up, tip-down
         int[] out = recolor(vine, png(1, 2, new int[] {0xFFFFFFFF, 0xFF000000}));
-        assertArrayEquals(new int[] {0xFF0F2616, 0xFF76B371}, out);
+        assertArrayEquals(new int[] {0xFF3B3272, 0xFFE4E0FF}, out);
     }
 
     @Test

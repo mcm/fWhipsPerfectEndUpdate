@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 /** Functional requirements of the Astral and Voidvine visual revamp that can be read straight from the resources. */
 class VisualRevampRequirementsTest {
-    private static final int[] ASTRAL_LOG_GRADIENT = {0x1F1A45, 0x4A3F8F, 0x8A7FD0};
+    private static final int[] ASTRAL_LOG_GRADIENT = {0x0B1F12, 0x1D4526, 0x3F7A45};
 
     /** FR-2 and FR-3: chorus-based log sides and wood, bamboo log ends, stripped variants untouched. */
     @Test

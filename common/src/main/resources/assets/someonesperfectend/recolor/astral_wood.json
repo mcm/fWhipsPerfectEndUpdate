@@ -1,10 +1,10 @@
 {
   "palette": {
     "gradient": [
-      "#2a2659",
-      "#5d64b8",
-      "#98a4e6",
-      "#d4dbff"
+      "#0f2616",
+      "#24522e",
+      "#3d7d45",
+      "#76b371"
     ]
   },
   "recipes": [
@@ -17,9 +17,9 @@
       "target": "someonesperfectend:block/astral_log",
       "palette": {
         "gradient": [
-          "#1f1a45",
-          "#4a3f8f",
-          "#8a7fd0"
+          "#0b1f12",
+          "#1d4526",
+          "#3f7a45"
         ]
       }
     },
@@ -28,9 +28,9 @@
       "target": "someonesperfectend:block/flowering_astral_log",
       "palette": {
         "gradient": [
-          "#1f1a45",
-          "#4a3f8f",
-          "#8a7fd0"
+          "#0b1f12",
+          "#1d4526",
+          "#3f7a45"
         ]
       }
     },
