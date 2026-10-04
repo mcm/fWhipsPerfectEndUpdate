@@ -180,17 +180,24 @@ The outer End (at least 1024 blocks from the origin) is split into three elevati
 about Y=40), middle (vanilla, about Y=62), and upper (about Y=100). The override of
 `data/minecraft/worldgen/noise_settings/end.json` is the vanilla file with the terrain density wrapped in
 `someonesperfectend:elevation_bands` (`worldgen/ElevationBandsFunction`, layout math in `ElevationBands`).
-The function divides the outer End into seeded Voronoi regions about 320 blocks across. It gives each region a
-band and moves that region's islands by the band's offset (−20, 0, or +40 blocks, multiples of the 4-block
-noise cell). A 24-block void strip separates regions with different bands, so an island is split, never
-sheared. Within 1024 blocks nothing changes. Regions near that circle are always middle band, so the central
-island, the void ring, and End Gateway exits stay vanilla. `ElevationBandGameTests` checks this against the
-vanilla `end.json` read from the vanilla data pack. The Overworld and Nether are not touched.
+The function moves whole islands, never parts of one (`worldgen/ElevationBandLayout`). It reuses vanilla's
+own island model: `minecraft:end_islands` puts island centers on a 16-block grid and gives each a round island
+(`100 - distance × falloff`). Centers whose islands, cut at value 0 (a little past vanilla's edge at 8, to cover
+the 3D noise fringe), come within 24 blocks of each other form one island group, found by flood fill and cached.
+Each group gets a seeded band, rolled from its lowest center, and all of it moves by the band's offset (−20, 0,
+or +40 blocks, multiples of the 4-block noise cell). Every 8-block noise cell corner belongs to the center with
+the highest value there; a corner next to a corner of a group with another offset is forced to void, so cells
+are never sheared, and the link margin keeps those seams off the islands. The seeded island noise is read from
+the `end_islands` function in the argument (`EndIslandDensityFunctionAccessor`). Within 1024 blocks nothing
+changes, and groups with a center within 1536 blocks are always middle band, so the central island, the void
+ring, and End Gateway exits stay vanilla. `ElevationBandsTest` checks with the vanilla island noise that no
+island column is cut or sheared; `ElevationBandGameTests` checks the real terrain against the vanilla `end.json`
+read from the vanilla data pack. The Overworld and Nether are not touched.
 
 End Cities use the vanilla structure, structure set, and pieces unchanged. Vanilla starts a city only where
 its footprint's lowest corner is at Y ≥ 60; `EndCityStructureMixin` moves that threshold by the band offset of
-the start column (`worldgen/EndCities`) and rejects starts in band gaps. As a result, the islands that would
-host a city in vanilla host one at their band's height. `EndCityGameTests` finds starts in all three bands of a
+the start column (`worldgen/EndCities`) and rejects starts in the void seams between bands. As a result, the
+islands that would host a city in vanilla host one at their band's height. `EndCityGameTests` finds starts in all three bands of a
 fixed-seed 4096×4096 area. Over 8192×8192 it counts 52 starts against 61 with vanilla terrain; the gaps
 between bands account for the difference, which is inside the ±20% target.
 
@@ -224,8 +231,8 @@ endling bound to the village center (`Endling#setVillage`). A start needs a colu
 the village radius) from the origin, a biome in `#someonesperfectend:has_structure/endling_village`
 (`end_plains`, `end_forest`, `end_highlands`), and an island that reaches past the village radius all around,
 with hut and glowcap sites close to the center's height. Rarity is set in
-`worldgen/structure_set/endling_villages.json` (random spread, spacing 26 chunks, kept 3 chunks away from End
-City candidates). On the GameTest seed that gives about 1.2 villages per 1500×1500 blocks.
+`worldgen/structure_set/endling_villages.json` (random spread, spacing 29 chunks, kept 3 chunks away from End
+City candidates). On the GameTest seed that gives about 1.0 villages per 1500×1500 blocks.
 
 The GameTest server creates its world with structure generation turned off, so its real chunks never get
 structure starts and `/locate` finds nothing there. `EndlingVillageGameTests` therefore runs vanilla's

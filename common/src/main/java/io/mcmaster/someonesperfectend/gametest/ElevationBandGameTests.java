@@ -31,10 +31,13 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.RandomState;
 import org.slf4j.Logger;
 
-/** US-012: outer-End elevation bands, vanilla terrain near the origin, and End Gateway exits. */
+/** US-012, MOD-71: outer-End elevation bands move whole islands; vanilla terrain near the origin; End Gateway exits. */
 public final class ElevationBandGameTests {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long SEED = 20260928L;
+    /** Top of the vanilla End's bottom slide, which {@code elevation_bands} reapplies to lowered islands. */
+    private static final int BOTTOM_SLIDE_TOP = 32;
+
     private static final LevelHeightAccessor END_HEIGHT = LevelHeightAccessor.create(0, 256);
     private static final ResourceLocation END_SETTINGS_FILE =
             ResourceLocation.withDefaultNamespace("worldgen/noise_settings/end.json");
@@ -107,7 +110,7 @@ public final class ElevationBandGameTests {
         helper.succeed();
     }
 
-    /** An island keeps its shape: the whole island is moved by one offset (the offset is per region). */
+    /** An island keeps its shape: the whole island is moved by one offset (the offset is per island group). */
     @GameTest
     public static void regionsMoveIslandsWhole(GameTestHelper helper) {
         MinecraftServer server = helper.getLevel().getServer();
@@ -141,6 +144,53 @@ public final class ElevationBandGameTests {
             checked++;
         }
         helper.assertTrue(checked > 0, "No moved island columns found");
+        helper.succeed();
+    }
+
+    /**
+     * MOD-71: no island is broken apart. Every vanilla island column of the outer End (at noise cell corners, where
+     * the terrain is sampled) is still land, at its vanilla height moved by its group's band, and the columns of
+     * one island along a line all move by the same offset.
+     */
+    @GameTest(timeoutTicks = 400)
+    public static void islandsAreNeverSplit(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        Generator ours = new Generator(server, modEndSettings(server).value());
+        Generator reference = new Generator(server, vanillaEndSettings(server));
+        ElevationBandsFunction bands = ours.bands();
+        int islandColumns = 0;
+        int moved = 0;
+        for (int line = 0; line < 4; line++) {
+            int z = -3000 + line * 2000;
+            int previousSurface = 0;
+            int previousOffset = 0;
+            for (int x = 2400; x < 6400; x += 8) {
+                int vanillaSurface = reference.surface(x, z);
+                if (vanillaSurface <= 0 || bands.layout().islandValue(x, z) <= 0) {
+                    previousSurface = 0;
+                    continue;
+                }
+                islandColumns++;
+                int offset = bands.offsetAt(x, z);
+                helper.assertTrue(offset != ElevationBands.GAP, "Void cuts through an island at " + x + "," + z);
+                int surface = ours.surface(x, z);
+                int expected = vanillaSurface + offset;
+                // Lowered below the bottom slide, an island is tapered like vanilla's lowest islands: never higher.
+                helper.assertTrue(
+                        expected < BOTTOM_SLIDE_TOP ? surface <= expected : surface == expected,
+                        "Island column " + x + "," + z + " is at " + surface + ", not vanilla " + vanillaSurface
+                                + " moved by " + offset);
+                helper.assertTrue(
+                        previousSurface <= 0 || previousOffset == offset,
+                        "Island sheared between " + (x - 8) + "," + z + " and " + x + "," + z);
+                moved += offset != 0 ? 1 : 0;
+                previousSurface = surface;
+                previousOffset = offset;
+            }
+        }
+        LOGGER.info("Island columns checked: {}, moved: {}", islandColumns, moved);
+        helper.assertTrue(islandColumns >= 50, "Too few island columns sampled: " + islandColumns);
+        helper.assertTrue(moved > 0, "No moved island columns sampled");
         helper.succeed();
     }
 
