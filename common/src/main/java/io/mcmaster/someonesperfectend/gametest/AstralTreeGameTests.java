@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
+import io.mcmaster.someonesperfectend.block.AstralLogBlock;
 import io.mcmaster.someonesperfectend.block.AstralSaplingBlock;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.worldgen.AstralTreeConfiguration;
@@ -160,8 +161,17 @@ public final class AstralTreeGameTests {
                 helper.assertTrue(pos.getY() < origin.getY() + height, "log above the trunk top at " + pos.immutable());
                 int neighbors = 0;
                 for (Direction direction : net.minecraft.core.Direction.values()) {
-                    if (isTreeLog(helper.getBlockState(pos.relative(direction)))) {
+                    BlockState neighbor = helper.getBlockState(pos.relative(direction));
+                    if (isTreeLog(neighbor)) {
                         neighbors++;
+                    }
+                    if (state.is(ModBlocks.ASTRAL_LOG.get())) {
+                        // Chorus Plant-shaped logs reach towards their tree neighbors and down into the soil.
+                        boolean expected = isTreeLog(neighbor) || direction == Direction.DOWN && pos.equals(origin);
+                        helper.assertTrue(
+                                state.getValue(AstralLogBlock.CONNECTIONS.get(direction)) == expected,
+                                "Astral Log at " + pos.immutable() + " connection " + direction + " should be "
+                                        + expected + ": " + state);
                     }
                 }
                 if (neighbors == 1 && !pos.equals(origin)) {

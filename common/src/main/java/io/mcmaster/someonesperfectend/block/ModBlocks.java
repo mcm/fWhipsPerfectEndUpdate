@@ -143,13 +143,19 @@ public final class ModBlocks {
     private static final MapColor ASTRAL_WOOD_COLOR = MapColor.COLOR_LIGHT_BLUE;
     private static final MapColor ASTRAL_BARK_COLOR = MapColor.COLOR_PURPLE;
 
-    public static final RegistrySupplier<RotatedPillarBlock> ASTRAL_LOG = ModRegistries.block(
+    /** Chorus Plant-shaped log that connects to its Astral Log neighbors (see {@link AstralLogBlock}). */
+    public static final RegistrySupplier<AstralLogBlock> ASTRAL_LOG = ModRegistries.block(
             "astral_log",
-            () -> new RotatedPillarBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_BARK_COLOR, ModWoodTypes.ASTRAL)));
-    /** Chorus Flower-look Astral Log (MOD-50 US-002); drops a plain Astral Log unless mined with Silk Touch. */
+            () -> new AstralLogBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_BARK_COLOR, ModWoodTypes.ASTRAL)
+                    .noOcclusion()));
+    /**
+     * Chorus Flower-look and -shaped Astral Log (MOD-50 US-002); drops a plain Astral Log unless mined with Silk
+     * Touch.
+     */
     public static final RegistrySupplier<RotatedPillarBlock> FLOWERING_ASTRAL_LOG = ModRegistries.block(
             "flowering_astral_log",
-            () -> new RotatedPillarBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_BARK_COLOR, ModWoodTypes.ASTRAL)));
+            () -> new RotatedPillarBlock(logProperties(ASTRAL_WOOD_COLOR, ASTRAL_BARK_COLOR, ModWoodTypes.ASTRAL)
+                    .noOcclusion()));
 
     public static final RegistrySupplier<RotatedPillarBlock> ASTRAL_WOOD = ModRegistries.block(
             "astral_wood",

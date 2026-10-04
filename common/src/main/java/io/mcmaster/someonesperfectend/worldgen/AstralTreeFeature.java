@@ -1,6 +1,7 @@
 package io.mcmaster.someonesperfectend.worldgen;
 
 import com.mojang.serialization.Codec;
+import io.mcmaster.someonesperfectend.block.AstralLogBlock;
 import io.mcmaster.someonesperfectend.block.ModBlockTags;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import java.util.ArrayDeque;
@@ -33,7 +34,8 @@ import net.minecraft.world.level.material.Fluids;
  * stem and of every branch. The trunk starts at the origin, which must sit on {@link ModBlockTags#END_PLANT_SOIL}.
  * Nothing is placed if any log position is blocked, or, with {@link AstralTreeConfiguration#maxOverhang()}, if any
  * log or leaf would stick out further than that past the island edge. Each log independently becomes a Flowering
- * Astral Log (same axis) with {@link AstralTreeConfiguration#floweringLogChance()}.
+ * Astral Log (same axis) with {@link AstralTreeConfiguration#floweringLogChance()}. Astral Logs are then connected
+ * to their neighbors ({@link AstralLogBlock#connect}), since neighbor shape updates are skipped while placing.
  */
 public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
     /** Leaves are placed within this distance of a branch tip. */
@@ -141,6 +143,14 @@ public class AstralTreeFeature extends Feature<AstralTreeConfiguration> {
                 state = state.setValue(BlockStateProperties.AXIS, log.getValue());
             }
             level.setBlock(log.getKey(), state, Block.UPDATE_ALL | Block.UPDATE_KNOWN_SHAPE);
+        }
+        // Chorus Plant-shaped Astral Logs reach towards each other once they are all placed.
+        for (BlockPos pos : logs.keySet()) {
+            BlockState state = level.getBlockState(pos);
+            BlockState connected = AstralLogBlock.connect(state, level, pos);
+            if (connected != state) {
+                level.setBlock(pos, connected, Block.UPDATE_ALL | Block.UPDATE_KNOWN_SHAPE);
+            }
         }
         for (Map.Entry<BlockPos, Integer> leaf : distances.entrySet()) {
             BlockPos pos = leaf.getKey();
