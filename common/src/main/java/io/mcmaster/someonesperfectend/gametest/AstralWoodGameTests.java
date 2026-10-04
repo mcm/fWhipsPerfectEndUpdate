@@ -2,6 +2,7 @@ package io.mcmaster.someonesperfectend.gametest;
 
 import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.block.AstralLogBlock;
+import io.mcmaster.someonesperfectend.block.EnderblossomBlock;
 import io.mcmaster.someonesperfectend.block.ModBlockTags;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.block.ModWoodTypes;
@@ -33,7 +34,9 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChorusPlantBlock;
 import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -126,6 +129,61 @@ public final class AstralWoodGameTests {
                     state.getValue(AstralLogBlock.CONNECTIONS.get(direction)) == expected.contains(direction),
                     "Astral Log at " + pos + " should connect only " + expected + ": " + state);
         }
+    }
+
+    /**
+     * Astral Logs and Flowering Astral Logs don't join vanilla chorus: an Astral Log doesn't reach towards a Chorus
+     * Plant or Chorus Flower, and a Chorus Plant doesn't reach towards an Astral Log or Flowering Astral Log.
+     */
+    @GameTest
+    public static void astralLogsDoNotConnectToChorus(GameTestHelper helper) {
+        BlockPos log = new BlockPos(2, 2, 2);
+        BlockPos plant = log.above();
+        helper.setBlock(log, ModBlocks.ASTRAL_LOG.get());
+        helper.setBlock(log.east(), Blocks.CHORUS_PLANT);
+        helper.setBlock(log.west(), Blocks.CHORUS_FLOWER);
+        helper.setBlock(plant, Blocks.CHORUS_PLANT);
+        helper.setBlock(plant.north(), ModBlocks.FLOWERING_ASTRAL_LOG.get());
+        helper.setBlock(plant.south(), ModBlocks.ASTRAL_LOG.get());
+        // Work the connections out from all neighbors, as placing each block does.
+        ServerLevel level = helper.getLevel();
+        BlockState astral = AstralLogBlock.connect(helper.getBlockState(log), level, helper.absolutePos(log));
+        for (Direction direction : Direction.values()) {
+            helper.assertFalse(
+                    astral.getValue(AstralLogBlock.CONNECTIONS.get(direction)),
+                    "the Astral Log should not connect to chorus: " + astral);
+        }
+        for (BlockPos pos : List.of(plant, log.east())) {
+            BlockState chorus =
+                    ChorusPlantBlock.getStateWithConnections(level, helper.absolutePos(pos), helper.getBlockState(pos));
+            for (Direction direction : Direction.values()) {
+                helper.assertFalse(
+                        chorus.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction)),
+                        "the Chorus Plant at " + pos + " should not connect to Astral Logs: " + chorus);
+            }
+        }
+        helper.succeed();
+    }
+
+    /**
+     * The Enderblossom model sets its stem on a chorus plant-shaped Astral Log's core, inside the log's block, so on
+     * supports whose face is the block edge it is drawn out at that face instead of inside the support.
+     */
+    @GameTest
+    public static void enderblossomStemSitsOnTheSupportFace(GameTestHelper helper) {
+        helper.assertTrue(
+                EnderblossomBlock.stemOffset(ModBlocks.ASTRAL_LOG.get().defaultBlockState()) == 0.0F,
+                "on an Astral Log the stem should stay on the log's core");
+        for (Block support : List.of(
+                ModBlocks.FLOWERING_ASTRAL_LOG.get(),
+                ModBlocks.ASTRAL_WOOD.get(),
+                ModBlocks.STRIPPED_ASTRAL_LOG.get(),
+                ModBlocks.STRIPPED_ASTRAL_WOOD.get())) {
+            helper.assertTrue(
+                    EnderblossomBlock.stemOffset(support.defaultBlockState()) == EnderblossomBlock.STEM_DEPTH,
+                    "on " + support + " the stem should be moved out to the block face");
+        }
+        helper.succeed();
     }
 
     @GameTest

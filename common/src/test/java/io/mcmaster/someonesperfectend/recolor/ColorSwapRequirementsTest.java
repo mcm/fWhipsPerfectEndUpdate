@@ -44,6 +44,23 @@ class ColorSwapRequirementsTest {
         assertEquals(GREEN_BARK, gradient(recipePalette(file, "someonesperfectend:block/flowering_astral_log")));
     }
 
+    /**
+     * The Flowering Astral Log's flower keeps chorus flower's light petals as the Astral leaves lavender, so it stands
+     * out from the green stem instead of melting into the gradient.
+     */
+    @Test
+    void floweringAstralLogFlowerStandsOut() throws IOException {
+        JsonObject palette = recipePalette(read("astral_wood.json"), "someonesperfectend:block/flowering_astral_log");
+        assertEquals(
+                Map.of(
+                        "#a178a1", "#7f78c9",
+                        "#ab8aab", "#8f88d6",
+                        "#d6bbd6", "#b9b3ef",
+                        "#eed6ee", "#d2cdfa",
+                        "#fbf3fe", "#e4e0ff"),
+                colors(palette));
+    }
+
     /** FR-2: the Voidvine wood set takes the old Astral wood purples. */
     @Test
     void voidvineWoodSetUsesThePurples() throws IOException {
