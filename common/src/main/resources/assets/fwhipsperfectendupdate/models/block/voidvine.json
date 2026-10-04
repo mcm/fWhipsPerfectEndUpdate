@@ -1,0 +1,6 @@
+{
+  "parent": "fwhipsperfectendupdate:block/voidvine_template",
+  "textures": {
+    "cross": "fwhipsperfectendupdate:block/voidvine"
+  }
+}

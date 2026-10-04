@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/door_bottom_left_open",
-  "textures": {
-    "bottom": "someonesperfectend:block/voidvine_door_bottom",
-    "top": "someonesperfectend:block/voidvine_door_top"
-  }
-}

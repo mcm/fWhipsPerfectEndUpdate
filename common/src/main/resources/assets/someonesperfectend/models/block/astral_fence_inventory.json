@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/fence_inventory",
-  "textures": {
-    "texture": "someonesperfectend:block/astral_planks"
-  }
-}

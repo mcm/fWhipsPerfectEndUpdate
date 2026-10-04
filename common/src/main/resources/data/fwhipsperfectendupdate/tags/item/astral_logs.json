@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "fwhipsperfectendupdate:astral_log",
+    "fwhipsperfectendupdate:flowering_astral_log",
+    "fwhipsperfectendupdate:astral_wood",
+    "fwhipsperfectendupdate:stripped_astral_log",
+    "fwhipsperfectendupdate:stripped_astral_wood"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "fwhipsperfectendupdate:block/flowering_astral_leaves"
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "block.enderblossom.open": {
+    "subtitle": "subtitles.fwhipsperfectendupdate.block.enderblossom.open",
+    "sounds": [
+      {
+        "name": "minecraft:block/chorus_flower/grow1",
+        "pitch": 1.6,
+        "volume": 0.6
+      },
+      {
+        "name": "minecraft:block/chorus_flower/grow2",
+        "pitch": 1.6,
+        "volume": 0.6
+      },
+      {
+        "name": "minecraft:block/chorus_flower/grow3",
+        "pitch": 1.6,
+        "volume": 0.6
+      },
+      {
+        "name": "minecraft:block/chorus_flower/grow4",
+        "pitch": 1.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "block.enderblossom.open_long": {
+    "subtitle": "subtitles.fwhipsperfectendupdate.block.enderblossom.open",
+    "sounds": [
+      {
+        "name": "minecraft:block/chorus_flower/grow1",
+        "pitch": 1.3,
+        "volume": 0.9
+      },
+      {
+        "name": "minecraft:block/chorus_flower/grow2",
+        "pitch": 1.3,
+        "volume": 0.9
+      },
+      {
+        "name": "minecraft:block/chorus_flower/grow3",
+        "pitch": 1.3,
+        "volume": 0.9
+      },
+      {
+        "name": "minecraft:block/chorus_flower/grow4",
+        "pitch": 1.3,
+        "volume": 0.9
+      }
+    ]
+  },
+  "block.enderblossom.close": {
+    "subtitle": "subtitles.fwhipsperfectendupdate.block.enderblossom.close",
+    "sounds": [
+      {
+        "name": "minecraft:block/chorus_flower/death1",
+        "pitch": 1.4,
+        "volume": 0.6
+      },
+      {
+        "name": "minecraft:block/chorus_flower/death2",
+        "pitch": 1.4,
+        "volume": 0.6
+      },
+      {
+        "name": "minecraft:block/chorus_flower/death3",
+        "pitch": 1.4,
+        "volume": 0.6
+      }
+    ]
+  },
+  "block.enderblossom.close_long": {
+    "subtitle": "subtitles.fwhipsperfectendupdate.block.enderblossom.close",
+    "sounds": [
+      {
+        "name": "minecraft:block/chorus_flower/death1",
+        "pitch": 1.1,
+        "volume": 0.9
+      },
+      {
+        "name": "minecraft:block/chorus_flower/death2",
+        "pitch": 1.1,
+        "volume": 0.9
+      },
+      {
+        "name": "minecraft:block/chorus_flower/death3",
+        "pitch": 1.1,
+        "volume": 0.9
+      }
+    ]
+  },
+  "block.enderblossom.idle": {
+    "subtitle": "subtitles.fwhipsperfectendupdate.block.enderblossom.idle",
+    "sounds": [
+      {
+        "name": "minecraft:mob/endermen/idle1",
+        "pitch": 1.8,
+        "volume": 0.15
+      },
+      {
+        "name": "minecraft:mob/endermen/idle2",
+        "pitch": 1.8,
+        "volume": 0.15
+      },
+      {
+        "name": "minecraft:mob/endermen/idle3",
+        "pitch": 1.8,
+        "volume": 0.15
+      },
+      {
+        "name": "minecraft:mob/endermen/idle4",
+        "pitch": 1.8,
+        "volume": 0.15
+      },
+      {
+        "name": "minecraft:mob/endermen/idle5",
+        "pitch": 1.8,
+        "volume": 0.15
+      }
+    ]
+  }
+}

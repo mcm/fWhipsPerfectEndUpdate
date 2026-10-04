@@ -1,0 +1,15 @@
+{
+  "feature": "fwhipsperfectendupdate:end_highlands_under_island_foliage",
+  "placement": [
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

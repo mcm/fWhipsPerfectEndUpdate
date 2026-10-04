@@ -5,6 +5,6 @@
  * Run it from this directory (`cd gradle/spotless && ../../gradlew spotlessCheck`), or use the `spotlessCheck` and
  * `spotlessApply` tasks of the main build, which delegate here. `-p gradle/spotless` does not work.
  */
-rootProject.name = 'someonesperfectend-spotless'
+rootProject.name = 'fwhipsperfectendupdate-spotless'
 rootProject.projectDir = file('../..')
 rootProject.buildFileName = 'gradle/spotless/spotless.gradle'

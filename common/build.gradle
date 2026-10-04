@@ -35,10 +35,10 @@ test {
  * Run with `./gradlew exportRecoloredTextures`.
  */
 tasks.register('exportRecoloredTextures', JavaExec) {
-    group = 'someonesperfectend'
+    group = 'fwhipsperfectendupdate'
     description = 'Writes the recolored textures from a local vanilla client jar to build/recolored-textures/'
     classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'io.mcmaster.someonesperfectend.recolor.RecolorExport'
+    mainClass = 'io.mcmaster.fwhipsperfectendupdate.recolor.RecolorExport'
     def output = rootProject.layout.buildDirectory.dir('recolored-textures').get().asFile
     def resources = file('src/main/resources')
     def clientJarPath = providers.gradleProperty('clientJar')

@@ -1,0 +1,71 @@
+{
+  "palette": {
+    "gradient": [
+      "#0b3a46",
+      "#1fa8bd",
+      "#9cf6ff"
+    ]
+  },
+  "recipes": [
+    {
+      "source": "minecraft:block/pink_petals",
+      "target": "fwhipsperfectendupdate:block/void_petals",
+      "palette": {
+        "gradient": [
+          "#4d5a96",
+          "#9db3ea",
+          "#e6ebff"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:item/pink_petals",
+      "target": "fwhipsperfectendupdate:item/void_petals",
+      "palette": {
+        "gradient": [
+          "#3c5a4f",
+          "#9db3ea",
+          "#e6ebff"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:block/pink_petals_stem",
+      "target": "fwhipsperfectendupdate:block/void_petals_stem",
+      "palette": {
+        "gradient": [
+          "#2f5a5c",
+          "#5f9c93"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:block/red_mushroom",
+      "target": "fwhipsperfectendupdate:block/glowcap"
+    },
+    {
+      "source": "minecraft:block/red_mushroom_block",
+      "target": "fwhipsperfectendupdate:block/glowcap_block"
+    },
+    {
+      "source": "minecraft:block/mushroom_block_inside",
+      "target": "fwhipsperfectendupdate:block/glowcap_block_inside",
+      "palette": {
+        "gradient": [
+          "#8fb8bd",
+          "#d9f4f2"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:block/mushroom_stem",
+      "target": "fwhipsperfectendupdate:block/glowcap_stem",
+      "palette": {
+        "gradient": [
+          "#9fbfc4",
+          "#e4f7f6"
+        ]
+      }
+    }
+  ]
+}

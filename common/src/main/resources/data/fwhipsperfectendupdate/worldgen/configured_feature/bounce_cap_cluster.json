@@ -1,0 +1,19 @@
+{
+  "type": "fwhipsperfectendupdate:bounce_cap_cluster",
+  "config": {
+    "state": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "fwhipsperfectendupdate:bounce_cap"
+      }
+    },
+    "size": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 4
+    },
+    "search_radius": 6,
+    "candidates": 12,
+    "cluster_radius": 2
+  }
+}

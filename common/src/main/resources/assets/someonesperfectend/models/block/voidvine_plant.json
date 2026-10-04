@@ -1,6 +1,0 @@
-{
-  "parent": "someonesperfectend:block/voidvine_template",
-  "textures": {
-    "cross": "someonesperfectend:block/voidvine_plant"
-  }
-}

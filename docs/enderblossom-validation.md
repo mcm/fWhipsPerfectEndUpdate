@@ -29,7 +29,7 @@ Extra checks:
 ## Owner playtest
 
 Quick setup in a creative world:
-`/locate biome someonesperfectend:end_forest`, then use `/summon minecraft:enderman ~ ~ ~5 {NoAI:1b}` to bring
+`/locate biome fwhipsperfectendupdate:end_forest`, then use `/summon minecraft:enderman ~ ~ ~5 {NoAI:1b}` to bring
 an Enderman in and `/kill @e[type=enderman]` to remove it. To make an Enderman teleport, use `/effect give @e[type=enderman] minecraft:instant_damage`
 (or hit it). For stew, craft a bowl, a brown mushroom, a red mushroom and either blossom.
 

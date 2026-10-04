@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "fwhipsperfectendupdate:block/astral_wood",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "fwhipsperfectendupdate:block/astral_wood"
+    },
+    "axis=z": {
+      "model": "fwhipsperfectendupdate:block/astral_wood",
+      "x": 90
+    }
+  }
+}

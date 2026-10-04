@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_custom_fence_gate",
+  "textures": {
+    "particle": "fwhipsperfectendupdate:block/voidvine_fence_gate_particle",
+    "texture": "fwhipsperfectendupdate:block/voidvine_fence_gate"
+  }
+}

@@ -1,6 +1,6 @@
 # MVP validation (US-029)
 
-Validation of "Someone's Perfect End Update" MVP (MC 1.21.1, Fabric + NeoForge) against the PRD
+Validation of "fWhip's Perfect End Update" MVP (MC 1.21.1, Fabric + NeoForge) against the PRD
 (`.ralph-tui/tasks/prd-someones-perfect-end-update.md`), done 2026-09-28 on branch
 `steve/mod-1-epic-someones-perfect-end-update-mvp-mc-1211-fabric-neoforge`.
 
@@ -29,7 +29,7 @@ Fixed during validation:
 
 ## 2. Built jars
 
-Checked `someonesperfectend-{fabric,neoforge}-1.0.0.jar`:
+Checked `fwhipsperfectendupdate-{fabric,neoforge}-1.0.0.jar`:
 - **No PNG files at all** and nothing under `assets/minecraft/`. Every texture is generated at runtime by
   the recolor pipeline.
 - The only `.nbt` files are our own GameTest air templates (`structure/gametest/empty*.nbt`). The Endling
@@ -115,7 +115,7 @@ Run each item on **both** Fabric and NeoForge (`./gradlew :fabric:runClient`, `.
       survival or creative. Decide on the leftover Accessories key binding, config screen and `/accessories` command
 - [ ] Fresh world: beat the dragon, go through a gateway, and see the three elevation bands, all three new
       biomes, under-island foliage, End Cities in more than one band, and an Endling village (`/locate structure
-      someonesperfectend:endling_village`)
+      fwhipsperfectendupdate:endling_village`)
 - [ ] Bounce Caps let you hop between bands; a missed jump can still drop you into the void
 - [ ] Breed Driftjellies in the End; they go dormant in the Overworld
 - [ ] Before the dragon: an Endling refuses (head shake + villager "no"). After: barter works, and Endlings become

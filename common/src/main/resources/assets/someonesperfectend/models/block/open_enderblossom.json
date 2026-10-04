@@ -1,8 +1,0 @@
-{
-  "parent": "someonesperfectend:block/template_wall_enderblossom_emissive",
-  "textures": {
-    "cross": "someonesperfectend:block/open_enderblossom",
-    "side": "someonesperfectend:block/open_enderblossom_side",
-    "emissive": "someonesperfectend:block/open_enderblossom_emissive"
-  }
-}

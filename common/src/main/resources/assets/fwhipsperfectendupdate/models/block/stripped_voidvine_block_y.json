@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_uv_locked_y",
+  "textures": {
+    "end": "fwhipsperfectendupdate:block/stripped_voidvine_block_top",
+    "side": "fwhipsperfectendupdate:block/stripped_voidvine_block"
+  }
+}

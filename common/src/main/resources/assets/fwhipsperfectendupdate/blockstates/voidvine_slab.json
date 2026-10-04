@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "fwhipsperfectendupdate:block/voidvine_slab"
+    },
+    "type=double": {
+      "model": "fwhipsperfectendupdate:block/voidvine_planks"
+    },
+    "type=top": {
+      "model": "fwhipsperfectendupdate:block/voidvine_slab_top"
+    }
+  }
+}

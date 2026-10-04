@@ -1,10 +1,10 @@
-# Contributing to Someone's Perfect End Update
+# Contributing to fWhip's Perfect End Update
 
 This is the developer guide for the mod: how the code is laid out, how its systems work, and how to build and
 test it. For what the mod adds to the game, see the [README](README.md).
 
-- Mod id: `someonesperfectend`
-- Base package: `io.mcmaster.someonesperfectend`
+- Mod id: `fwhipsperfectendupdate`
+- Base package: `io.mcmaster.fwhipsperfectendupdate`
 - Minecraft 1.21.1, Java 21, Fabric + NeoForge from one [Architectury](https://docs.architectury.dev/) codebase
 
 ## Build layout
@@ -13,20 +13,20 @@ test it. For what the mod adds to the game, see the [README](README.md).
 build.gradle          root: shared Loom/Architectury setup, GameTest harness, `gameTestAll`
 gradle.properties     versions (Minecraft, loaders, Architectury API, Fabric API, JUnit)
 common/               loader-independent code and resources (Mojang mappings)
-  src/main/java/io/mcmaster/someonesperfectend/
-    SomeonesPerfectEnd.java     common init (called by both loader entrypoints)
+  src/main/java/io/mcmaster/fwhipsperfectendupdate/
+    FwhipsPerfectEndUpdate.java     common init (called by both loader entrypoints)
     registry/ModRegistries.java Architectury DeferredRegisters + creative tab + registration helpers
     recolor/                    runtime texture recolor pipeline (see "Textures")
-    mixin/                      common mixins (someonesperfectend.mixins.json)
+    mixin/                      common mixins (fwhipsperfectendupdate.mixins.json)
     gametest/                   GameTests shared by both loaders
   src/main/resources/
-    assets/someonesperfectend/lang/en_us.json
-    assets/someonesperfectend/recolor/            texture recolor recipes (.json)
-    data/someonesperfectend/structure/gametest/   GameTest structure templates (.nbt)
+    assets/fwhipsperfectendupdate/lang/en_us.json
+    assets/fwhipsperfectendupdate/recolor/            texture recolor recipes (.json)
+    data/fwhipsperfectendupdate/structure/gametest/   GameTest structure templates (.nbt)
   src/test/java/                JUnit 5 unit tests (run by `./gradlew build`)
 fabric/               Fabric entrypoints, fabric.mod.json, @ExpectPlatform impls (`<package>.fabric.*Impl`)
 neoforge/             NeoForge @Mod class, META-INF/neoforge.mods.toml, @ExpectPlatform impls
-                      (`<package>.neoforge.*Impl`), NeoForge-only mixins (someonesperfectend-neoforge.mixins.json)
+                      (`<package>.neoforge.*Impl`), NeoForge-only mixins (fwhipsperfectendupdate-neoforge.mixins.json)
 ```
 
 All gameplay code goes in `common`. The loader modules only hold entrypoints, metadata and the small
@@ -44,10 +44,10 @@ public static final RegistrySupplier<Block> VOIDSOIL =
         ModRegistries.block("voidsoil", () -> new Block(BlockBehaviour.Properties.of()));
 ```
 
-`block(...)` also registers a `BlockItem` in the "Someone's Perfect End Update" creative tab;
+`block(...)` also registers a `BlockItem` in the "fWhip's Perfect End Update" creative tab;
 `ModRegistries.itemProperties()` gives item properties that put an item in that tab. Make sure the
 class holding the entries is loaded before `ModRegistries.register()` runs (reference it from
-`SomeonesPerfectEnd.init()`).
+`FwhipsPerfectEndUpdate.init()`).
 
 ### Adding Minecraft versions (26.1, 26.3)
 
@@ -70,7 +70,7 @@ Only 1.21.1 is built today. The plan for the 26.1 and 26.3 ports
 Mojang's textures are never committed or packaged. Placeholder textures are generated on the client at every
 resource reload by recoloring the player's own vanilla textures:
 
-1. Recipes are JSON files in `common/src/main/resources/assets/someonesperfectend/recolor/` (resource packs can
+1. Recipes are JSON files in `common/src/main/resources/assets/fwhipsperfectendupdate/recolor/` (resource packs can
    add or replace files there too).
 2. On every client resource reload, `ReloadableResourceManagerMixin` builds `RecolorPackResources`: for each
    recipe it reads the source texture (and its `.png.mcmeta`, so animations are kept) from the highest-priority
@@ -78,18 +78,18 @@ resource reload by recoloring the player's own vanilla textures:
    priority. The log reports `Recolor: generated N textures (M replaced by real PNGs, E errors)`.
 3. **Hand-drawn art wins:** if any pack (the mod's own assets or a user resource pack) has a real PNG at a
    recipe's target, that recipe is not generated. To replace a placeholder, add
-   `assets/someonesperfectend/textures/<path>.png`; no code or recipe change is needed.
+   `assets/fwhipsperfectendupdate/textures/<path>.png`; no code or recipe change is needed.
 
 Original hand-drawn textures (the Enderblossoms so far) are authored with the
 [mc-asset](https://www.npmjs.com/package/mc-asset) CLI. Their editable sources live in `art/textures/<path>.grid`
 (plus the `.mcpx` that `mc-asset render` writes) and mirror the PNG paths under
-`assets/someonesperfectend/textures/`. To change one, edit the `.grid` and re-render it:
+`assets/fwhipsperfectendupdate/textures/`. To change one, edit the `.grid` and re-render it:
 
 ```
 mc-asset render art/textures/block/open_enderblossom.grid --force \
-    --output common/src/main/resources/assets/someonesperfectend/textures/block/open_enderblossom.png \
+    --output common/src/main/resources/assets/fwhipsperfectendupdate/textures/block/open_enderblossom.png \
     --source art/textures/block/open_enderblossom.mcpx
-mc-asset validate common/src/main/resources/assets/someonesperfectend/textures/block/open_enderblossom.png \
+mc-asset validate common/src/main/resources/assets/fwhipsperfectendupdate/textures/block/open_enderblossom.png \
     --profile minecraft:block
 ```
 
@@ -99,8 +99,8 @@ A recipe file holds one recipe or a list sharing a palette:
 {
   "palette": {"gradient": ["#241f52", "#6f6fcf", "#d8d0ff"]},
   "recipes": [
-    {"source": "minecraft:block/bamboo_planks", "target": "someonesperfectend:block/astral_planks"},
-    {"source": "minecraft:block/bamboo_door_top", "target": "someonesperfectend:block/astral_door_top",
+    {"source": "minecraft:block/bamboo_planks", "target": "fwhipsperfectendupdate:block/astral_planks"},
+    {"source": "minecraft:block/bamboo_door_top", "target": "fwhipsperfectendupdate:block/astral_door_top",
      "palette": {"hsv": {"hue": 250, "saturation": 0.6}, "colors": {"#e3c16a": "#c9c6ff"}}}
   ]
 }
@@ -131,9 +131,9 @@ Each recipe can also set:
   "palette": {"gradient": ["#0f2616", "#3d7d45", "#76b371"],
               "colors": {"#eb8931": "#3fd3dd", "#f7e26b": "#c6fbff"}},
   "recipes": [
-    {"source": "minecraft:block/twisting_vines", "target": "someonesperfectend:block/hanging_vine",
+    {"source": "minecraft:block/twisting_vines", "target": "fwhipsperfectendupdate:block/hanging_vine",
      "flip": "vertical"},
-    {"source": "minecraft:block/cave_vines_lit", "target": "someonesperfectend:block/hanging_vine_berries",
+    {"source": "minecraft:block/cave_vines_lit", "target": "fwhipsperfectendupdate:block/hanging_vine_berries",
      "flip": "vertical", "keep_only_mapped": true}
   ]
 }
@@ -149,11 +149,11 @@ contains `assets/minecraft/textures`.
 The single trinket slot is built on [Accessories](https://github.com/wisp-forest/Accessories) (Wisp Forest,
 `io.wispforest:accessories-*`, which also pulls in owo-lib). Code is in `common/.../trinket/`.
 
-- The slot is an Accessories "unique slot" named `someonesperfectend:trinket` (`Trinkets.init()`), bound to
+- The slot is an Accessories "unique slot" named `fwhipsperfectendupdate:trinket` (`Trinkets.init()`), bound to
   players only, in strict mode (data packs can't resize it or change what it accepts). It accepts only items in
-  `#someonesperfectend:trinkets`. An item's behavior comes from an Accessories `Accessory` registered for it
+  `#fwhipsperfectendupdate:trinkets`. An item's behavior comes from an Accessories `Accessory` registered for it
   (see `totem/EffectTotemItem`); its look on the player comes from an `AccessoryRenderer` registered in
-  `SomeonesPerfectEndClient` (`TrinketRenderer` hangs it on the front of the belt). Register one for every new
+  `FwhipsPerfectEndUpdateClient` (`TrinketRenderer` hangs it on the front of the belt). Register one for every new
   trinket item.
 - `InventoryMenuMixin` adds `TrinketSlot` to the vanilla player `InventoryMenu` after the vanilla slots (so it is
   slot 46 and vanilla indices don't move), directly above the off-hand slot. The slot reads and writes the
@@ -177,7 +177,7 @@ The single trinket slot is built on [Accessories](https://github.com/wisp-forest
 ### Totem of Haste mining boost
 
 Haste III or higher mines much faster **only while an activated Totem of Haste** (one with the
-`someonesperfectend:totem_activated` component) is worn in the trinket slot, e.g. a Haste II beacon plus the
+`fwhipsperfectendupdate:totem_activated` component) is worn in the trinket slot, e.g. a Haste II beacon plus the
 totem. The Haste multiplier becomes `1 + 0.6 × (amplifier + 1)` instead of vanilla's `1 + 0.2 × (amplifier + 1)`,
 so Efficiency V with Haste III breaks end stone and deepslate instantly (Efficiency IV does not). Haste II with the
 totem, and Haste III from anywhere else (commands, other mods) without the totem, stay vanilla.
@@ -192,7 +192,7 @@ totem, and Haste III from anywhere else (commands, other mods) without the totem
 
 The outer End (at least 1024 blocks from the origin) is split into three elevation bands: lower, middle
 (vanilla, surface about Y=57–62), and upper. The override of `data/minecraft/worldgen/noise_settings/end.json`
-is the vanilla file with the terrain density wrapped in `someonesperfectend:elevation_bands`
+is the vanilla file with the terrain density wrapped in `fwhipsperfectendupdate:elevation_bands`
 (`worldgen/ElevationBandsFunction`, settings and offset math in `ElevationBands`), and with the noise height
 raised from 128 to 192 so raised islands fit.
 
@@ -243,7 +243,7 @@ it counts 61 starts, the same as with vanilla terrain (the target is within ±20
 
 ## End biomes
 
-`end_plains`, `end_forest`, and `end_oasis` are data (`data/someonesperfectend/worldgen/biome/`): vanilla End
+`end_plains`, `end_forest`, and `end_oasis` are data (`data/fwhipsperfectendupdate/worldgen/biome/`): vanilla End
 ambience (Endermen, mood sound, water colors, `end_gateway_return`) with pastel fog/sky colors and ambient
 particles. They are placed by [TerraBlender](https://github.com/Glitchfiend/TerraBlender) (required library):
 `ModBiomes.registerPlacement()` adds them to TerraBlender's End highlands and midlands lists (Fabric: the
@@ -252,7 +252,7 @@ particles. They are placed by [TerraBlender](https://github.com/Glitchfiend/Terr
 in its `config/terrablender.toml`.
 
 - **Surface rules** live in the same `end.json` override: `end_turf` on island tops in all three biomes, with
-  `voidsoil` patches (noise `someonesperfectend:voidsoil_patch`) in forest and oasis. Other biomes keep end stone.
+  `voidsoil` patches (noise `fwhipsperfectendupdate:voidsoil_patch`) in forest and oasis. Other biomes keep end stone.
 - **Purity:** with only TerraBlender, the Overworld and Nether use only vanilla's region, so their biomes are
   exactly vanilla. TerraBlender 4.1 builds its End "small islands" area from the edge list, which would turn the
   void between islands into `end_barrens`; `TheEndBiomeSourceMixin` (runs before TerraBlender) restores
@@ -328,12 +328,12 @@ removed, lava next to that flow, and a glass bottle.
 
 ## Endling villages
 
-`someonesperfectend:endling_village` is a custom structure type (`worldgen/EndlingVillageStructure`) whose
+`fwhipsperfectendupdate:endling_village` is a custom structure type (`worldgen/EndlingVillageStructure`) whose
 pieces are placed by code (`EndlingVillagePieces`); it uses no structure `.nbt` files. The plan
 (`EndlingVillageLayout`) has 1–3 `huge_glowcap`s near the center and a ring of 3–6 huts around them (Voidvine
 plank floor, Astral or Voidvine walls, glowcap-block roof, doorway facing the center). Each hut spawns one
 endling bound to the village center (`Endling#setVillage`). A start needs a column at least 1024 blocks (plus
-the village radius) from the origin, a biome in `#someonesperfectend:has_structure/endling_village`
+the village radius) from the origin, a biome in `#fwhipsperfectendupdate:has_structure/endling_village`
 (`end_plains`, `end_forest`, `end_highlands`), and an island that reaches past the village radius all around,
 with hut and glowcap sites close to the center's height. Rarity is set in
 `worldgen/structure_set/endling_villages.json` (random spread, spacing 29 chunks, kept 3 chunks away from End
@@ -346,7 +346,7 @@ structure-start step (`ChunkGenerator#createStructures`) on a fresh proto chunk 
 
 ## Endling bartering and the Voidvine wood set
 
-Endlings in the End take one item from `#someonesperfectend:endling_barter_inputs` (dropped by, or handed over
+Endlings in the End take one item from `#fwhipsperfectendupdate:endling_barter_inputs` (dropped by, or handed over
 from, a player who has `minecraft:end/kill_dragon`), inspect it for 6 seconds and roll
 `loot_table/gameplay/endling_bartering.json` (special inputs such as beacons, totems and beds roll their own
 tables under `gameplay/endling_barter/`). The default table gives Astral saplings and logs, Voidvine Blocks
@@ -354,7 +354,7 @@ tables under `gameplay/endling_barter/`). The default table gives Astral sapling
 
 Voidvine itself (the hanging plant grown under Voidsoil) only crafts into sticks. The Voidvine Block has no
 recipe: it comes from Endling barters, or from breaking placed ones. Voidvine and Stripped Voidvine Blocks
-(`#someonesperfectend:voidvine_blocks`) craft into Voidvine Planks; stripped blocks also make hanging signs, and
+(`#fwhipsperfectendupdate:voidvine_blocks`) craft into Voidvine Planks; stripped blocks also make hanging signs, and
 the planks make the rest of the set. `EndlingBarterGameTests` and `VoidvineWoodGameTests` check this.
 
 ## Quality gates
@@ -393,12 +393,12 @@ change in the snapshot Loom and Architectury Gradle plugins.
 
 ### GameTests
 
-- Write tests in `common/src/main/java/io/mcmaster/someonesperfectend/gametest/` as
+- Write tests in `common/src/main/java/io/mcmaster/fwhipsperfectendupdate/gametest/` as
   `public static void name(GameTestHelper helper)` methods annotated with the vanilla `@GameTest`, and add the
   class to `ModGameTests.TEST_CLASSES`.
-- `@GameTest(template = "...")` takes a **full** template id (`someonesperfectend:gametest/<name>`); leaving it
+- `@GameTest(template = "...")` takes a **full** template id (`fwhipsperfectendupdate:gametest/<name>`); leaving it
   empty uses `ModGameTests.EMPTY_TEMPLATE`, an 8×8×8 air structure. Templates are vanilla structure `.nbt` files
-  under `common/src/main/resources/data/someonesperfectend/structure/gametest/`.
+  under `common/src/main/resources/data/fwhipsperfectendupdate/structure/gametest/`.
 - Each loader registers `ModGameTests` (Fabric: the `fabric-gametest` entrypoint; NeoForge:
   `RegisterGameTestsEvent`). Its `@GameTestGenerator` turns the annotated methods into test functions. This
   is needed because Fabric and NeoForge build template ids from `@GameTest` differently. Fabric also registers

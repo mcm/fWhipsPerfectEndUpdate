@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {"condition": "minecraft:match_tool", "predicate": {"items": "minecraft:shears"}}
+          ],
+          "name": "fwhipsperfectendupdate:short_void_grass"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "fwhipsperfectendupdate:blocks/short_void_grass"
+}

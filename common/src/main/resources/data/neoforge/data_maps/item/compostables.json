@@ -1,21 +1,21 @@
 {
   "values": {
-    "someonesperfectend:void_petals": {
+    "fwhipsperfectendupdate:void_petals": {
       "chance": 0.3
     },
-    "someonesperfectend:glowcap": {
+    "fwhipsperfectendupdate:glowcap": {
       "chance": 0.65
     },
-    "someonesperfectend:astral_leaves": {
+    "fwhipsperfectendupdate:astral_leaves": {
       "chance": 0.3
     },
-    "someonesperfectend:flowering_astral_leaves": {
+    "fwhipsperfectendupdate:flowering_astral_leaves": {
       "chance": 0.3
     },
-    "someonesperfectend:astral_sapling": {
+    "fwhipsperfectendupdate:astral_sapling": {
       "chance": 0.3
     },
-    "someonesperfectend:voidfruit": {
+    "fwhipsperfectendupdate:voidfruit": {
       "chance": 0.3
     }
   }

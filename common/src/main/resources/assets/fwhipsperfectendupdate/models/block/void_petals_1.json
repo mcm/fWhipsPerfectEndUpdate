@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/flowerbed_1",
+  "textures": {
+    "flowerbed": "fwhipsperfectendupdate:block/void_petals",
+    "stem": "fwhipsperfectendupdate:block/void_petals_stem"
+  }
+}

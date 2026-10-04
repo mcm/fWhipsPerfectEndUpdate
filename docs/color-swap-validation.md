@@ -19,7 +19,7 @@ purple, and the Voidvine, its item and the Voidfruit in purple with cyan berries
 
 ## Owner playtest
 
-Setup: in a creative world, run `/locate biome someonesperfectend:end_forest` and teleport there. For Voidvines, use `/give @s someonesperfectend:voidvine` and plant it under Voidsoil, or
+Setup: in a creative world, run `/locate biome fwhipsperfectendupdate:end_forest` and teleport there. For Voidvines, use `/give @s fwhipsperfectendupdate:voidvine` and plant it under Voidsoil, or
 find them under the islands.
 
 - [ ] Astral trunks (green) no longer read as chorus plants.

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    {
+      "tag": "fwhipsperfectendupdate:voidvine_blocks"
+    }
+  ],
+  "result": {
+    "count": 2,
+    "id": "fwhipsperfectendupdate:voidvine_planks"
+  }
+}

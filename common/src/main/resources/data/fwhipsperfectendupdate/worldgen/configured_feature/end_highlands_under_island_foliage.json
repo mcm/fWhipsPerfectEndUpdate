@@ -1,0 +1,32 @@
+{
+  "type": "fwhipsperfectendupdate:under_island_foliage",
+  "config": {
+    "soil": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "fwhipsperfectendupdate:voidsoil"
+      }
+    },
+    "replaceable": {
+      "type": "minecraft:matching_blocks",
+      "blocks": "minecraft:end_stone"
+    },
+    "radius": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 4
+    },
+    "vine_chance": 0.3,
+    "vine_length": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 4,
+      "max_inclusive": 16
+    },
+    "fruit_chance": 0.3,
+    "min_y": {
+      "absolute": 5
+    },
+    "region_size": 64,
+    "region_chance": 0.1
+  }
+}

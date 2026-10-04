@@ -1,0 +1,18 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "exclusion_zone": {
+      "chunk_count": 3,
+      "other_set": "minecraft:end_cities"
+    },
+    "salt": 20260923,
+    "separation": 8,
+    "spacing": 29
+  },
+  "structures": [
+    {
+      "structure": "fwhipsperfectendupdate:endling_village",
+      "weight": 1
+    }
+  ]
+}

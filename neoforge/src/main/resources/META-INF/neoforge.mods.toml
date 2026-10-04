@@ -3,43 +3,43 @@ loaderVersion = "[4,)"
 license = "All-Rights-Reserved"
 
 [[mods]]
-modId = "someonesperfectend"
+modId = "fwhipsperfectendupdate"
 version = "${version}"
-displayName = "Someone's Perfect End Update"
+displayName = "fWhip's Perfect End Update"
 authors = "Steve McMaster"
 description = '''
 Adds life, terrain variety, and endgame systems to the End while keeping it desolate. Inspired by fWhip's "perfect End update" video; not affiliated with or endorsed by fWhip or Mojang.
 '''
 
-[[dependencies.someonesperfectend]]
+[[dependencies.fwhipsperfectendupdate]]
 modId = "neoforge"
 type = "required"
 versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.someonesperfectend]]
+[[dependencies.fwhipsperfectendupdate]]
 modId = "minecraft"
 type = "required"
 versionRange = "[1.21.1,1.21.2)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.someonesperfectend]]
+[[dependencies.fwhipsperfectendupdate]]
 modId = "architectury"
 type = "required"
 versionRange = "[13.0.11,)"
 ordering = "AFTER"
 side = "BOTH"
 
-[[dependencies.someonesperfectend]]
+[[dependencies.fwhipsperfectendupdate]]
 modId = "accessories"
 type = "required"
 versionRange = "[1,)"
 ordering = "AFTER"
 side = "BOTH"
 
-[[dependencies.someonesperfectend]]
+[[dependencies.fwhipsperfectendupdate]]
 modId = "terrablender"
 type = "required"
 versionRange = "[4.1,)"
@@ -47,7 +47,7 @@ ordering = "AFTER"
 side = "BOTH"
 
 [[mixins]]
-config = "someonesperfectend.mixins.json"
+config = "fwhipsperfectendupdate.mixins.json"
 
 [[mixins]]
-config = "someonesperfectend-neoforge.mixins.json"
+config = "fwhipsperfectendupdate-neoforge.mixins.json"

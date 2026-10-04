@@ -1,10 +1,10 @@
 {
   "replace": false,
   "values": [
-    "someonesperfectend:glowcap_block",
-    "someonesperfectend:glowcap_stem",
-    "someonesperfectend:bounce_cap",
-    "#someonesperfectend:voidvine_blocks",
-    "#someonesperfectend:ender_beds"
+    "fwhipsperfectendupdate:glowcap_block",
+    "fwhipsperfectendupdate:glowcap_stem",
+    "fwhipsperfectendupdate:bounce_cap",
+    "#fwhipsperfectendupdate:voidvine_blocks",
+    "#fwhipsperfectendupdate:ender_beds"
   ]
 }

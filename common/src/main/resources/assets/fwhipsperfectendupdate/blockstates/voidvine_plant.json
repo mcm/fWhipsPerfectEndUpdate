@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "berries=false": {
+      "model": "fwhipsperfectendupdate:block/voidvine_plant"
+    },
+    "berries=true": {
+      "model": "fwhipsperfectendupdate:block/voidvine_plant_lit"
+    }
+  }
+}

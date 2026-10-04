@@ -1,0 +1,14 @@
+{
+  "recipes": [
+    {
+      "source": "minecraft:item/empty_slot_emerald",
+      "target": "fwhipsperfectendupdate:item/empty_trinket_slot",
+      "palette": {
+        "gradient": [
+          "#bdb3e6",
+          "#f5f1ff"
+        ]
+      }
+    }
+  ]
+}

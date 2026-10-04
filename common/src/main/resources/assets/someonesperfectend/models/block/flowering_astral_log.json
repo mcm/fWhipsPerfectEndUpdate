@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/template_chorus_flower",
-  "textures": {
-    "texture": "someonesperfectend:block/flowering_astral_log",
-    "bottom": "someonesperfectend:block/astral_log"
-  }
-}

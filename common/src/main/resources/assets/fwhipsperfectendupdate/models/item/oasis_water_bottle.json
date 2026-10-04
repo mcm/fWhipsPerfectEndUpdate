@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "fwhipsperfectendupdate:item/oasis_water_bottle_overlay",
+    "layer1": "minecraft:item/potion"
+  }
+}

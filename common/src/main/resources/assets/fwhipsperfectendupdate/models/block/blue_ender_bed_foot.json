@@ -1,0 +1,7 @@
+{
+  "parent": "fwhipsperfectendupdate:block/template_ender_bed_foot",
+  "textures": {
+    "bed": "fwhipsperfectendupdate:block/ender_bed/blue",
+    "particle": "minecraft:block/blue_wool"
+  }
+}

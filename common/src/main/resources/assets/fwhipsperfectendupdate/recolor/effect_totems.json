@@ -1,0 +1,59 @@
+{
+  "recipes": [
+    {
+      "source": "minecraft:item/totem_of_undying",
+      "target": "fwhipsperfectendupdate:item/totem_of_speed",
+      "palette": {
+        "gradient": [
+          "#1b3440",
+          "#5aa6c9",
+          "#dff4ff"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:item/totem_of_undying",
+      "target": "fwhipsperfectendupdate:item/totem_of_haste",
+      "palette": {
+        "gradient": [
+          "#3d2a07",
+          "#d9b43a",
+          "#fff6c8"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:item/totem_of_undying",
+      "target": "fwhipsperfectendupdate:item/totem_of_resistance",
+      "palette": {
+        "gradient": [
+          "#2a1447",
+          "#8a52d9",
+          "#efdcff"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:item/totem_of_undying",
+      "target": "fwhipsperfectendupdate:item/totem_of_jump_boost",
+      "palette": {
+        "gradient": [
+          "#123d18",
+          "#4fd15f",
+          "#e2ffd9"
+        ]
+      }
+    },
+    {
+      "source": "minecraft:item/totem_of_undying",
+      "target": "fwhipsperfectendupdate:item/totem_of_strength",
+      "palette": {
+        "gradient": [
+          "#3d0c0c",
+          "#c8332c",
+          "#ffd9d0"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_glowcap": {
+      "conditions": {
+        "items": [
+          {
+            "items": "fwhipsperfectendupdate:glowcap"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "fwhipsperfectendupdate:cyan_dye_from_glowcap"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_glowcap"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "fwhipsperfectendupdate:cyan_dye_from_glowcap"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "values": [
+    "#minecraft:foot_armor",
+    "#minecraft:chest_armor",
+    "#minecraft:enchantable/mining",
+    "#minecraft:enchantable/weapon",
+    "#fwhipsperfectendupdate:effect_totems"
+  ]
+}

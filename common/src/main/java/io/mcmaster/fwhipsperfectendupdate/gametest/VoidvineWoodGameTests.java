@@ -1,0 +1,219 @@
+package io.mcmaster.fwhipsperfectendupdate.gametest;
+
+import static io.mcmaster.fwhipsperfectendupdate.gametest.AstralWoodGameTests.assertFireOdds;
+import static io.mcmaster.fwhipsperfectendupdate.gametest.AstralWoodGameTests.assertSign;
+import static io.mcmaster.fwhipsperfectendupdate.gametest.AstralWoodGameTests.craft;
+import static io.mcmaster.fwhipsperfectendupdate.gametest.AstralWoodGameTests.editAndCheck;
+import static io.mcmaster.fwhipsperfectendupdate.gametest.AstralWoodGameTests.useOnTop;
+
+import dev.architectury.registry.fuel.FuelRegistry;
+import io.mcmaster.fwhipsperfectendupdate.FwhipsPerfectEndUpdate;
+import io.mcmaster.fwhipsperfectendupdate.block.ModBlocks;
+import io.mcmaster.fwhipsperfectendupdate.block.ModWoodTypes;
+import io.mcmaster.fwhipsperfectendupdate.mixin.FireBlockInvoker;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.WoodType;
+
+public final class VoidvineWoodGameTests {
+    private VoidvineWoodGameTests() {}
+
+    @GameTest
+    public static void axeStripsVoidvineBlock(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(
+                pos,
+                ModBlocks.VOIDVINE_BLOCK.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Z));
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+        useOnTop(helper, player, pos);
+        BlockState stripped = helper.getBlockState(pos);
+        helper.assertTrue(stripped.is(ModBlocks.STRIPPED_VOIDVINE_BLOCK.get()), "block was not stripped: " + stripped);
+        helper.assertTrue(stripped.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Z, "stripping lost the axis");
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void stalksCraftIntoSticksOnly(GameTestHelper helper) {
+        ItemStack stalk = new ItemStack(ModBlocks.VOIDVINE.get());
+        ItemStack sticks = craft(helper, CraftingInput.of(1, 2, List.of(stalk, stalk)));
+        helper.assertTrue(sticks.is(Items.STICK) && sticks.getCount() == 1, "2 stalks crafted into " + sticks);
+        ItemStack nine = craft(helper, CraftingInput.of(3, 3, Collections.nCopies(9, stalk)));
+        helper.assertFalse(nine.is(ModBlocks.VOIDVINE_BLOCK.get().asItem()), "9 stalks crafted into " + nine);
+        helper.succeed();
+    }
+
+    /** US-006 (MOD-50): the Voidvine Block comes only from Endling bartering, so no recipe makes it. */
+    @GameTest
+    public static void noRecipeOutputsVoidvineBlock(GameTestHelper helper) {
+        Item block = ModBlocks.VOIDVINE_BLOCK.get().asItem();
+        for (RecipeHolder<?> recipe : helper.getLevel().getRecipeManager().getRecipes()) {
+            helper.assertFalse(
+                    recipe.value()
+                            .getResultItem(helper.getLevel().registryAccess())
+                            .is(block),
+                    "recipe " + recipe.id() + " outputs the Voidvine Block");
+        }
+        helper.assertTrue(
+                helper.getLevel()
+                                .getServer()
+                                .getAdvancements()
+                                .get(FwhipsPerfectEndUpdate.id("recipes/building_blocks/voidvine_block"))
+                        == null,
+                "the Voidvine Block recipe advancement should be gone");
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void blockCraftsIntoPlanks(GameTestHelper helper) {
+        for (ItemLike block : List.of(ModBlocks.VOIDVINE_BLOCK.get(), ModBlocks.STRIPPED_VOIDVINE_BLOCK.get())) {
+            ItemStack result = craft(helper, CraftingInput.of(1, 1, List.of(new ItemStack(block))));
+            helper.assertTrue(
+                    result.is(ModBlocks.VOIDVINE_PLANKS.get().asItem()) && result.getCount() == 2,
+                    block + " crafted into " + result);
+        }
+        ItemStack stripped = new ItemStack(ModBlocks.STRIPPED_VOIDVINE_BLOCK.get());
+        ItemStack chain = new ItemStack(Items.CHAIN);
+        ItemStack hangingSigns = craft(
+                helper,
+                CraftingInput.of(
+                        3,
+                        3,
+                        List.of(
+                                chain,
+                                ItemStack.EMPTY,
+                                chain,
+                                stripped,
+                                stripped,
+                                stripped,
+                                stripped,
+                                stripped,
+                                stripped)));
+        helper.assertTrue(
+                hangingSigns.is(ModBlocks.VOIDVINE_HANGING_SIGN_ITEM.get()) && hangingSigns.getCount() == 6,
+                "stripped blocks and chains crafted into " + hangingSigns);
+        helper.assertTrue(
+                helper.getLevel()
+                                .getServer()
+                                .getAdvancements()
+                                .get(FwhipsPerfectEndUpdate.id("recipes/building_blocks/voidvine_planks"))
+                        != null,
+                "planks recipe advancement is missing");
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void planksCraftIntoSlabsAndStairs(GameTestHelper helper) {
+        ItemStack planks = new ItemStack(ModBlocks.VOIDVINE_PLANKS.get());
+        ItemStack slabs = craft(helper, CraftingInput.of(3, 1, Collections.nCopies(3, planks)));
+        helper.assertTrue(
+                slabs.is(ModBlocks.VOIDVINE_SLAB.get().asItem()) && slabs.getCount() == 6,
+                "3 planks crafted into " + slabs);
+        ItemStack stairs = craft(
+                helper,
+                CraftingInput.of(
+                        3,
+                        3,
+                        List.of(
+                                planks,
+                                ItemStack.EMPTY,
+                                ItemStack.EMPTY,
+                                planks,
+                                planks,
+                                ItemStack.EMPTY,
+                                planks,
+                                planks,
+                                planks)));
+        helper.assertTrue(
+                stairs.is(ModBlocks.VOIDVINE_STAIRS.get().asItem()) && stairs.getCount() == 4,
+                "6 planks crafted into " + stairs);
+        ItemStack slab = new ItemStack(ModBlocks.VOIDVINE_SLAB.get());
+        ItemStack twoSlabs = craft(helper, CraftingInput.of(1, 2, List.of(slab, slab)));
+        helper.assertTrue(twoSlabs.isEmpty(), "2 slabs crafted into " + twoSlabs);
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void voidvineBurnsAndFuelsFurnaces(GameTestHelper helper) {
+        FireBlockInvoker fire = (FireBlockInvoker) Blocks.FIRE;
+        for (Block block : List.of(
+                ModBlocks.VOIDVINE_PLANKS.get(),
+                ModBlocks.VOIDVINE_STAIRS.get(),
+                ModBlocks.VOIDVINE_SLAB.get(),
+                ModBlocks.VOIDVINE_FENCE.get(),
+                ModBlocks.VOIDVINE_FENCE_GATE.get())) {
+            assertFireOdds(helper, fire, block, 5, 20);
+        }
+        for (Block block : List.of(ModBlocks.VOIDVINE_BLOCK.get(), ModBlocks.STRIPPED_VOIDVINE_BLOCK.get())) {
+            assertFireOdds(helper, fire, block, 5, 5);
+        }
+        // Burn times of the matching bamboo items (vanilla furnace fuel map).
+        Map<ItemLike, Integer> fuel = Map.ofEntries(
+                Map.entry(ModBlocks.VOIDVINE.get(), 50),
+                Map.entry(ModBlocks.VOIDVINE_BLOCK.get(), 300),
+                Map.entry(ModBlocks.STRIPPED_VOIDVINE_BLOCK.get(), 300),
+                Map.entry(ModBlocks.VOIDVINE_PLANKS.get(), 300),
+                Map.entry(ModBlocks.VOIDVINE_STAIRS.get(), 300),
+                Map.entry(ModBlocks.VOIDVINE_SLAB.get(), 150),
+                Map.entry(ModBlocks.VOIDVINE_FENCE.get(), 300),
+                Map.entry(ModBlocks.VOIDVINE_FENCE_GATE.get(), 300),
+                Map.entry(ModBlocks.VOIDVINE_TRAPDOOR.get(), 300),
+                Map.entry(ModBlocks.VOIDVINE_PRESSURE_PLATE.get(), 300),
+                Map.entry(ModBlocks.VOIDVINE_DOOR.get(), 200),
+                Map.entry(ModBlocks.VOIDVINE_BUTTON.get(), 100),
+                Map.entry(ModBlocks.VOIDVINE_SIGN_ITEM.get(), 200),
+                Map.entry(ModBlocks.VOIDVINE_HANGING_SIGN_ITEM.get(), 800));
+        fuel.forEach((item, ticks) -> {
+            int burnTime = FuelRegistry.get(new ItemStack(item));
+            helper.assertTrue(burnTime == ticks, item.asItem() + " burns for " + burnTime + ", expected " + ticks);
+        });
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void voidvineSignCanBePlacedAndEdited(GameTestHelper helper) {
+        BlockPos ground = new BlockPos(1, 1, 1);
+        helper.setBlock(ground, Blocks.STONE);
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModBlocks.VOIDVINE_SIGN_ITEM.get()));
+        useOnTop(helper, player, ground);
+        BlockPos signPos = ground.above();
+        helper.assertBlockPresent(ModBlocks.VOIDVINE_SIGN.get(), signPos);
+        editAndCheck(helper, player, assertSign(helper, signPos, SignBlockEntity.class), "Voidvine");
+        helper.succeed();
+    }
+
+    @GameTest
+    public static void voidvineWoodTypeIsRegistered(GameTestHelper helper) {
+        helper.assertTrue(
+                WoodType.values().anyMatch(type -> type == ModWoodTypes.VOIDVINE), "voidvine WoodType missing");
+        helper.assertTrue(
+                ModWoodTypes.VOIDVINE.name().equals("fwhipsperfectendupdate:voidvine"),
+                "unexpected name " + ModWoodTypes.VOIDVINE.name());
+        helper.assertTrue(ModBlocks.VOIDVINE_DOOR.get().type() == ModWoodTypes.VOIDVINE_SET, "door uses another set");
+        Item stalk = ModBlocks.VOIDVINE.get();
+        helper.assertTrue(
+                stalk.builtInRegistryHolder().key().location().equals(FwhipsPerfectEndUpdate.id("voidvine")),
+                "stalk item has the wrong id");
+        helper.succeed();
+    }
+}
