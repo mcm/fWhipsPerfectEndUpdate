@@ -7,6 +7,7 @@ import io.mcmaster.someonesperfectend.mixin.PoiTypesInvoker;
 import io.mcmaster.someonesperfectend.registry.ModRegistries;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -110,14 +112,14 @@ public final class EnderblossomShaking {
      */
     public static void checkLookers(
             ServerLevel level, BlockPos pos, BlockState state, Iterable<? extends Player> players) {
-        if (!(state.getBlock() instanceof EnderblossomBlock blossom)
+        if (!(state.getBlock() instanceof EnderblossomBlock)
                 || !(level.getBlockEntity(pos) instanceof EnderblossomBlockEntity entity)) {
             return;
         }
-        Vec3 head = blossom.headPosition(state, pos);
+        AABB flower = lookBox(pos);
         Set<UUID> looking = new HashSet<>();
         for (Player player : players) {
-            if (player.level() == level && isLookingAt(player, head)) {
+            if (player.level() == level && isLookingAt(player, flower)) {
                 looking.add(player.getUUID());
             }
         }
@@ -127,29 +129,35 @@ public final class EnderblossomShaking {
     }
 
     /**
-     * Vanilla's {@code EnderMan#isLookingAtMe} aimed at {@code target}: the look direction is within
-     * {@code 0.025 / distance} of the direction to the target, nothing solid is in between, and the player isn't
-     * wearing a carved pumpkin.
+     * What a player has to look at to make the blossom at {@code pos} shake: its whole block space, which the tilted
+     * flower fills. (The Enderman stare test aimed at the flower head only caught its top few pixels.)
      */
-    public static boolean isLookingAt(Player player, Vec3 target) {
+    public static AABB lookBox(BlockPos pos) {
+        return new AABB(pos);
+    }
+
+    /**
+     * Whether {@code player} is staring at {@code target}, like an Enderman notices a stare: the player's look ray hits
+     * the box within {@link #LOOK_RANGE} blocks, nothing solid is in between, and the player isn't wearing a carved
+     * pumpkin.
+     */
+    public static boolean isLookingAt(Player player, AABB target) {
         if (player.isSpectator()
                 || !player.isAlive()
                 || player.getItemBySlot(EquipmentSlot.HEAD).is(Items.CARVED_PUMPKIN)) {
             return false;
         }
         Vec3 eye = player.getEyePosition();
-        Vec3 toTarget = target.subtract(eye);
-        double distance = toTarget.length();
-        if (distance > LOOK_RANGE || distance < 1.0E-4) {
-            return false;
+        if (target.contains(eye)) {
+            return true;
         }
-        double dot = player.getViewVector(1.0F).normalize().dot(toTarget.normalize());
-        if (dot <= 1.0 - 0.025 / distance) {
-            return false;
-        }
-        return player.level()
-                        .clip(new ClipContext(eye, target, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player))
-                        .getType()
-                == HitResult.Type.MISS;
+        Vec3 end = eye.add(player.getViewVector(1.0F).normalize().scale(LOOK_RANGE));
+        Optional<Vec3> hit = target.clip(eye, end);
+        return hit.isPresent()
+                && player.level()
+                                .clip(new ClipContext(
+                                        eye, hit.get(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player))
+                                .getType()
+                        == HitResult.Type.MISS;
     }
 }

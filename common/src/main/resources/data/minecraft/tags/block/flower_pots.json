@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "someonesperfectend:potted_glowcap",
-    "someonesperfectend:potted_astral_sapling"
+    "someonesperfectend:potted_astral_sapling",
+    "someonesperfectend:potted_open_enderblossom",
+    "someonesperfectend:potted_closed_enderblossom"
   ]
 }

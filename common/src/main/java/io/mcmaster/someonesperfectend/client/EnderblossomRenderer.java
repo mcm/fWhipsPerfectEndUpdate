@@ -7,9 +7,9 @@ import io.mcmaster.someonesperfectend.SomeonesPerfectEnd;
 import io.mcmaster.someonesperfectend.block.EnderblossomBlock;
 import io.mcmaster.someonesperfectend.block.EnderblossomBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -64,7 +64,9 @@ public class EnderblossomRenderer implements BlockEntityRenderer<EnderblossomBlo
             poseStack.translate(-pivotX, -STEM_BASE_Y, -pivotZ);
         }
         BakedModel model = blockRenderer.getBlockModel(state);
-        VertexConsumer buffer = buffers.getBuffer(ItemBlockRenderTypes.getMovingBlockRenderType(state));
+        // Not ItemBlockRenderTypes: NeoForge doesn't fill its block map from setRenderLayer, so it would say solid
+        // and draw the transparent pixels black.
+        VertexConsumer buffer = buffers.getBuffer(RenderType.cutout());
         TextureAtlasSprite emissive = block.type().open()
                 ? Minecraft.getInstance()
                         .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)

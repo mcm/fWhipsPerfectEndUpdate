@@ -19,15 +19,13 @@ class LookShakeTrackerTest {
     }
 
     @Test
-    void shakesAtMostEveryFortyTicksWhileLooking() {
+    void shakesAtMostEveryTwentyTicksWhileLooking() {
         LookShakeTracker tracker = new LookShakeTracker();
         assertTrue(tracker.update(Set.of(ALICE), 0));
-        for (long time = 10; time < LookShakeTracker.REPEAT_INTERVAL; time += 10) {
-            assertFalse(tracker.update(Set.of(ALICE), time), "shook again at " + time);
-        }
+        assertFalse(tracker.update(Set.of(ALICE), 10));
+        assertTrue(tracker.update(Set.of(ALICE), 20));
+        assertFalse(tracker.update(Set.of(ALICE), 30));
         assertTrue(tracker.update(Set.of(ALICE), 40));
-        assertFalse(tracker.update(Set.of(ALICE), 50));
-        assertTrue(tracker.update(Set.of(ALICE), 80));
     }
 
     @Test
@@ -43,10 +41,10 @@ class LookShakeTrackerTest {
         LookShakeTracker tracker = new LookShakeTracker();
         assertTrue(tracker.update(Set.of(ALICE), 0));
         assertTrue(tracker.update(Set.of(ALICE, BOB), 10));
-        assertFalse(tracker.update(Set.of(ALICE, BOB), 20));
-        // Alice's 40 ticks are up, Bob's aren't.
-        assertTrue(tracker.update(Set.of(ALICE, BOB), 40));
-        assertFalse(tracker.update(Set.of(BOB), 45));
-        assertTrue(tracker.update(Set.of(BOB), 50));
+        assertFalse(tracker.update(Set.of(ALICE, BOB), 15));
+        // Alice's 20 ticks are up, Bob's aren't.
+        assertTrue(tracker.update(Set.of(ALICE, BOB), 20));
+        assertFalse(tracker.update(Set.of(BOB), 25));
+        assertTrue(tracker.update(Set.of(BOB), 30));
     }
 }
