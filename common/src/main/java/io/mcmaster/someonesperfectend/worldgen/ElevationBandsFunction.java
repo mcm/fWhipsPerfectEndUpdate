@@ -3,6 +3,7 @@ package io.mcmaster.someonesperfectend.worldgen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.mcmaster.someonesperfectend.mixin.EndIslandDensityFunctionAccessor;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -11,16 +12,18 @@ import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 /**
  * Density function {@code someonesperfectend:elevation_bands}: evaluates {@code argument} moved up or down by
- * the {@link ElevationBands} offset of the column, and returns void in the gaps between bands.
+ * the elevation band offset of the column, and returns void in the seams between island groups.
  *
  * <p>The End noise settings wrap the terrain density (inside {@code interpolated} and {@code blend_density})
  * with this function. Offsets are multiples of the End's 4-block noise cell height, so a moved island is the
  * vanilla island shape, translated. Within {@code min_distance} of the origin the argument is returned as is.
  *
- * <p>{@code noise} seeds the region layout, so it differs per world seed.
+ * <p>The island groups come from the seeded {@code minecraft:end_islands} function inside {@code argument}
+ * (see {@link ElevationBandLayout}); {@code noise} seeds the band of each group, so both differ per world seed.
  */
 public final class ElevationBandsFunction implements DensityFunction {
     /** Density of the void gaps; below the vanilla End's lowest value of {@code -0.234375} near the floor. */
@@ -35,23 +38,26 @@ public final class ElevationBandsFunction implements DensityFunction {
                     NoiseHolder.CODEC.fieldOf("noise").forGetter(f -> f.noise),
                     Codec.INT
                             .optionalFieldOf("lower_offset", ElevationBands.DEFAULT.lowerOffset())
-                            .forGetter(f -> f.layout.lowerOffset()),
+                            .forGetter(f -> f.layout.settings().lowerOffset()),
                     Codec.INT
                             .optionalFieldOf("upper_offset", ElevationBands.DEFAULT.upperOffset())
-                            .forGetter(f -> f.layout.upperOffset()),
-                    Codec.intRange(16, 4096)
-                            .optionalFieldOf("region_size", ElevationBands.DEFAULT.regionSize())
-                            .forGetter(f -> f.layout.regionSize()),
+                            .forGetter(f -> f.layout.settings().upperOffset()),
+                    Codec.intRange(-100, 80)
+                            .optionalFieldOf("island_threshold", ElevationBands.DEFAULT.islandThreshold())
+                            .forGetter(f -> f.layout.settings().islandThreshold()),
                     Codec.intRange(0, 256)
-                            .optionalFieldOf("gap_width", ElevationBands.DEFAULT.gapWidth())
-                            .forGetter(f -> f.layout.gapWidth()),
+                            .optionalFieldOf("link_margin", ElevationBands.DEFAULT.linkMargin())
+                            .forGetter(f -> f.layout.settings().linkMargin()),
                     Codec.intRange(0, 1 << 20)
                             .optionalFieldOf("min_distance", ElevationBands.DEFAULT.minDistance())
-                            .forGetter(f -> f.layout.minDistance()))
+                            .forGetter(f -> f.layout.settings().minDistance()),
+                    Codec.intRange(0, 1 << 20)
+                            .optionalFieldOf("middle_distance", ElevationBands.DEFAULT.middleDistance())
+                            .forGetter(f -> f.layout.settings().middleDistance()))
             .apply(
                     instance,
-                    (argument, noise, lower, upper, size, gap, distance) -> new ElevationBandsFunction(
-                            argument, noise, new ElevationBands(lower, upper, size, gap, distance))));
+                    (argument, noise, lower, upper, threshold, margin, distance, middle) -> new ElevationBandsFunction(
+                            argument, noise, new ElevationBands(lower, upper, threshold, margin, distance, middle))));
 
     private static final KeyDispatchDataCodec<ElevationBandsFunction> DISPATCH = KeyDispatchDataCodec.of(CODEC);
 
@@ -64,15 +70,54 @@ public final class ElevationBandsFunction implements DensityFunction {
 
     private final DensityFunction argument;
     private final NoiseHolder noise;
-    private final ElevationBands layout;
-    private final ElevationBands.CellRandom cellRandom;
+    /** The island noise of the {@code end_islands} function in {@code argument}, or null if there is none. */
+    private final SimplexNoise islandNoise;
 
-    public ElevationBandsFunction(DensityFunction argument, NoiseHolder noise, ElevationBands layout) {
+    private final ElevationBandLayout layout;
+
+    /**
+     * Decoded (unseeded) function. Registry holders in {@code argument} may not be bound yet, so the island noise
+     * is looked up when the random state seeds this function ({@link #mapAll}), not here.
+     */
+    public ElevationBandsFunction(DensityFunction argument, NoiseHolder noise, ElevationBands settings) {
+        this(argument, noise, null, settings);
+    }
+
+    private ElevationBandsFunction(
+            DensityFunction argument, NoiseHolder noise, SimplexNoise islandNoise, ElevationBands settings) {
+        this(argument, noise, islandNoise, settings.layout(islandCenters(islandNoise), cellRandom(noise)));
+    }
+
+    private ElevationBandsFunction(
+            DensityFunction argument, NoiseHolder noise, SimplexNoise islandNoise, ElevationBandLayout layout) {
         this.argument = argument;
         this.noise = noise;
+        this.islandNoise = islandNoise;
         this.layout = layout;
-        this.cellRandom = (cellX, cellZ, channel) -> ElevationBands.mix(
+    }
+
+    private static ElevationBands.CellRandom cellRandom(NoiseHolder noise) {
+        return (cellX, cellZ, channel) -> ElevationBands.mix(
                 noise.getValue(cellX + 0.37, channel * 0.71 + 0.13, cellZ + 0.59), cellX, cellZ, channel);
+    }
+
+    private static ElevationBands.IslandCenters islandCenters(SimplexNoise islandNoise) {
+        return islandNoise == null ? (gridX, gridZ) -> false : ElevationBandLayout.vanillaCenters(islandNoise);
+    }
+
+    /** The noise of the first {@code minecraft:end_islands} function in a density function tree. */
+    private static SimplexNoise findIslandNoise(DensityFunction function) {
+        SimplexNoise[] found = new SimplexNoise[1];
+        function.mapAll(new Visitor() {
+            @Override
+            public DensityFunction apply(DensityFunction visited) {
+                if (found[0] == null && visited instanceof EndIslandDensityFunctionAccessor islands) {
+                    found[0] = islands.someonesperfectend$islandNoise();
+                }
+                return visited;
+            }
+        });
+        return found[0];
     }
 
     /** The seeded elevation bands of a generator's random state, if its final density uses them. */
@@ -96,7 +141,7 @@ public final class ElevationBandsFunction implements DensityFunction {
         return argument;
     }
 
-    public ElevationBands layout() {
+    public ElevationBandLayout layout() {
         return layout;
     }
 
@@ -107,7 +152,7 @@ public final class ElevationBandsFunction implements DensityFunction {
             cache.owner = this;
             cache.x = x;
             cache.z = z;
-            cache.offset = layout.offsetAt(x, z, cellRandom);
+            cache.offset = layout.offsetAt(x, z);
         }
         return cache.offset;
     }
@@ -138,7 +183,14 @@ public final class ElevationBandsFunction implements DensityFunction {
 
     @Override
     public DensityFunction mapAll(Visitor visitor) {
-        return visitor.apply(new ElevationBandsFunction(argument.mapAll(visitor), visitor.visitNoise(noise), layout));
+        DensityFunction mappedArgument = argument.mapAll(visitor);
+        NoiseHolder mappedNoise = visitor.visitNoise(noise);
+        SimplexNoise mappedIslands = findIslandNoise(mappedArgument);
+        // Keep the layout (and its island group cache) unless seeding changed the noises, e.g. per-chunk copies.
+        if (mappedNoise.noise() == noise.noise() && mappedIslands == islandNoise) {
+            return visitor.apply(new ElevationBandsFunction(mappedArgument, mappedNoise, islandNoise, layout));
+        }
+        return visitor.apply(new ElevationBandsFunction(mappedArgument, mappedNoise, mappedIslands, layout.settings()));
     }
 
     @Override

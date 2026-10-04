@@ -25,9 +25,9 @@ Java 21 is required. The mod must be installed on both the server and every clie
 
 ### Terrain
 
-- **Elevation bands.** The outer End (from about 1024 blocks out) is split into large regions whose islands sit
-  lower, at vanilla height, or higher. Bands are separated by void, so you need a way to climb or bridge
-  between them.
+- **Elevation bands.** In the outer End (from about 1024 blocks out) each island sits lower, at vanilla
+  height, or higher. Islands always move whole, never split; islands at different heights are separated by
+  void, so you need a way to climb or bridge between them.
 - **End Cities** still generate, now in all three bands.
 
 ### Biomes
