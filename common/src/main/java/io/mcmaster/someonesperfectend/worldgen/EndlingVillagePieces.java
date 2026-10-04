@@ -1,9 +1,11 @@
 package io.mcmaster.someonesperfectend.worldgen;
 
+import com.mojang.logging.LogUtils;
 import io.mcmaster.someonesperfectend.block.ModBlockTags;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
 import io.mcmaster.someonesperfectend.entity.Endling;
 import io.mcmaster.someonesperfectend.entity.Endlings;
+import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -20,6 +22,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 /**
  * Code-placed pieces of the Endling village (US-023). All coordinates are absolute (no piece orientation);
@@ -30,6 +34,14 @@ public final class EndlingVillagePieces {
     public static final int FOUNDATION_DEPTH = 6;
 
     private static final int HUT_HEIGHT = 5;
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    /**
+     * Test hook: told about every hut endling right after the level was asked to add it, with whether the level
+     * took it. Lets GameTests follow endlings that never show up in entity lookups.
+     */
+    @Nullable
+    public static volatile BiConsumer<Endling, Boolean> endlingSpawnListener;
 
     private EndlingVillagePieces() {}
 
@@ -178,6 +190,7 @@ public final class EndlingVillagePieces {
     static void spawnEndling(WorldGenLevel level, BlockPos pos, BlockPos village) {
         Endling endling = Endlings.TYPE.get().create(level.getLevel());
         if (endling == null) {
+            LOGGER.warn("Couldn't create the village endling at {}", pos);
             return;
         }
         endling.moveTo(
@@ -188,7 +201,17 @@ public final class EndlingVillagePieces {
                 0.0F);
         endling.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null);
         endling.setVillage(village, EndlingVillageLayout.RADIUS);
-        level.addFreshEntityWithPassengers(endling);
+        // An endling has no passengers, so this is addFreshEntityWithPassengers with its result.
+        boolean added = level.addFreshEntity(endling);
+        if (added) {
+            LOGGER.debug("Spawned village endling {} at {}", endling.getUUID(), pos);
+        } else {
+            LOGGER.warn("The level refused the village endling at {} (village {})", pos, village);
+        }
+        BiConsumer<Endling, Boolean> listener = endlingSpawnListener;
+        if (listener != null) {
+            listener.accept(endling, added);
+        }
     }
 
     /** A {@code huge_glowcap} grown from End soil at {@code base} (the block above the ground). */
