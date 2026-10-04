@@ -12,6 +12,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -41,6 +42,7 @@ public final class ModRegistries {
     public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES =
             create(Registries.DATA_COMPONENT_TYPE);
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = create(Registries.SOUND_EVENT);
+    public static final DeferredRegister<MobEffect> MOB_EFFECTS = create(Registries.MOB_EFFECT);
     public static final DeferredRegister<Potion> POTIONS = create(Registries.POTION);
     public static final DeferredRegister<Feature<?>> FEATURES = create(Registries.FEATURE);
     public static final DeferredRegister<MapCodec<? extends DensityFunction>> DENSITY_FUNCTION_TYPES =
@@ -104,6 +106,7 @@ public final class ModRegistries {
         FLUIDS.register();
         DATA_COMPONENT_TYPES.register();
         SOUND_EVENTS.register();
+        MOB_EFFECTS.register();
         BLOCKS.register();
         ITEMS.register();
         BLOCK_ENTITY_TYPES.register();

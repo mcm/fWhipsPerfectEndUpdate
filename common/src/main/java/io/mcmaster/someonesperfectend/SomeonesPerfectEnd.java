@@ -3,6 +3,7 @@ package io.mcmaster.someonesperfectend;
 import io.mcmaster.someonesperfectend.alchemy.OasisPotions;
 import io.mcmaster.someonesperfectend.block.EnderBeds;
 import io.mcmaster.someonesperfectend.block.ModBlocks;
+import io.mcmaster.someonesperfectend.effect.ModEffects;
 import io.mcmaster.someonesperfectend.entity.Driftjellies;
 import io.mcmaster.someonesperfectend.entity.Endlings;
 import io.mcmaster.someonesperfectend.entity.ModBoats;
@@ -26,6 +27,7 @@ public final class SomeonesPerfectEnd {
     /** Common init; called from each loader's entrypoint during mod construction. */
     public static void init() {
         ModSounds.init();
+        ModEffects.init();
         ModBlocks.init();
         EnderBeds.init();
         ModBoats.init();

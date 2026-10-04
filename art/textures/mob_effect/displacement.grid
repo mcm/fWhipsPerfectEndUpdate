@@ -1,0 +1,30 @@
+; Displacement effect icon (original art): a lavender Enderblossom eye flanked by two portal arcs, one fading in, one fading out.
+[palette]
+. = transparent
+o = #2A1240FF role=outline
+s = #5A2B86FF role=shadow
+b = #8B4FCFFF role=base
+l = #C08AF2FF role=light
+h = #F1DCFFFF role=highlight
+M = #B02ADBFF role=custom
+N = #E064F5FF role=custom
+
+[grid]
+..................
+......oooooo......
+....oosbbbbsoo....
+...osb......bso...
+..osb..oooo..bso..
+..ob..oMMMMo..bo..
+.osb.oMNhhNMo.bso.
+.ob..oMhhhhMo..bo.
+.ob..oMNhhNMo..bo.
+.ob...oMMMMo...bo.
+.osb...oooo...bso.
+..ob..........bo..
+..osl........lso..
+...osl......lso...
+....oolllllloo....
+......oooooo......
+..................
+..................
