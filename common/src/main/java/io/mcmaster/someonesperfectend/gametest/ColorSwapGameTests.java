@@ -53,7 +53,8 @@ public final class ColorSwapGameTests {
         assertColor(helper, ModBlocks.VOIDVINE_HEAD.get().defaultBlockState(), MapColor.COLOR_PURPLE);
         assertColor(helper, ModBlocks.VOIDVINE_BODY.get().defaultBlockState(), MapColor.COLOR_PURPLE);
         assertLog(helper, ModBlocks.VOIDVINE_BLOCK.get(), MapColor.COLOR_LIGHT_BLUE, MapColor.COLOR_PURPLE);
-        assertLog(helper, ModBlocks.STRIPPED_VOIDVINE_BLOCK.get(), MapColor.COLOR_LIGHT_BLUE, MapColor.COLOR_LIGHT_BLUE);
+        assertLog(
+                helper, ModBlocks.STRIPPED_VOIDVINE_BLOCK.get(), MapColor.COLOR_LIGHT_BLUE, MapColor.COLOR_LIGHT_BLUE);
         for (Block block : new Block[] {
             ModBlocks.VOIDVINE_PLANKS.get(),
             ModBlocks.VOIDVINE_STAIRS.get(),
@@ -82,8 +83,6 @@ public final class ColorSwapGameTests {
 
     private static void assertColor(GameTestHelper helper, BlockState state, MapColor expected) {
         MapColor actual = state.getMapColor(helper.getLevel(), BlockPos.ZERO);
-        helper.assertTrue(
-                actual == expected,
-                state + " maps to color " + actual.id + ", expected " + expected.id);
+        helper.assertTrue(actual == expected, state + " maps to color " + actual.id + ", expected " + expected.id);
     }
 }

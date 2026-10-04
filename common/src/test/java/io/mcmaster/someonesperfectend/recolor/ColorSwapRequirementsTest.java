@@ -97,13 +97,16 @@ class ColorSwapRequirementsTest {
 
     private static List<String> gradient(JsonObject palette) {
         List<String> stops = new ArrayList<>();
-        palette.getAsJsonArray("gradient").forEach(e -> stops.add(e.getAsString().toLowerCase(Locale.ROOT)));
+        palette.getAsJsonArray("gradient")
+                .forEach(e -> stops.add(e.getAsString().toLowerCase(Locale.ROOT)));
         return stops;
     }
 
     private static Map<String, String> colors(JsonObject palette) {
         Map<String, String> colors = new HashMap<>();
-        palette.getAsJsonObject("colors").entrySet().forEach(e -> colors.put(e.getKey(), e.getValue().getAsString()));
+        palette.getAsJsonObject("colors")
+                .entrySet()
+                .forEach(e -> colors.put(e.getKey(), e.getValue().getAsString()));
         return colors;
     }
 
