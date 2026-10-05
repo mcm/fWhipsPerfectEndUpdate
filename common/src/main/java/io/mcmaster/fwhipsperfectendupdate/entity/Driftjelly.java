@@ -41,8 +41,8 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * A passive, floating jellyfish. It hovers {@link #MIN_HOVER}–{@link #MAX_HOVER} blocks above the ground, bobs
- * slowly, and only wanders to spots over solid ground; if it ends up over the void anyway (pushed, knocked back), it
- * drifts back to the last spot where it had ground below.
+ * slowly, and wanders at most {@link #MAX_VOID_DRIFT} blocks out past the edge of the ground; if it ends up further
+ * out over the void anyway (pushed, knocked back), it drifts back toward the last spot where it had ground below.
  *
  * <p>Players holding Voidfruit tempt it down to {@link #TEMPTED_MIN_HOVER}–{@link #TEMPTED_MAX_HOVER} blocks, and
  * feeding Voidfruit breeds it (vanilla {@link Animal} love, cooldowns, and baby growth). Like a Hoglin outside the
@@ -60,6 +60,9 @@ public class Driftjelly extends Animal {
     public static final int GROUND_SCAN = 12;
 
     public static final double NO_GROUND = -1.0;
+    /** How far (horizontally) past the last spot with ground below a driftjelly may drift out over the void. */
+    public static final double MAX_VOID_DRIFT = 5.0;
+
     public static final double TEMPTED_MIN_HOVER = 1.0;
     public static final double TEMPTED_MAX_HOVER = 2.0;
     /** Ticks outside the End before a driftjelly turns dormant (15 seconds). */
@@ -236,12 +239,15 @@ public class Driftjelly extends Animal {
         Vec3 motion = getDeltaMovement();
         double dy = Mth.sin(tickCount * 0.1F) * 0.003;
         if (height == NO_GROUND) {
-            // Over the void: stop wandering and drift back toward ground, keeping the current height.
-            getNavigation().stop();
-            if (lastGroundPos != null) {
-                Vec3 back = new Vec3(lastGroundPos.x - getX(), 0.0, lastGroundPos.z - getZ());
-                if (back.lengthSqr() > 1.0E-4) {
-                    motion = motion.add(back.normalize().scale(0.02));
+            // Over the void: free to drift a little past the edge, keeping the current height. Too far out, it stops
+            // wandering and drifts back toward ground.
+            if (!withinVoidDrift(lastGroundPos, getX(), getZ())) {
+                getNavigation().stop();
+                if (lastGroundPos != null) {
+                    Vec3 back = new Vec3(lastGroundPos.x - getX(), 0.0, lastGroundPos.z - getZ());
+                    if (back.lengthSqr() > 1.0E-4) {
+                        motion = motion.add(back.normalize().scale(0.02));
+                    }
                 }
             }
         } else {
@@ -262,6 +268,25 @@ public class Driftjelly extends Animal {
                     containAxis(getZ(), containment.getZ(), motion.z));
         }
         setDeltaMovement(motion);
+    }
+
+    /** Last position (feet) that had ground below it, or {@code null} if it hasn't been over ground since loading. */
+    @Nullable
+    public Vec3 lastGroundPos() {
+        return lastGroundPos;
+    }
+
+    /**
+     * Whether ({@code x}, {@code z}) is within {@link #MAX_VOID_DRIFT} blocks horizontally of {@code groundPos}, i.e.
+     * close enough to ground for a driftjelly to drift there over the void. Always false without a ground position.
+     */
+    public static boolean withinVoidDrift(@Nullable Vec3 groundPos, double x, double z) {
+        if (groundPos == null) {
+            return false;
+        }
+        double dx = x - groundPos.x;
+        double dz = z - groundPos.z;
+        return dx * dx + dz * dz <= MAX_VOID_DRIFT * MAX_VOID_DRIFT;
     }
 
     /** The planted Glowcap containing this driftjelly, or {@code null} if it is free. */
