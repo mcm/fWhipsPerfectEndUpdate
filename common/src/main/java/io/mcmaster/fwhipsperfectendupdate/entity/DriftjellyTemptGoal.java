@@ -59,7 +59,7 @@ public class DriftjellyTemptGoal extends TemptGoal {
 
     /**
      * Flies straight toward the player (the move control's wanted position is reset every tick), holding position
-     * rather than following the player out over the void.
+     * rather than following the player more than {@link Driftjelly#MAX_VOID_DRIFT} blocks out over the void.
      */
     @Override
     public void tick() {
@@ -73,7 +73,8 @@ public class DriftjellyTemptGoal extends TemptGoal {
         }
         double aheadX = jelly.getX() + dx / distance;
         double aheadZ = jelly.getZ() + dz / distance;
-        if (Driftjelly.heightAboveGround(jelly.level(), aheadX, jelly.getY(), aheadZ) == Driftjelly.NO_GROUND) {
+        if (Driftjelly.heightAboveGround(jelly.level(), aheadX, jelly.getY(), aheadZ) == Driftjelly.NO_GROUND
+                && !Driftjelly.withinVoidDrift(jelly.lastGroundPos(), aheadX, aheadZ)) {
             return;
         }
         double probe = player.getY() + 1.0;

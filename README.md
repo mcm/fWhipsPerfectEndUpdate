@@ -58,10 +58,11 @@ and vanilla's End Highlands, patches of Voidsoil grow Voidvine that hangs into t
 
 ### Creatures
 
-- **Driftjellies**: passive jellyfish that float above the islands. Tempt and breed them with Voidfruit; they
-  drop gel you can cook. Outside the End they go dormant. To pen them in for a farm, plant a Glowcap: a
-  Driftjelly that comes within 7 blocks of it stays in the 15×15×15 box centered on it, floating freely inside.
-  Break the Glowcap or put the Driftjelly on a lead to let it go.
+- **Driftjellies**: passive jellyfish that float above the islands, drifting up to 5 blocks out past the edge (so
+  they can cross narrow gaps between islands). Tempt and breed them with Voidfruit; they drop gel you can cook.
+  Outside the End they go dormant. To pen them in for a farm, plant a Glowcap: a Driftjelly that comes within 7
+  blocks of it stays in the 15×15×15 box centered on it, floating freely inside. Break the Glowcap or put the
+  Driftjelly on a lead to let it go.
 - **Endlings**: short, friendly Ender folk that live in **Endling villages** around giant Glowcaps. Once you
   have beaten the Ender Dragon, drop or hand an Endling an item and it throws back a barter (saplings, logs,
   Voidvine Blocks, Voidfruit, and more; some items such as beacons, Totems of Undying, and beds have their own
