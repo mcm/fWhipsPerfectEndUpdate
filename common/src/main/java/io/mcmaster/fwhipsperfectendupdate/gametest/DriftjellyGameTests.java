@@ -88,60 +88,97 @@ public final class DriftjellyGameTests {
         });
     }
 
-    @GameTest(template = TALL, timeoutTicks = 260)
-    public static void staysOverGroundNextToTheVoid(GameTestHelper helper) {
-        // A 5x5 island high enough above the template floor that the driftjelly sees void around it.
-        int islandY = 14;
+    /** Lays a 5x5 end stone island centered on the template's middle column at {@code islandY}. */
+    private static void island(GameTestHelper helper, int islandY) {
         for (int x = MID - 2; x <= MID + 2; x++) {
             for (int z = MID - 2; z <= MID + 2; z++) {
                 helper.setBlock(x, islandY, z, Blocks.END_STONE);
             }
         }
+    }
+
+    @GameTest(template = TALL, timeoutTicks = 260)
+    public static void driftsOnlyALittlePastTheEdge(GameTestHelper helper) {
+        // A 5x5 island high enough above the template floor that the driftjelly sees void around it.
+        int islandY = 14;
+        island(helper, islandY);
         Driftjelly jelly = spawn(helper, MID + 0.5, islandY + 4.0, MID + 0.5);
         Vec3 origin = helper.absoluteVec(Vec3.ZERO);
+        boolean pastTheEdge = false;
         for (int i = 0; i < 200; i++) {
             Vec3 target = DriftjellyDriftGoal.pickTarget(jelly);
             if (target != null) {
                 Vec3 rel = target.subtract(origin);
-                helper.assertTrue(overIsland(rel), "wander target over the void: " + rel);
+                helper.assertTrue(nearIsland(rel, 0.0), "wander target too far out over the void: " + rel);
+                pastTheEdge |= !nearIsland(rel, -Driftjelly.MAX_VOID_DRIFT);
             }
         }
+        helper.assertTrue(pastTheEdge, "the driftjelly should pick some wander targets past the island's edge");
         forTicks(
                 helper,
                 200,
                 () -> {
                     Vec3 rel = jelly.position().subtract(origin);
-                    // Allow the driftjelly's hitbox to reach a little past the edge.
-                    helper.assertTrue(
-                            rel.x >= MID - 3 && rel.x <= MID + 4 && rel.z >= MID - 3 && rel.z <= MID + 4,
-                            "driftjelly drifted out over the void: " + rel);
+                    // Allow a little overshoot past the leash.
+                    helper.assertTrue(nearIsland(rel, 1.0), "driftjelly drifted too far out over the void: " + rel);
                 },
                 jelly::discard);
     }
 
-    private static boolean overIsland(Vec3 rel) {
-        return rel.x >= MID - 2 && rel.x <= MID + 3 && rel.z >= MID - 2 && rel.z <= MID + 3;
+    /** Within {@link Driftjelly#MAX_VOID_DRIFT} + {@code slack} blocks of the island on each horizontal axis. */
+    private static boolean nearIsland(Vec3 rel, double slack) {
+        double reach = Driftjelly.MAX_VOID_DRIFT + slack;
+        return rel.x >= MID - 2 - reach
+                && rel.x <= MID + 3 + reach
+                && rel.z >= MID - 2 - reach
+                && rel.z <= MID + 3 + reach;
     }
 
-    @GameTest(template = TALL, timeoutTicks = 100)
-    public static void driftsBackFromTheVoid(GameTestHelper helper) {
+    @GameTest(template = TALL)
+    public static void wandersAcrossANarrowGap(GameTestHelper helper) {
+        // Two 5x5 islands three blocks apart, with void below the gap.
         int islandY = 14;
-        for (int x = MID - 2; x <= MID + 2; x++) {
+        for (int z = MID - 2; z <= MID + 2; z++) {
+            for (int x = 2; x <= 6; x++) {
+                helper.setBlock(x, islandY, z, Blocks.END_STONE);
+                helper.setBlock(x + 8, islandY, z, Blocks.END_STONE);
+            }
+        }
+        Driftjelly jelly = spawn(helper, 4.5, islandY + 4.0, MID + 0.5);
+        Vec3 origin = helper.absoluteVec(Vec3.ZERO);
+        boolean across = false;
+        for (int i = 0; i < 500 && !across; i++) {
+            Vec3 target = DriftjellyDriftGoal.pickTarget(jelly);
+            across = target != null && target.x - origin.x >= 10.0;
+        }
+        helper.assertTrue(across, "the driftjelly should pick wander targets on the island across the gap");
+        jelly.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TALL, timeoutTicks = 200)
+    public static void driftsBackFromTheVoid(GameTestHelper helper) {
+        // A 5x5 island against the template's low-x side, leaving room inside the test's barrier walls to push the
+        // driftjelly well past the leash.
+        int islandY = 14;
+        for (int x = 0; x <= 4; x++) {
             for (int z = MID - 2; z <= MID + 2; z++) {
                 helper.setBlock(x, islandY, z, Blocks.END_STONE);
             }
         }
-        Driftjelly jelly = spawn(helper, MID + 0.5, islandY + 4.0, MID + 0.5);
+        Driftjelly jelly = spawn(helper, 2.5, islandY + 4.0, MID + 0.5);
         Vec3 origin = helper.absoluteVec(Vec3.ZERO);
+        double edge = 5 + Driftjelly.MAX_VOID_DRIFT;
         double[] maxX = {0.0};
         helper.onEachTick(() -> maxX[0] = Math.max(maxX[0], jelly.getX() - origin.x));
-        helper.runAfterDelay(5, () -> jelly.setDeltaMovement(0.6, 0.0, 0.0));
+        helper.runAfterDelay(5, () -> jelly.setDeltaMovement(1.5, 0.0, 0.0));
         helper.runAfterDelay(
                 20,
                 () -> helper.succeedWhen(() -> {
-                    helper.assertTrue(maxX[0] > MID + 4, "the push should have sent the driftjelly over the void");
+                    helper.assertTrue(
+                            maxX[0] > edge + 2, "the push should have sent the driftjelly far out over the void");
                     double x = jelly.getX() - origin.x;
-                    helper.assertTrue(x <= MID + 3, "driftjelly has not come back over ground, x = " + x);
+                    helper.assertTrue(x <= edge, "driftjelly has not come back near ground, x = " + x);
                     jelly.discard();
                 }));
     }
